@@ -1,15 +1,15 @@
 from torch import nn
 
 
-class VisCNN(nn.Module):
+class THGStrainStressCNN(nn.Module):
     """Convolutional Neural Network (CNN) to calculate stress-strain features in THG skin images.
 
     Assumes a 2D 258*258*1 input image.
     """
 
     def __init__(self):
-        super(VisCNN, self).__init__()
-        self.conv1 = nn.Conv2d(1, 64, 3)  # TODO: How many input channels? Only THG?
+        super(THGStrainStressCNN, self).__init__()
+        self.conv1 = nn.Conv2d(3, 64, 3)  # TODO: How many input channels? Only SHG?
         self.conv2 = nn.Conv2d(64, 64, 5)
         self.conv3 = nn.Conv2d(64, 64, 3)
         self.conv4 = nn.Conv2d(64, 64, 6)
@@ -20,7 +20,7 @@ class VisCNN(nn.Module):
             1 * 1 * 256, 3
         )  # TODO: How many output features are needed?
 
-        self.dropout = nn.Dropout2d(0.3)
+        self.dropout = nn.Dropout2d(0.15)
         self.max_pool = nn.MaxPool2d(2)
         self.relu = nn.ReLU()
 

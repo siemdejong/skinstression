@@ -1,3 +1,8 @@
+# Automated run
+run.sh
+output.txt
+/experiments/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
