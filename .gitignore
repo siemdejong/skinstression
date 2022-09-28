@@ -1,4 +1,6 @@
 # Automated run
+slurm
+*.script
 run.sh
 output.txt
 /experiments/
