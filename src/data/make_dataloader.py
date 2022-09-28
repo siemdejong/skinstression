@@ -1,14 +1,16 @@
 import torch
 from torch.utils.data import DataLoader, SubsetRandomSampler, random_split
-from torchvision.transforms import Compose, Resize, ToPILImage, ToTensor
-from torchvision.transforms.functional import to_tensor
+from torchvision.transforms import Compose, Resize
 
 from data.make_dataset import THGStrainStressDataset
 
 
 class THGStrainStressDataLoader:
-    def __init__(self, config):
-        """TODO: Currently is tightly coupled to the k-fold cross-validation with test + validation sets scheme. Make efforts to decouple the two."""
+    def __init__(self, config: dict):
+        """TODO: Currently is tightly coupled to the k-fold cross-validation with test + validation sets scheme. Make efforts to decouple the two.
+        Args:
+            config: configuration.
+        """
         self.config = config
 
         self.dataset = THGStrainStressDataset(
@@ -30,15 +32,12 @@ class THGStrainStressDataLoader:
             generator=torch.Generator().manual_seed(1),
         )
 
-    def get_test_dataloader(self):
+    def get_train_validation_subsampler(self, ids: list[int]):
+        """Get dataloader supporting the agent's k_fold_cross_validation_with_validation_and_test_set() function.
 
-        test_loader = DataLoader(
-            dataset=self.test_set, batch_size=self.config.batch_size_test
-        )
-        return test_loader
-
-    def get_train_validation_subsampler(self, ids):
-
+        Args:
+            ids: indices of the samples to be put in the dataloader.
+        """
         subsampler = SubsetRandomSampler(ids)
         data_loader = DataLoader(
             self.dataset,
@@ -47,5 +46,14 @@ class THGStrainStressDataLoader:
         )
         return data_loader
 
+    def get_test_dataloader(self):
+        """Get dataloader supporting the agent's test() function."""
+
+        test_loader = DataLoader(
+            dataset=self.test_set, batch_size=self.config.batch_size_test
+        )
+        return test_loader
+
     def finalize(self):
+        """Finalize the dataloader."""
         pass

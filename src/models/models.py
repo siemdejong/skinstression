@@ -2,9 +2,9 @@ from torch import nn
 
 
 class THGStrainStressCNN(nn.Module):
-    """Convolutional Neural Network (CNN) to calculate stress-strain features in THG skin images.
+    """Convolutional Neural Network (CNN) to calculate strain-stress features in THG skin images.
 
-    Assumes a 2D 258*258*1 input image.
+    Assumes a 2D RGB 258*258*1 input image.
     """
 
     def __init__(self):

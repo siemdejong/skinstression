@@ -1,12 +1,8 @@
 """
 __author__ = "Siem de Jong"
-Project structure inspired by Hager Rady and Mo'men AbdelRazek (moemen95/Pytorch-Project-Template).
-
-Main
--Capture the config file
--Process the json config passed
--Create an agent instance
--Run the agent
+Project structure inspired by
+    - Hager Rady and Mo'men AbdelRazek (moemen95/Pytorch-Project-Template)
+    - and drivendata/cookiecutter-data-science.
 """
 
 import argparse
@@ -16,8 +12,13 @@ from utils.config import *
 
 
 def main():
-    print("test")
-    print(globals())
+    """Main function.
+
+    1. Captures the config file.
+    2. Processes the json config passed.
+    3. Creates an agent instance.
+    4. Runs the agent.
+    """
     # parse the path of the json config file
     arg_parser = argparse.ArgumentParser(description="")
     arg_parser.add_argument(

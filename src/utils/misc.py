@@ -1,9 +1,17 @@
 import logging
+import sys
 import time
+from subprocess import call
+
+import torch
 
 
 def timeit(f):
-    """Decorator to time Any Function"""
+    """Decorator to time any function.
+
+    Args:
+        f: function to be decorated.
+    """
 
     def timed(*args, **kwargs):
         start_time = time.time()
@@ -20,11 +28,9 @@ def timeit(f):
 
 
 def print_cuda_statistics():
-    logger = logging.getLogger("Cuda Statistics")
-    import sys
-    from subprocess import call
+    """Log CUDA statistics."""
 
-    import torch
+    logger = logging.getLogger("Cuda Statistics")
 
     logger.info("__Python VERSION:  {}".format(sys.version))
     logger.info("__pyTorch VERSION:  {}".format(torch.__version__))
