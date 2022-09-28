@@ -72,10 +72,10 @@ class THGStrainStressAgent(BaseAgent):
         self.summary_writer = SummaryWriter(log_dir=self.config.summary_dir)
 
     def load_checkpoint(self, filename):
-        """
-        Latest checkpoint loader
-        :param file_name: name of the checkpoint file
-        :return:
+        """Load latest checkpoint.
+
+        Args:
+            filename: name of checkpoint file in directory provided by config.checkpoint_dir.
         """
         filename = self.config.checkpoint_dir + filename
         try:
@@ -103,11 +103,11 @@ class THGStrainStressAgent(BaseAgent):
             self.logger.info("Training without using checkpoint.")
 
     def save_checkpoint(self, filename="checkpoint.pth.tar", is_best=False):
-        """
-        Checkpoint saver
-        :param file_name: name of the checkpoint file
-        :param is_best: boolean flag to indicate whether current checkpoint's accuracy is the best so far
-        :return:
+        """Saves checkpoint.
+
+        Args:
+            filename: name of checkpoint file in directory provide by config.checkpoint_dir to be loaded.
+            is_best: indicate whether current checkpoint's metric is the best so far.
         """
         state = {
             "epoch": self.current_epoch,
@@ -127,10 +127,7 @@ class THGStrainStressAgent(BaseAgent):
             )
 
     def run(self):
-        """
-        The main operator
-        :return:
-        """
+        """Main operator."""
         try:
             self.k_fold_cross_validation_with_validation_and_test_set()
 
@@ -138,7 +135,9 @@ class THGStrainStressAgent(BaseAgent):
             self.logger.info("You have entered CTRL+C. Exiting...")
 
     def k_fold_cross_validation_with_validation_and_test_set(self):
-
+        """Performs a k-fold cross-validation training scheme
+        with a validation and test set.
+        """
         # Training and validation.
         kfold = KFold(n_splits=self.config.k_folds, shuffle=True)
 
@@ -169,10 +168,7 @@ class THGStrainStressAgent(BaseAgent):
         self.test()
 
     def train(self):
-        """
-        Main training loop
-        :return:
-        """
+        """Main training loop."""
         self.current_epoch = 1
         while self.current_epoch <= self.config.max_epoch + 1:
             self.train_one_epoch()
@@ -184,10 +180,7 @@ class THGStrainStressAgent(BaseAgent):
         self.summary_writer.flush()
 
     def train_one_epoch(self):
-        """
-        One epoch of training
-        :return:
-        """
+        """One epoch of training."""
         # Turn on training mode.
         self.model.train()
 
@@ -219,10 +212,7 @@ class THGStrainStressAgent(BaseAgent):
             self.current_iteration += 1
 
     def validate(self):
-        """
-        One cycle of model validation
-        :return:
-        """
+        """One cycle of model validation."""
         # Turn on evaluation mode.
         self.model.eval()
 
@@ -261,6 +251,8 @@ class THGStrainStressAgent(BaseAgent):
         return is_best
 
     def test(self):
+        """One cycle of model testing.
+        TODO: This function is very similar to validate(). Merge them?"""
         self.model.eval()
 
         validation_loss = 0
@@ -293,9 +285,6 @@ class THGStrainStressAgent(BaseAgent):
         self.save_checkpoint("best-model-checkpoint.pth.tar")
 
     def finalize(self):
-        """
-        Finalizes all the operations of the 2 Main classes of the process, the operator and the data loader
-        :return:
-        """
+        """Finalize all operations of this agent and corresponding dataloader"""
         self.summary_writer.close()
         self.data_loader.finalize()

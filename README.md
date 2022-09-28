@@ -1,4 +1,4 @@
-thg-stress-strain
+thg-strain-stress
 ==============================
 
 Training and validating a Pytorch model to obtain stress-strain curves from third harmonic generation images of human skin tissue.
@@ -16,6 +16,8 @@ Project Organization
     │   └── raw            <- The original, immutable data dump.
     │
     ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
+    │
+    ├── experiments        <- Created by src/utils/dirs.py create_dirs(), logging experiments
     │
     ├── models             <- Trained and serialized models, model predictions, or model summaries
     │
@@ -35,23 +37,31 @@ Project Organization
     ├── src                <- Source code for use in this project.
     │   ├── __init__.py    <- Makes src a Python module
     │   │
-    │   ├── data           <- Scripts to download or generate data
+    │   ├── main.py        <- Main function controlling the global process.
+    │   │
+    │   ├── agents         <- Agents to control the model training process.
+    │   │   ├── agent.py
+    │   │   └── base.py
+    │   │
+    │   ├── configs        <- JSON configuration files.
+    │   │   └── config.json
+    │   │
+    │   ├── data           <- DataSet and DataLoader classes to feed the neural network.
+    │   │   ├── make_dataloader.py
     │   │   └── make_dataset.py
     │   │
     │   ├── features       <- Scripts to turn raw data into features for modeling
     │   │   └── build_features.py
     │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
+    │   ├── models         <- Model neural network definitions.
+    │   │   └── models.py
+    │   │
+    │   ├── utils         <- Utility functions.
+    │   │   ├── config.py
+    │   │   ├── dirs.py
+    │   │   └── misc.py
     │   │
     │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
     │       └── visualize.py
     │
     └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
-
-
---------
-
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>

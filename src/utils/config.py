@@ -58,31 +58,32 @@ def get_config_from_json(json_file):
             exit(-1)
 
 
-def process_config(json_file):
-    """
-    Get the json file
-    Processing it with EasyDict to be accessible as attributes
-    then editing the path of the experiments folder
-    creating some important directories in the experiment folder
-    Then setup the logging in the whole program
-    Then return the config
-    :param json_file: the path of the config file
-    :return: config object(namespace)
+def process_config(json_file: str):
+    """Processes configuration file.
+
+    Sets up output directory structure.
+    Sets up logging.
+
+    Args:
+        json_file: path to json file containing configurations.
+
+    Returns:
+        configuration object.
     """
     config, _ = get_config_from_json(json_file)
     print(" The experiment configuration:")
     pprint(config)
 
-    # making sure that you have provided the exp_name.
+    # Ming sure that exp_name is provided.
     try:
         print(" *************************************** ")
         print("The experiment name is {}".format(config.exp_name))
         print(" *************************************** ")
     except AttributeError:
-        print("Please provide the exp_name in json file.")
+        print("Please provide exp_name in json config file.")
         exit(-1)
 
-    # create some important directories to be used for that experiment.
+    # Create experiment directory with logging childs.
     config.summary_dir = os.path.join("experiments", config.exp_name, "summaries/")
     config.checkpoint_dir = os.path.join("experiments", config.exp_name, "checkpoints/")
     config.out_dir = os.path.join("experiments", config.exp_name, "out/")
@@ -91,7 +92,8 @@ def process_config(json_file):
         [config.summary_dir, config.checkpoint_dir, config.out_dir, config.log_dir]
     )
 
-    # setup logging in the project
+    # Setup logging.
     setup_logging(config.log_dir)
     logging.getLogger().info("Logging directories are succesfully created.")
+
     return config
