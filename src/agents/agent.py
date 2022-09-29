@@ -175,7 +175,7 @@ class THGStrainStressAgent(BaseAgent):
 
         # Define split ids.
         splits = KFold(
-            n_splits=self.k_folds, shuffle=True, random_state=self.config.seed
+            n_splits=self.k_folds - 1, shuffle=True, random_state=self.config.seed
         )
 
         results_per_fold = []
