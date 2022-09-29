@@ -7,7 +7,7 @@ class THGStrainStressCNN(nn.Module):
     Assumes a 2D RGB 258*258*1 input image.
     """
 
-    def __init__(self):
+    def __init__(self, config):
         super(THGStrainStressCNN, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, 3)  # TODO: How many input channels? Only SHG?
         self.conv2 = nn.Conv2d(64, 64, 5)
@@ -17,10 +17,10 @@ class THGStrainStressCNN(nn.Module):
         self.fc1 = nn.Linear(1 * 1 * 64, 1 * 1 * 64)
         self.fc2 = nn.Linear(1 * 1 * 64, 1 * 1 * 256)
         self.fc3 = nn.Linear(
-            1 * 1 * 256, 3
+            1 * 1 * 256, config.output_features
         )  # TODO: How many output features are needed?
 
-        self.dropout = nn.Dropout2d(0.15)
+        self.dropout = nn.Dropout2d(config.dropout)
         self.max_pool = nn.MaxPool2d(2)
         self.relu = nn.ReLU()
 
