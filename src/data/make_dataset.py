@@ -22,7 +22,7 @@ class THGStrainStressDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
-        image = read_image(img_path).float()
+        image = Image.open(img_path)
 
         # Extract the labels from the indexed row, not including the index.
         labels = torch.tensor(self.img_labels.iloc[idx, 1:].values.astype(float))

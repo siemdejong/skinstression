@@ -1,7 +1,7 @@
 {
     "data": {
-        "labels_file": "data/processed/patches/labels.csv",
-        "img_dir": "data/processed/patches"
+        "labels_file": "data/interim/labels.csv",
+        "img_dir": "data/interim/"
     },
     "agent": "THGStrainStressAgent",
     "batch_size_test": 16,
