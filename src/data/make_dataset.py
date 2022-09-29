@@ -34,18 +34,21 @@ class THGStrainStressDataset(Dataset):
             labels = self.label_transform(labels)
         return image, labels
 
-    def setup_k_folds_cross_validation_dataflow(self, train_idx, val_idx):
+    @staticmethod
+    def setup_k_folds_cross_validation_dataflow(
+        dataset, train_idx, val_idx, batch_size
+    ):
         train_sampler = SubsetRandomSampler(train_idx)
         val_sampler = SubsetRandomSampler(val_idx)
 
         train_loader = DataLoader(
-            self,
-            batch_size=self.config.batch_size_train_validation,
+            dataset,
+            batch_size=batch_size,
             sampler=train_sampler,
         )
         val_loader = DataLoader(
-            self,
-            batch_size=self.config.batch_size_train_validation,
+            dataset,
+            batch_size=batch_size,
             sampler=val_sampler,
         )
 

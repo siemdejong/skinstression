@@ -189,8 +189,11 @@ class THGStrainStressAgent(BaseAgent):
             (
                 train_loader,
                 val_loader,
-            ) = self.dataset.setup_k_folds_cross_validation_dataflow(
-                train_idx=train_idx, val_idx=val_idx
+            ) = THGStrainStressDataset.setup_k_folds_cross_validation_dataflow(
+                dataset=self.train_validation_set,
+                train_idx=train_idx,
+                val_idx=val_idx,
+                batch_size=self.config.batch_size_train_validation,
             )
             train_results, val_results = self.train(train_loader, val_loader)
             results_per_fold.append([train_results, val_results])
