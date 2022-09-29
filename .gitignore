@@ -1,7 +1,7 @@
 # Automated run
 slurm
-*.script
-run.sh
+thg-strain-stress.sh
+submit.sh
 output.txt
 /experiments/
 

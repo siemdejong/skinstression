@@ -4,12 +4,14 @@ import numpy as np
 import pandas as pd
 import torch
 from PIL import Image
-from torch.utils.data import Dataset
-from torchvision.io import read_image
+from torch.utils.data import DataLoader, Dataset, SubsetRandomSampler
 
 
 class THGStrainStressDataset(Dataset):
-    def __init__(self, labels_file, img_dir, transform=None, label_transform=None):
+    def __init__(
+        self, config, labels_file, img_dir, transform=None, label_transform=None
+    ):
+        self.config = config
 
         # header = 0, assume there is a header in the labels.csv file.
         self.img_labels = pd.read_csv(labels_file, header=0)
@@ -31,6 +33,23 @@ class THGStrainStressDataset(Dataset):
         if self.label_transform:
             labels = self.label_transform(labels)
         return image, labels
+
+    def setup_k_folds_cross_validation_dataflow(self, train_idx, val_idx):
+        train_sampler = SubsetRandomSampler(train_idx)
+        val_sampler = SubsetRandomSampler(val_idx)
+
+        train_loader = DataLoader(
+            self,
+            batch_size=self.config.batch_size_train_validation,
+            sampler=train_sampler,
+        )
+        val_loader = DataLoader(
+            self,
+            batch_size=self.config.batch_size_train_validation,
+            sampler=val_sampler,
+        )
+
+        return train_loader, val_loader
 
 
 class RandomImageDataset(Dataset):
