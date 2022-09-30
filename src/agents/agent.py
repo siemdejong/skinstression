@@ -174,6 +174,7 @@ class THGStrainStressAgent(BaseAgent):
         )
 
         # Define split ids.
+        # Use k - 1 splits, because one split is reserved for the test set.
         splits = KFold(
             n_splits=self.k_folds - 1, shuffle=True, random_state=self.config.seed
         )
@@ -189,14 +190,20 @@ class THGStrainStressAgent(BaseAgent):
             (
                 train_loader,
                 val_loader,
-            ) = self.dataset.setup_k_folds_cross_validation_dataflow(
-                train_idx=train_idx, val_idx=val_idx
+            ) = THGStrainStressDataset.setup_k_folds_cross_validation_dataflow(
+                dataset=self.train_validation_set,
+                train_idx=train_idx,
+                val_idx=val_idx,
+                batch_size=self.config.batch_size_train_validation,
             )
             train_results, val_results = self.train(train_loader, val_loader)
             results_per_fold.append([train_results, val_results])
 
-        test_loader = DataLoader(self.test_set, batch_size=self.config.batch_size_test)
-        self.test(test_loader)
+            test_loader = DataLoader(
+                self.test_set,
+                batch_size=self.config.batch_size_test,
+            )
+            self.test(test_loader)
 
     def train(self, train_loader, val_loader):
         """Main training loop."""
@@ -237,7 +244,18 @@ class THGStrainStressAgent(BaseAgent):
 
             running_training_loss += loss.item()
 
-        avg_loss = running_training_loss / len(train_loader.dataset)
+            if batch_idx % self.config.log_interval == 0:
+                self.logger.info(
+                    "Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(
+                        self.current_epoch,
+                        batch_idx * len(data),
+                        len(train_loader.dataset),
+                        100.0 * batch_idx / len(train_loader),
+                        loss.item(),
+                    )
+                )
+
+        avg_loss = running_training_loss / len(train_loader)
 
         self.summary_writer.add_scalar(
             f"fold-{self.fold}-loss/train", avg_loss, self.current_epoch
@@ -248,7 +266,7 @@ class THGStrainStressAgent(BaseAgent):
                 self.current_epoch,
                 batch_idx * len(data),
                 len(train_loader.dataset),
-                100.0 * batch_idx / len(train_loader.dataset),
+                100.0 * batch_idx / len(train_loader),
                 loss.item(),
             )
         )
@@ -270,7 +288,7 @@ class THGStrainStressAgent(BaseAgent):
                     output, target
                 )  # sum up batch loss
 
-        avg_loss = running_validation_loss / len(val_loader.dataset)
+        avg_loss = running_validation_loss / len(val_loader)
 
         self.summary_writer.add_scalar(
             f"fold-{self.fold}-loss/validation", avg_loss, self.current_epoch
@@ -282,43 +300,45 @@ class THGStrainStressAgent(BaseAgent):
             )
         )
 
-        # Keep track of best performing model.
-        if self.lowest_loss > avg_loss:
-            self.lowest_loss = avg_loss
-            torch.save(
-                self.model.state_dict(),
-                self.config.checkpoint_dir + "best-checkpoint.pth",
-            )
-            # self.best_model = self.model
-            # self.save_checkpoint()
-
     def test(self, test_loader):
         """One cycle of model testing.
         TODO: This function is very similar to validate(). Merge them?
         """
-        # Load best model.
-        self.best_model = THGStrainStressCNN(self.config).to(self.device)
-        self.best_model.load_state_dict(
-            torch.load(self.config.checkpoint_dir + "best-checkpoint.pth")
-        )
-
-        self.best_model.eval()
+        self.model.eval()
 
         running_testing_loss = 0
 
         with torch.no_grad():
             for data, target in test_loader:
                 data, target = data.to(self.device), target.to(self.device)
-                output = self.best_model(data)
+                output = self.model(data)
                 running_testing_loss += self.loss(output, target)  # sum up batch loss
 
-        avg_loss = running_testing_loss / len(test_loader.dataset)
+        avg_loss = running_testing_loss / len(test_loader)
 
         self.logger.info(
             "\nTest set: Average loss: {:.4f}\n".format(
                 avg_loss,
             )
         )
+
+        self.update_best_model(avg_loss)
+
+    def update_best_model(self, loss: float):
+        """If the test loss is lower than the lowest stored test loss,
+        save the model and update the lowest loss stored.
+
+        Args:
+            loss: the loss to be compared with the lowest recorded loss.
+        """
+        # Keep track of best performing model.
+        if self.lowest_loss > loss:
+            self.lowest_loss = loss
+            # TODO: Move model savings to save_checkpoint().
+            torch.save(
+                self.model.state_dict(),
+                self.config.checkpoint_dir + "best-checkpoint.pth",
+            )
 
     def finalize(self):
         """Finalize all operations of this agent and corresponding dataloader"""
