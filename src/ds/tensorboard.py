@@ -23,6 +23,15 @@ class TensorboardExperiment:
         self._writer = SummaryWriter(log_dir=log_dir)
         plt.ioff()
 
+        charts = {
+            f"training": [
+                "Multiline",
+                [f"TRAIN/epoch/loss", f"VAL/epoch/loss"],
+            ]
+        }
+        layout = {"THG-STRAIN-STRESS": charts}
+        self._writer.add_custom_scalars(layout)
+
     def set_stage(self, stage: Stage):
         self.stage = stage
 
@@ -46,6 +55,13 @@ class TensorboardExperiment:
     def add_epoch_metric(self, name: str, value: float, step: int):
         tag = f"{self.stage.name}/epoch/{name}"
         self._writer.add_scalar(tag, value, step)
+
+    def add_train_val_epoch_metrics(
+        self, name: str, train_value: float, val_value: float, step: int
+    ):
+        main_tag = f"{Stage.TRAIN.name}-{Stage.VAL.name}/epoch/{name}"
+        scalars = {"train": train_value, "val": val_value}
+        self._writer.add_scalars(main_tag, scalars, step)
 
     def add_fold_metric(self, name: str, value: float, step: int):
         tag = f"{self.stage.name}/fold/{name}"

@@ -31,6 +31,9 @@ log = logging.getLogger(__name__)
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: THGStrainStressConfig) -> None:
+
+    # Hydra creates an output directory automatically at cwd.
+    # Use it for tensorboard summaries.
     log_dir = os.getcwd() + "/tensorboard"
 
     if torch.cuda.is_available():
@@ -40,22 +43,26 @@ def main(cfg: THGStrainStressConfig) -> None:
         device = torch.device("cpu")
         log.warning(f"Using device {device}. Is GPU set up properly?")
 
-    model = THGStrainStressCNN(cfg.params.dropout, cfg.params.num_output_features).to(
-        device
-    )
+    model = THGStrainStressCNN(
+        cfg.params.model.dropout, cfg.params.model.num_output_features
+    ).to(device)
 
     # TODO: Which loss function? KL/MSE/MAE/MSLE?
+    # Maybe we can even use loss as a means of how accurate the sigmoid is.
     loss_fn = torch.nn.L1Loss().to(device)  # MAE.
     # loss_fn = torch.nn.MSELoss().to(device)
 
     optimizer = torch.optim.Adam(
         params=model.parameters(),
-        lr=cfg.params.lr,
-        betas=(cfg.params.beta_1, cfg.params.beta_2),
+        lr=cfg.params.optimizer.lr,
+        betas=(cfg.params.optimizer.beta_1, cfg.params.optimizer.beta_2),
     )
 
+    # TODO: Which LR scheduler to use?
     # CosineAnnealingLR, CyclicLR
-    # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, 300)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+        optimizer, cfg.params.scheduler.T_0
+    )
 
     data_transform = Compose(
         [
@@ -78,7 +85,7 @@ def main(cfg: THGStrainStressConfig) -> None:
         if not (Path(cfg.paths.data) / str(folder)).is_dir():
             log.info(
                 f"{Path(cfg.paths.data) / str(folder)} will be excluded "
-                f"because it is not provided in {cfg.paths.targets}"
+                f"because it is not found."
             )
             continue
 
@@ -95,6 +102,7 @@ def main(cfg: THGStrainStressConfig) -> None:
     dataset = ConcatDataset(datasets)
 
     runner_iter = k_fold(
+        n_splits=cfg.params.k_folds,
         model=model,
         loss_fn=loss_fn,
         optimizer=optimizer,
@@ -104,15 +112,16 @@ def main(cfg: THGStrainStressConfig) -> None:
         groups=groups,
     )
 
-    # Setup the experiment tracker
-    tracker = TensorboardExperiment(log_path=log_dir)
-
     for fold_id, (train_runner, val_runner) in enumerate(runner_iter):
+
+        # Setup the experiment tracker
+        tracker = TensorboardExperiment(log_path=log_dir)
+
         run_fold(
             train_runner=train_runner,
             val_runner=val_runner,
             experiment=tracker,
-            # scheduler=scheduler,
+            scheduler=scheduler,
             fold_id=fold_id,
             epoch_count=cfg.params.epoch_count,
         )

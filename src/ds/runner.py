@@ -106,12 +106,17 @@ def run_epoch(
     experiment.add_epoch_metric("loss", val_runner.avg_loss, epoch_id)
     experiment.add_epoch_sigmoid(val_runner.prediction, val_runner.target, epoch_id)
 
+    # # Combined TRAIN/VAL epoch metrics
+    # experiment.add_train_val_epoch_metrics(
+    #     "loss", train_runner.avg_loss, val_runner.avg_loss, epoch_id
+    # )
+
 
 def run_fold(
     val_runner: Runner,
     train_runner: Runner,
     experiment: ExperimentTracker,
-    # scheduler: torch.optim.lr_scheduler,
+    scheduler: torch.optim.lr_scheduler,
     fold_id: int,
     epoch_count: int,
 ) -> None:
@@ -130,7 +135,10 @@ def run_fold(
 
         log.info(
             summary(
-                train_runner, val_runner, epoch_id=epoch_id, epoch_count=epoch_count
+                train_runner,
+                val_runner,
+                epoch_id=epoch_id,
+                epoch_count=epoch_count,
             )
         )
 
@@ -138,7 +146,7 @@ def run_fold(
         train_runner.reset()
         val_runner.reset()
 
-        # scheduler.step()
+        scheduler.step()
 
         # Flush the tracker after every epoch for live updates
         experiment.flush()

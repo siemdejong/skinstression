@@ -2,6 +2,24 @@ from dataclasses import dataclass
 
 
 @dataclass
+class Model:
+    dropout: float
+    num_output_features: int
+
+
+@dataclass
+class Optimizer:
+    lr: float
+    beta_1: float
+    beta_2: float
+
+
+@dataclass
+class Scheduler:
+    T_0: int
+
+
+@dataclass
 class Paths:
     log: str
     data: str
@@ -11,12 +29,11 @@ class Paths:
 @dataclass
 class Params:
     epoch_count: int
-    lr: float
     batch_size: int
-    dropout: float
-    num_output_features: int
-    beta_1: float
-    beta_2: float
+    k_folds: int
+    model: Model
+    optimizer: Optimizer
+    scheduler: Scheduler
 
 
 @dataclass

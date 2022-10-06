@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 
 
 def k_fold(
+    n_splits: int,
     model: torch.nn.Module,
     loss_fn: torch.nn.Module,
     optimizer: torch.optim.Optimizer,
@@ -23,7 +24,7 @@ def k_fold(
     groups: np.ndarray,
 ) -> Generator[Tuple[Runner, Runner], None, None]:
 
-    sgkf = StratifiedGroupKFold(n_splits=5)
+    sgkf = StratifiedGroupKFold(n_splits=n_splits)
 
     for train_idx, val_idx in sgkf.split(
         X=np.ones((len(dataset), 1)), y=groups, groups=groups
