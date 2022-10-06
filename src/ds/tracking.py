@@ -23,8 +23,8 @@ class ExperimentTracker(Protocol):
         """Implements logging a epoch-level metric."""
         ...
 
-    def add_epoch_confusion_matrix(
-        self, y_true: list[np.array], y_pred: list[np.array], step: int
-    ):
-        """Implements logging a confusion matrix at epoch-level."""
-        ...
+    # def add_epoch_confusion_matrix(
+    #     self, y_true: list[np.array], y_pred: list[np.array], step: int
+    # ):
+    #     """Implements logging a confusion matrix at epoch-level."""
+    #     ...

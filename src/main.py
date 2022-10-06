@@ -10,7 +10,7 @@ from torchvision.transforms import RandomCrop, Resize, ToTensor, Grayscale, Comp
 import pandas as pd
 import numpy as np
 
-from ds.dataset import create_dataloader
+# from ds.dataset import create_dataloader
 from ds.models import THGStrainStressCNN
 from ds.runner import run_fold, run_test
 from ds.tensorboard import TensorboardExperiment
@@ -34,10 +34,10 @@ def main(cfg: THGStrainStressConfig) -> None:
     log_dir = os.getcwd() + "/tensorboard"
 
     if torch.cuda.is_available():
-        device = "cuda"
+        device = torch.device("cuda")
         log.info(f"Using device {device}.")
     else:
-        device = "cpu"
+        device = torch.device("cpu")
         log.warning(f"Using device {device}. Is GPU set up properly?")
 
     model = THGStrainStressCNN(cfg.params.dropout, cfg.params.num_output_features).to(

@@ -6,7 +6,7 @@ from torchvision.transforms import Compose, Grayscale, RandomCrop, ToTensor
 from ds.runner import Runner
 import torch
 from ds.tracking import Stage
-from ds.dataset import create_dataloader, THGStrainStressDataset
+from ds.dataset import THGStrainStressDataset
 from typing import Generator, Tuple
 import logging
 
@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 
 def k_fold(
     model: torch.nn.Module,
-    loss_fn: torch.nn.modules.loss,
+    loss_fn: torch.nn.Module,
     optimizer: torch.optim.Optimizer,
     device: torch.device,
     batch_size: int,

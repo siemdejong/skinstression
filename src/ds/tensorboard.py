@@ -5,11 +5,13 @@ import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 import matplotlib.pyplot as plt
+import matplotlib
 from torch.utils.tensorboard import SummaryWriter
 
 from ds.tracking import Stage
 from ds.utils import create_experiment_log_dir
 from ds.functions import sigmoid
+from typing import Optional
 
 
 class TensorboardExperiment:
@@ -72,8 +74,8 @@ class TensorboardExperiment:
 
     def add_epoch_sigmoid(
         self,
-        prediction: np.array,
-        target: np.array,
+        prediction: np.ndarray,
+        target: np.ndarray,
         step=None,
     ) -> None:
         fig = self.create_sigmoid(prediction=prediction, target=target, step=step)
@@ -81,8 +83,8 @@ class TensorboardExperiment:
         self._writer.add_figure(tag, fig, step)
 
     def create_sigmoid(
-        self, prediction: np.array, target: np.array, step: int = None
-    ) -> plt.Figure:
+        self, prediction: np.ndarray, target: np.ndarray, step: Optional[int] = None
+    ) -> matplotlib.figure.Figure:
         x = np.linspace(1, 2.5, 1000)
 
         fig, ax = plt.subplots(1, 1)
@@ -97,8 +99,8 @@ class TensorboardExperiment:
             ax.plot(x, sigmoid(x, *y_prediction), "--", label="prediction")
             ax.plot(x, sigmoid(x, *y_target), "-", label="target")
 
-        ax.set_xlim([0.8, 2.6])
-        ax.set_ylim([0, 7])
+        ax.set_xlim(0.8, 2.6)
+        ax.set_ylim(0, 7)
         ax.legend()
 
         return fig

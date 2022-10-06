@@ -62,28 +62,28 @@ class THGStrainStressDataset(Dataset[Any]):
         return image, self.targets
 
 
-def create_dataloader(
-    batch_size: int,
-    data_path: Path,
-    label_path: Path,
-    shuffle: bool = True,
-) -> DataLoader[Any]:
-    return DataLoader(
-        dataset=THGStrainStressDataset(
-            data_dir=data_path,
-            label_path=label_path,
-            data_transform=Compose(
-                [
-                    RandomCrop(size=(258, 258)),
-                    # Resize((258, 258)),
-                    Grayscale(),
-                    # AugMix(),
-                    # RandAugment(num_ops=2),
-                    ToTensor(),
-                    # Lambda(lambda y: (y - y.mean()) / y.std()), # To normalize the image.
-                ],
-            ),
-        ),
-        batch_size=batch_size,
-        shuffle=shuffle,
-    )
+# def create_dataloader(
+#     batch_size: int,
+#     data_path: Path,
+#     label_path: Path,
+#     shuffle: bool = True,
+# ) -> DataLoader[Any]:
+#     return DataLoader(
+#         dataset=THGStrainStressDataset(
+#             data_dir=data_path,
+#             label_path=label_path,
+#             data_transform=Compose(
+#                 [
+#                     RandomCrop(size=(258, 258)),
+#                     # Resize((258, 258)),
+#                     Grayscale(),
+#                     # AugMix(),
+#                     # RandAugment(num_ops=2),
+#                     ToTensor(),
+#                     # Lambda(lambda y: (y - y.mean()) / y.std()), # To normalize the image.
+#                 ],
+#             ),
+#         ),
+#         batch_size=batch_size,
+#         shuffle=shuffle,
+#     )

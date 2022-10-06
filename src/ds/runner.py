@@ -17,10 +17,10 @@ class Runner:
         self,
         loader: DataLoader[Any],
         model: torch.nn.Module,
-        loss_fn: torch.nn.modules.loss,
+        loss_fn: torch.nn.Module,
         stage: Stage,
         optimizer: Optional[torch.optim.Optimizer] = None,
-        device: Optional[torch.device] = "cpu",
+        device: Optional[torch.device] = torch.device("cpu"),
     ) -> None:
         self.epoch_count = 0
         self.loader = loader
