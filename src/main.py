@@ -8,6 +8,7 @@ import torch
 from torch.utils.data import ConcatDataset
 from torchvision.transforms import RandomCrop, Resize, ToTensor, Grayscale, Compose
 import pandas as pd
+import numpy as np
 
 from ds.dataset import create_dataloader
 from ds.models import THGStrainStressCNN
@@ -58,8 +59,8 @@ def main(cfg: THGStrainStressConfig) -> None:
 
     data_transform = Compose(
         [
-            RandomCrop(size=(258, 258)),
-            # Resize((258, 258)),
+            # RandomCrop(size=(258, 258)),
+            Resize((258, 258)),
             Grayscale(),
             # AugMix(),
             # RandAugment(num_ops=2),
@@ -90,6 +91,7 @@ def main(cfg: THGStrainStressConfig) -> None:
         datasets.append(dataset)
         groups.extend([folder] * len(dataset))
 
+    groups = np.array(groups)
     dataset = ConcatDataset(datasets)
 
     runner_iter = k_fold(

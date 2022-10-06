@@ -20,13 +20,13 @@ def k_fold(
     device: torch.device,
     batch_size: int,
     dataset: Dataset,
-    groups: list[int],
+    groups: np.ndarray,
 ) -> Generator[Tuple[Runner, Runner], None, None]:
 
     sgkf = StratifiedGroupKFold(n_splits=5)
 
     for train_idx, val_idx in sgkf.split(
-        X=np.arange(len(dataset)), y=groups, groups=groups
+        X=np.ones((len(dataset), 1)), y=groups, groups=groups
     ):
 
         log.debug(
