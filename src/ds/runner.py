@@ -71,14 +71,14 @@ class Runner:
     def reset(self):
         self.loss_metric = Metric()
 
-    def save_checkpoint(self, path: str = os.getcwd()):
+    def save_checkpoint(self):
         torch.save(
             {
                 "epoch": self.epoch_count,
                 "model_state_dict": self.model.state_dict(),
                 "optimizer_state_dict": self.optimizer.state_dict(),
             },
-            f"{path}/checkpoint.pt",  # os.getcwd() is set by Hydra to 'outputs'.
+            f"{os.getcwd()}/checkpoint.pt",  # os.getcwd() is set by Hydra to 'outputs'.
         )
 
     def load_checkpoint(self, path: str):
