@@ -56,6 +56,14 @@ class TensorboardExperiment:
         tag = f"{self.stage.name}/epoch/{name}"
         self._writer.add_scalar(tag, value, step)
 
+    def add_epoch_metrics(
+        self, name: str, tag_scalar_dict: dict[str, float], step: int
+    ):
+        main_tag = f"epoch/{name}"
+        self._writer.add_scalars(
+            main_tag=main_tag, tag_scalar_dict=tag_scalar_dict, global_step=step
+        )
+
     def add_train_val_epoch_metrics(
         self, name: str, train_value: float, val_value: float, step: int
     ):

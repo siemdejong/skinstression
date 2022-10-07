@@ -111,7 +111,6 @@ def run_epoch(
     train_runner.run("Train Batches", experiment)
 
     # Log Training Epoch Metrics
-    experiment.add_epoch_metric("loss", train_runner.avg_loss, epoch_id)
     experiment.add_epoch_sigmoid(train_runner.prediction, train_runner.target, epoch_id)
 
     # Validation Loop
@@ -119,8 +118,11 @@ def run_epoch(
     val_runner.run("Validation Batches", experiment)
 
     # Log Validation Epoch Metrics
-    experiment.add_epoch_metric("loss", val_runner.avg_loss, epoch_id)
     experiment.add_epoch_sigmoid(val_runner.prediction, val_runner.target, epoch_id)
+
+    # Combine training and validation loss in one plot.
+    loss_value_dict = {"train": train_runner.avg_loss, "val": val_runner.avg_loss}
+    experiment.add_epoch_metrics("loss", loss_value_dict, epoch_id)
 
 
 def run_fold(
