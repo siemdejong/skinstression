@@ -8,8 +8,7 @@ from tqdm import tqdm
 
 from ds.metrics import Metric
 from ds.tracking import ExperimentTracker, Stage
-
-import os
+from ds.utils import save_checkpoint
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +30,6 @@ class Runner:
         self.compute_loss = loss_fn
         self.optimizer = optimizer
         self.device = device
-        # Assume Stage based on presence of optimizer
         self.stage = stage
 
     @property
@@ -126,15 +124,7 @@ def run_fold(
 
         if val_runner.avg_loss < _lowest_loss:
             _lowest_loss = val_runner.avg_loss
-            torch.save(
-                {
-                    "epoch": epoch_id,
-                    "model_state_dict": train_runner.model.state_dict(),
-                    "optimizer_state_dict": train_runner.optimizer.state_dict(),
-                    "loss": val_runner.avg_loss,
-                },
-                f"{os.getcwd()}/checkpoint.pt",
-            )
+            save_checkpoint(train_runner)
 
         experiment.add_fold_metric("loss", val_runner.avg_loss, fold_id)
 
