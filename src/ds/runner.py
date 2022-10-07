@@ -135,8 +135,6 @@ def run_fold(
                 },
                 f"{os.getcwd()}/checkpoint.pt",
             )
-            # TODO: implement model retrieval:
-            # https://pytorch.org/tutorials/recipes/recipes/saving_and_loading_a_general_checkpoint.html
 
         experiment.add_fold_metric("loss", val_runner.avg_loss, fold_id)
 

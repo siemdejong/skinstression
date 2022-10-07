@@ -1,4 +1,15 @@
 import pathlib
+import torch
+from torch import nn
+
+
+def load_checkpoint(path: str, model: nn.Module, optimizer: nn.Module):
+    checkpoint = torch.load(path)
+    model.load_state_dict(checkpoint["model_state_dict"])
+    optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+    epoch = checkpoint["epoch"]
+    loss = checkpoint["loss"]
+    return model, optimizer, epoch, loss
 
 
 def create_experiment_log_dir(root: str, parents: bool = True) -> str:
