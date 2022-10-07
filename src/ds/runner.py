@@ -9,6 +9,8 @@ from tqdm import tqdm
 from ds.metrics import Metric
 from ds.tracking import ExperimentTracker, Stage
 
+import os
+
 log = logging.getLogger(__name__)
 
 
@@ -106,11 +108,6 @@ def run_epoch(
     experiment.add_epoch_metric("loss", val_runner.avg_loss, epoch_id)
     experiment.add_epoch_sigmoid(val_runner.prediction, val_runner.target, epoch_id)
 
-    # # Combined TRAIN/VAL epoch metrics
-    # experiment.add_train_val_epoch_metrics(
-    #     "loss", train_runner.avg_loss, val_runner.avg_loss, epoch_id
-    # )
-
 
 def run_fold(
     val_runner: Runner,
@@ -129,7 +126,17 @@ def run_fold(
 
         if val_runner.avg_loss < _lowest_loss:
             _lowest_loss = val_runner.avg_loss
-            # TODO: Save model.
+            torch.save(
+                {
+                    "epoch": epoch_id,
+                    "model_state_dict": train_runner.model.state_dict(),
+                    "optimizer_state_dict": train_runner.optimizer.state_dict(),
+                    "loss": val_runner.avg_loss,
+                },
+                f"{os.getcwd()}/checkpoint.pt",
+            )
+            # TODO: implement model retrieval:
+            # https://pytorch.org/tutorials/recipes/recipes/saving_and_loading_a_general_checkpoint.html
 
         experiment.add_fold_metric("loss", val_runner.avg_loss, fold_id)
 
