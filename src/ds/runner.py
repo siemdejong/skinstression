@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from ds.metrics import Metric
 from ds.tracking import ExperimentTracker, Stage
-from ds.utils import save_checkpoint
+import os
 
 log = logging.getLogger(__name__)
 
@@ -71,6 +71,22 @@ class Runner:
     def reset(self):
         self.loss_metric = Metric()
 
+    def save_checkpoint(self, path: str = os.getcwd()):
+        torch.save(
+            {
+                "epoch": self.epoch_count,
+                "model_state_dict": self.model.state_dict(),
+                "optimizer_state_dict": self.optimizer.state_dict(),
+            },
+            f"{path}/checkpoint.pt",  # os.getcwd() is set by Hydra to 'outputs'.
+        )
+
+    def load_checkpoint(self, path: str):
+        checkpoint = torch.load(path)
+        self.model.load_state_dict(checkpoint["model_state_dict"])
+        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        self.epoch_count = checkpoint["epoch"]
+
 
 def run_test(
     test_runner: Runner,
@@ -124,7 +140,7 @@ def run_fold(
 
         if val_runner.avg_loss < _lowest_loss:
             _lowest_loss = val_runner.avg_loss
-            save_checkpoint(train_runner)
+            train_runner.save_checkpoint()
 
         experiment.add_fold_metric("loss", val_runner.avg_loss, fold_id)
 

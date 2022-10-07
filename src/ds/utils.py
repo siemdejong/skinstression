@@ -1,27 +1,4 @@
 import pathlib
-import torch
-from torch import nn
-from ds.runner import Runner
-import os
-
-
-def save_checkpoint(runner: Runner):
-    torch.save(
-        {
-            "epoch": runner.epoch_count,
-            "model_state_dict": runner.model.state_dict(),
-            "optimizer_state_dict": runner.optimizer.state_dict(),
-        },
-        f"{os.getcwd()}/checkpoint.pt",  # os.getcwd() is set by Hydra to 'outputs'.
-    )
-
-
-def load_checkpoint(path: str, model: nn.Module, optimizer: nn.Module):
-    checkpoint = torch.load(path)
-    model.load_state_dict(checkpoint["model_state_dict"])
-    optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-    epoch = checkpoint["epoch"]
-    return model, optimizer, epoch
 
 
 def create_experiment_log_dir(root: str, parents: bool = True) -> str:
