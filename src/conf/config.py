@@ -9,6 +9,7 @@ class Model:
 
 @dataclass
 class Optimizer:
+    name: str
     lr: float
     beta_1: float
     beta_2: float

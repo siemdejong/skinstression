@@ -52,11 +52,17 @@ def main(cfg: THGStrainStressConfig) -> None:
     loss_fn = torch.nn.L1Loss().to(device)  # MAE.
     # loss_fn = torch.nn.MSELoss().to(device)
 
-    optimizer = torch.optim.Adam(
-        params=model.parameters(),
-        lr=cfg.params.optimizer.lr,
-        betas=(cfg.params.optimizer.beta_1, cfg.params.optimizer.beta_2),
-    )
+    if cfg.params.optimizer.name == "adam":
+        optimizer = torch.optim.Adam(
+            params=model.parameters(),
+            lr=cfg.params.optimizer.lr,
+            betas=(cfg.params.optimizer.beta_1, cfg.params.optimizer.beta_2),
+        )
+    elif cfg.params.optimizer.name == "sgd":
+        optimizer = torch.optim.SGD(
+            params=model.parameters(),
+            lr=cfg.params.optimizer.lr,
+        )
 
     # TODO: Which LR scheduler to use?
     # CosineAnnealingLR, CyclicLR
@@ -102,6 +108,7 @@ def main(cfg: THGStrainStressConfig) -> None:
     dataset = ConcatDataset(datasets)
     log.info(f"Training on {len(dataset)} samples.")
 
+    # BUG: USES OPTIMIZER AND MODEL OF PREVIOUS K-FOLD.
     runner_iter = k_fold(
         n_splits=cfg.params.k_folds,
         model=model,
