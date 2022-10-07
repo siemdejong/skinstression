@@ -100,6 +100,7 @@ def main(cfg: THGStrainStressConfig) -> None:
 
     groups = np.array(groups)
     dataset = ConcatDataset(datasets)
+    log.info(f"Training on {len(dataset)} samples.")
 
     runner_iter = k_fold(
         n_splits=cfg.params.k_folds,
