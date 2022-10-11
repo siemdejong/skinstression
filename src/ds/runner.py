@@ -49,7 +49,7 @@ class Runner:
 
             if self.optimizer:
                 # Backpropagation
-                self.optimizer.zero_grad()
+                self.model.zero_grad(set_to_none=True)
                 loss.backward()
                 self.optimizer.step()
 
@@ -115,7 +115,8 @@ def run_epoch(
 
     # Validation Loop
     experiment.set_stage(Stage.VAL)
-    val_runner.run("Validation Batches", experiment)
+    with torch.no_grad():
+        val_runner.run("Validation Batches", experiment)
 
     # Log Validation Epoch Metrics
     experiment.add_epoch_sigmoid(val_runner.prediction, val_runner.target, epoch_id)

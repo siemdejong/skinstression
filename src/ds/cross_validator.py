@@ -42,10 +42,18 @@ def k_fold(
         val_dataset = Subset(dataset, val_idx)
 
         train_loader = DataLoader(
-            dataset=train_dataset, shuffle=True, batch_size=batch_size
+            dataset=train_dataset,
+            shuffle=True,
+            batch_size=batch_size,
+            pin_memory=True,
+            num_workers=22,
         )
         val_loader = DataLoader(
-            dataset=val_dataset, shuffle=True, batch_size=batch_size
+            dataset=val_dataset,
+            shuffle=True,
+            batch_size=batch_size,
+            pin_memory=True,
+            num_workers=22,
         )
 
         # Create the runners
