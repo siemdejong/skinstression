@@ -46,14 +46,14 @@ def k_fold(
             shuffle=True,
             batch_size=batch_size,
             pin_memory=True,
-            num_workers=22,
+            num_workers=2,
         )
         val_loader = DataLoader(
             dataset=val_dataset,
             shuffle=True,
             batch_size=batch_size,
             pin_memory=True,
-            num_workers=22,
+            num_workers=2,
         )
 
         # Create the runners
