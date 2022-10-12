@@ -70,42 +70,8 @@ def main(cfg: THGStrainStressConfig) -> None:
         optimizer, cfg.params.scheduler.T_0
     )
 
-    data_transform = Compose(
-        [
-            # RandomCrop(size=(258, 258)),
-            Resize((258, 258)),
-            Grayscale(),
-            # AugMix(),
-            # RandAugment(num_ops=2),
-            ToTensor(),
-            # Lambda(lambda y: (y - y.mean()) / y.std()), # To normalize the image.
-        ]
-    )
-    datasets = []
-    groups = []
-    for _, labels in pd.read_csv(cfg.paths.targets).iterrows():
+    dataset, groups = THGStrainStressDataset.load_data()
 
-        folder = int(labels["index"])
-        targets = labels[["A", "h", "slope", "C"]].to_numpy(dtype=float)
-
-        if not (Path(cfg.paths.data) / str(folder)).is_dir():
-            log.info(
-                f"{Path(cfg.paths.data) / str(folder)} will be excluded "
-                f"because it is not found."
-            )
-            continue
-
-        dataset = THGStrainStressDataset(
-            root_data_dir=cfg.paths.data,
-            folder=folder,
-            targets=targets,
-            data_transform=data_transform,
-        )
-        datasets.append(dataset)
-        groups.extend([folder] * len(dataset))
-
-    groups = np.array(groups)
-    dataset = ConcatDataset(datasets)
     log.info(f"Training on {len(dataset)} samples.")
 
     # BUG: USES OPTIMIZER AND MODEL OF PREVIOUS K-FOLD.
