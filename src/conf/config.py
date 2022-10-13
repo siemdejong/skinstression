@@ -36,8 +36,13 @@ class Params:
     optimizer: Optimizer
     scheduler: Scheduler
 
+@dataclass
+class Dist:
+    cpus: int
+    gpus: int
 
 @dataclass
 class THGStrainStressConfig:
     paths: Paths
     params: Params
+    dist: Dist
