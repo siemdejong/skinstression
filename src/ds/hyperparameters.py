@@ -178,7 +178,12 @@ def tune_hyperparameters(cfg: THGStrainStressConfig):
         cfg: hydra configuration object. Only uses cfg.optuna.trials.
     """
     # Create study.
+    study_name = "thg-strain-stress"
+    storage = f"sqlite:///{study_name}.db"
     study = optuna.create_study(
+        study_name=study_name,
+        storage=storage,
+        load_if_exists=True,
         direction="minimize",
         sampler=optuna.samplers.TPESampler(),
         pruner=optuna.pruners.SuccessiveHalvingPruner(),

@@ -1,3 +1,4 @@
+*.db
 sigmoid_labels.csv
 outputs
 config.yaml
