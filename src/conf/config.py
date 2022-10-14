@@ -47,8 +47,10 @@ class Dist:
 class Mode(Enum):
     TUNE: auto()
 
+
 @dataclass
 class Optuna:
+    study_name: str
     trials: int
 
 
