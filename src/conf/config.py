@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum, auto
 
 
 @dataclass
@@ -36,13 +37,25 @@ class Params:
     optimizer: Optimizer
     scheduler: Scheduler
 
+
 @dataclass
 class Dist:
     cpus: int
     gpus: int
+
+
+class Mode(Enum):
+    TUNE: auto()
+
+@dataclass
+class Optuna:
+    trials: int
+
 
 @dataclass
 class THGStrainStressConfig:
     paths: Paths
     params: Params
     dist: Dist
+    mode: Mode
+    optuna: Optuna
