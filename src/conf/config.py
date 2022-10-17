@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum, auto
 
 
 @dataclass
@@ -22,9 +23,9 @@ class Scheduler:
 
 @dataclass
 class Paths:
-    log: str
     data: str
     targets: str
+    optuna_db: str
 
 
 @dataclass
@@ -38,6 +39,26 @@ class Params:
 
 
 @dataclass
+class Dist:
+    cpus: int
+    gpus: int
+
+
+class Mode(Enum):
+    TUNE: int = 0
+    VISUALIZE: int = 1
+
+
+@dataclass
+class Optuna:
+    study_name: str
+    trials: int
+
+
+@dataclass
 class THGStrainStressConfig:
     paths: Paths
     params: Params
+    dist: Dist
+    mode: Mode
+    optuna: Optuna

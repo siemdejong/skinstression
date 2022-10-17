@@ -1,12 +1,13 @@
 from pathlib import Path
 from typing import Any
 import os
+import logging
 
 import pandas as pd
 import numpy as np
 import torch
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, ConcatDataset
 from torchvision.transforms import (
     Compose,
     Resize,
@@ -21,7 +22,7 @@ from torchvision.transforms import (
 )
 
 
-# from load_data import load_image_data, load_label_data
+log = logging.getLogger(__name__)
 
 
 class THGStrainStressDataset(Dataset[Any]):
@@ -61,29 +62,53 @@ class THGStrainStressDataset(Dataset[Any]):
 
         return image, self.targets
 
+    @staticmethod
+    def load_data(data_path: str, targets_path: str) -> tuple[Dataset, np.ndarray]:
+        """Gather all data and construct a full dataset object. Return groups with it.
 
-# def create_dataloader(
-#     batch_size: int,
-#     data_path: Path,
-#     label_path: Path,
-#     shuffle: bool = True,
-# ) -> DataLoader[Any]:
-#     return DataLoader(
-#         dataset=THGStrainStressDataset(
-#             data_dir=data_path,
-#             label_path=label_path,
-#             data_transform=Compose(
-#                 [
-#                     RandomCrop(size=(258, 258)),
-#                     # Resize((258, 258)),
-#                     Grayscale(),
-#                     # AugMix(),
-#                     # RandAugment(num_ops=2),
-#                     ToTensor(),
-#                     # Lambda(lambda y: (y - y.mean()) / y.std()), # To normalize the image.
-#                 ],
-#             ),
-#         ),
-#         batch_size=batch_size,
-#         shuffle=shuffle,
-#     )
+        Args:
+            data_path: the path to the directory containing the data.
+            targets_path: the path to the file containing the target data.
+
+        Returns:
+            dataset: a concatenated dataset including all data indexed by targets_path.
+            groups: array of indices denoting to what group subsets of the dataset belong to.
+        """
+        data_transform = Compose(
+            [
+                # RandomCrop(size=(258, 258)),
+                Resize((258, 258)),
+                Grayscale(),
+                # AugMix(),
+                # RandAugment(num_ops=2),
+                ToTensor(),
+                # Lambda(lambda y: (y - y.mean()) / y.std()), # To normalize the image.
+            ]
+        )
+        datasets = []
+        groups = []
+        for _, labels in pd.read_csv(targets_path).iterrows():
+
+            folder = int(labels["index"])
+            targets = labels[["A", "h", "slope", "C"]].to_numpy(dtype=float)
+
+            if not (Path(data_path) / str(folder)).is_dir():
+                log.info(
+                    f"{Path(data_path) / str(folder)} will be excluded "
+                    f"because it is not found."
+                )
+                continue
+
+            dataset = THGStrainStressDataset(
+                root_data_dir=data_path,
+                folder=folder,
+                targets=targets,
+                data_transform=data_transform,
+            )
+            datasets.append(dataset)
+            groups.extend([folder] * len(dataset))
+
+        groups = np.array(groups)
+        dataset = ConcatDataset(datasets)
+
+        return dataset, groups

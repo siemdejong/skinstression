@@ -4,21 +4,27 @@ from pathlib import Path
 import hydra
 from hydra.core.config_store import ConfigStore
 
+from ray import tune
 import torch
-from torch.utils.data import ConcatDataset
+from torch import nn
+from torch.utils.data import ConcatDataset, random_split
 from torchvision.transforms import RandomCrop, Resize, ToTensor, Grayscale, Compose
 import pandas as pd
 import numpy as np
 
+
 # from ds.dataset import create_dataloader
 from ds.models import THGStrainStressCNN
-from ds.runner import run_fold, run_test
+from ds.runner import run_epoch, run_fold, run_test
+from ds.runner import Runner
 from ds.tensorboard import TensorboardExperiment
 from ds.tracking import Stage
+from ds.hyperparameters import tune_hyperparameters
+from ds.visualization import visualize
 from sklearn.model_selection import RandomizedSearchCV
 from ds.cross_validator import k_fold
 from ds.dataset import THGStrainStressDataset
-from conf.config import THGStrainStressConfig
+from conf.config import THGStrainStressConfig, Mode
 
 cs = ConfigStore.instance()
 cs.store(name="thg_strain_stress_config", node=THGStrainStressConfig)
@@ -32,107 +38,16 @@ log = logging.getLogger(__name__)
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: THGStrainStressConfig) -> None:
 
-    # Hydra creates an output directory automatically at cwd.
-    # Use it for tensorboard summaries.
-    log_dir = os.getcwd() + "/tensorboard"
-
-    if torch.cuda.is_available():
-        device = torch.device("cuda")
-        log.info(f"Using device {device}.")
-    else:
-        device = torch.device("cpu")
-        log.warning(f"Using device {device}. Is GPU set up properly?")
-
-    model = THGStrainStressCNN(
-        cfg.params.model.dropout, cfg.params.model.num_output_features
-    ).to(device)
-
-    # TODO: Which loss function? KL/MSE/MAE/MSLE?
-    # Maybe we can even use loss as a means of how accurate the sigmoid is.
-    loss_fn = torch.nn.L1Loss().to(device)  # MAE.
-    # loss_fn = torch.nn.MSELoss().to(device)
-
-    if cfg.params.optimizer.name == "adam":
-        optimizer = torch.optim.Adam(
-            params=model.parameters(),
-            lr=cfg.params.optimizer.lr,
-            betas=(cfg.params.optimizer.beta_1, cfg.params.optimizer.beta_2),
-        )
-    elif cfg.params.optimizer.name == "sgd":
-        optimizer = torch.optim.SGD(
-            params=model.parameters(),
-            lr=cfg.params.optimizer.lr,
-        )
-
     # TODO: Which LR scheduler to use?
     # CosineAnnealingLR, CyclicLR
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
-        optimizer, cfg.params.scheduler.T_0
-    )
+    # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+    #     optimizer, cfg.params.scheduler.T_0
+    # )
 
-    data_transform = Compose(
-        [
-            # RandomCrop(size=(258, 258)),
-            Resize((258, 258)),
-            Grayscale(),
-            # AugMix(),
-            # RandAugment(num_ops=2),
-            ToTensor(),
-            # Lambda(lambda y: (y - y.mean()) / y.std()), # To normalize the image.
-        ]
-    )
-    datasets = []
-    groups = []
-    for _, labels in pd.read_csv(cfg.paths.targets).iterrows():
-
-        folder = int(labels["index"])
-        targets = labels[["A", "h", "slope", "C"]].to_numpy(dtype=float)
-
-        if not (Path(cfg.paths.data) / str(folder)).is_dir():
-            log.info(
-                f"{Path(cfg.paths.data) / str(folder)} will be excluded "
-                f"because it is not found."
-            )
-            continue
-
-        dataset = THGStrainStressDataset(
-            root_data_dir=cfg.paths.data,
-            folder=folder,
-            targets=targets,
-            data_transform=data_transform,
-        )
-        datasets.append(dataset)
-        groups.extend([folder] * len(dataset))
-
-    groups = np.array(groups)
-    dataset = ConcatDataset(datasets)
-    log.info(f"Training on {len(dataset)} samples.")
-
-    # BUG: USES OPTIMIZER AND MODEL OF PREVIOUS K-FOLD.
-    runner_iter = k_fold(
-        n_splits=cfg.params.k_folds,
-        model=model,
-        loss_fn=loss_fn,
-        optimizer=optimizer,
-        device=device,
-        batch_size=cfg.params.batch_size,
-        dataset=dataset,
-        groups=groups,
-    )
-
-    for fold_id, (train_runner, val_runner) in enumerate(runner_iter):
-
-        # Setup the experiment tracker
-        tracker = TensorboardExperiment(log_path=log_dir)
-
-        run_fold(
-            train_runner=train_runner,
-            val_runner=val_runner,
-            experiment=tracker,
-            scheduler=scheduler,
-            fold_id=fold_id,
-            epoch_count=cfg.params.epoch_count,
-        )
+    if cfg.mode == Mode.TUNE.name:
+        tune_hyperparameters(cfg)
+    elif cfg.mode == Mode.VISUALIZE.name:
+        visualize(cfg)
 
 
 if __name__ == "__main__":
