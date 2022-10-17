@@ -22,6 +22,7 @@ class Runner:
         stage: Stage,
         optimizer: Optional[torch.optim.Optimizer] = None,
         device: Optional[torch.device] = torch.device("cpu"),
+        progress_bar: Optional[bool] = True,
     ) -> None:
         self.epoch_count = 0
         self.loader = loader
@@ -31,6 +32,7 @@ class Runner:
         self.optimizer = optimizer
         self.device = device
         self.stage = stage
+        self.disable_progress_bar = not progress_bar
 
     @property
     def avg_loss(self):
@@ -41,7 +43,9 @@ class Runner:
         # Turn on eval or train mode.
         self.model.train(self.stage is Stage.TRAIN)
 
-        for x, y in tqdm(self.loader, desc=desc, ncols=80):
+        for x, y in tqdm(
+            self.loader, desc=desc, ncols=80, disable=self.disable_progress_bar
+        ):
             x, y = x.to(self.device), y.to(self.device)
             loss, batch_loss = self._run_single(x, y)
 
