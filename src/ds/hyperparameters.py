@@ -13,8 +13,6 @@ from optuna.visualization import (
 import optuna
 from optuna.trial import TrialState
 from optuna.study import MaxTrialsCallback
-from ray.tune.schedulers import ASHAScheduler
-from src.main import train
 import logging
 from torch import nn
 import torch
@@ -22,6 +20,8 @@ from torch.utils.data import random_split
 import os
 
 log = logging.getLogger(__name__)
+optuna.logging.enable_propagation()  # Propagate logs to the root logger.
+optuna.logging.disable_default_handler()  # Stop showing logs in sys.stderr.
 
 
 def train(trial, hparams, model):
@@ -33,12 +33,15 @@ def train(trial, hparams, model):
     loss_fn = nn.L1Loss()  # MAE.
     optimizer = torch.optim.Adam(
         params=model.parameters(),
-        lr=hparams.lr,
+        lr=hparams["lr"],
         betas=(0.9, 0.999),
-    ).to(device)
+    )
 
     # Split the dataset in train, validation and test (sub)sets.
-    dataset, groups = THGStrainStressDataset.load_data()
+    dataset, groups = THGStrainStressDataset.load_data(
+        data_path="/scistor/guest/sjg203/projects/thg-strain-stress/data/z-stacks",
+        targets_path="/scistor/guest/sjg203/projects/thg-strain-stress/data/z-stacks/sigmoid_labels.csv",
+    )
 
     train_test_split = int(len(dataset) * 0.8)
     train_set, test_set = random_split(
@@ -52,10 +55,10 @@ def train(trial, hparams, model):
 
     # Define dataloaders
     train_loader = torch.utils.data.DataLoader(
-        train_subset, batch_size=int(hparams.batch_size), num_workers=8
+        train_subset, batch_size=int(hparams["batch_size"]), num_workers=1
     )
     val_loader = torch.utils.data.DataLoader(
-        val_subset, batch_size=int(hparams.batch_size), num_workers=8
+        val_subset, batch_size=int(hparams["batch_size"]), num_workers=1
     )
 
     # Create the runners
@@ -112,32 +115,32 @@ def build_model(trial, hparams):
     # Block 1
     layers.append(nn.Conv2d(1, 64, 3))
     layers.append(nn.ReLU())
-    layers.append(nn.Dropout2d(hparams.dropout_1))
+    layers.append(nn.Dropout2d(hparams["dropout_1"]))
     for _ in range(3):
         layers.append(nn.MaxPool2d(2))
 
     # Block 2
     layers.append(nn.Conv2d(64, 64, 5))
     layers.append(nn.ReLU())
-    layers.append(nn.Dropout2d(hparams.dropout_2))
+    layers.append(nn.Dropout2d(hparams["dropout_2"]))
     layers.append(nn.MaxPool2d(2))
 
     # Block 3
     layers.append(nn.Conv2d(64, 64, 3))
     layers.append(nn.ReLU())
-    layers.append(nn.Dropout2d(hparams.dropout_3))
+    layers.append(nn.Dropout2d(hparams["dropout_3"]))
     layers.append(nn.MaxPool2d(2))
 
     # Block 4
     layers.append(nn.Conv2d(64, 64, 6))
     layers.append(nn.ReLU())
-    layers.append(nn.Dropout2d(hparams.dropout_4))
+    layers.append(nn.Dropout2d(hparams["dropout_4"]))
 
     # MLP
     layers.append(nn.Flatten())
-    layers.append(nn.Linear(64, hparams.n_nodes))
+    layers.append(nn.Linear(64, hparams["n_nodes"]))
     layers.append(nn.ReLU())
-    layers.append(nn.Linear(hparams.n_nodes, hparams.num_output_features))
+    layers.append(nn.Linear(hparams["n_nodes"], hparams["num_output_features"]))
 
     return nn.Sequential(*layers)
 
@@ -150,7 +153,7 @@ def objective(trial):
 
     # Define hyperparameter space.
     hparams = {
-        "lr": trial.suggest_loguniform("lr", 1e-5, 1e-1),
+        "lr": trial.suggest_float("lr", 1e-5, 1e-1, log=True),
         "dropout_1": trial.suggest_float("dropout_1", 0.1, 0.5),
         "dropout_2": trial.suggest_float("dropout_2", 0.1, 0.5),
         "dropout_3": trial.suggest_float("dropout_3", 0.1, 0.5),
@@ -192,6 +195,7 @@ def tune_hyperparameters(cfg: THGStrainStressConfig):
     # Optimize objective in study.
     study.optimize(
         objective,
+        show_progress_bar=True,
         callbacks=[
             MaxTrialsCallback(
                 cfg.optuna.trials, states=(TrialState.COMPLETE, TrialState.PRUNED)

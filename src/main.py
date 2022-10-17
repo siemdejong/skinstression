@@ -42,7 +42,8 @@ def main(cfg: THGStrainStressConfig) -> None:
     # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
     #     optimizer, cfg.params.scheduler.T_0
     # )
-    if cfg.mode is Mode.TUNE:
+
+    if cfg.mode == Mode.TUNE.name:
         tune_hyperparameters(cfg)
 
 
