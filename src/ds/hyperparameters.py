@@ -3,13 +3,6 @@ from ds.dataset import THGStrainStressDataset
 from ds.runner import Runner, Stage, run_epoch
 from ds.tensorboard import TensorboardExperiment
 
-
-from optuna.visualization import (
-    plot_intermediate_values,
-    plot_contour,
-    plot_param_importances,
-)
-
 import optuna
 from optuna.trial import TrialState
 from optuna.study import MaxTrialsCallback
@@ -220,7 +213,3 @@ def tune_hyperparameters(cfg: THGStrainStressConfig):
     for key, value in study.best_trial.params.items():
         log.info("    {}: {}".format(key, value))
 
-    # Visualization
-    # plot_intermediate_values(study)
-    # plot_contour(study)
-    # plot_param_importances(study)

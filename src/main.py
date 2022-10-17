@@ -20,6 +20,7 @@ from ds.runner import Runner
 from ds.tensorboard import TensorboardExperiment
 from ds.tracking import Stage
 from ds.hyperparameters import tune_hyperparameters
+from ds.visualization import visualize
 from sklearn.model_selection import RandomizedSearchCV
 from ds.cross_validator import k_fold
 from ds.dataset import THGStrainStressDataset
@@ -45,6 +46,8 @@ def main(cfg: THGStrainStressConfig) -> None:
 
     if cfg.mode == Mode.TUNE.name:
         tune_hyperparameters(cfg)
+    elif cfg.mode == Mode.VISUALIZE.name:
+        visualize(cfg)
 
 
 if __name__ == "__main__":

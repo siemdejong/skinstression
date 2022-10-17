@@ -23,9 +23,9 @@ class Scheduler:
 
 @dataclass
 class Paths:
-    log: str
     data: str
     targets: str
+    optuna_db: str
 
 
 @dataclass
@@ -45,7 +45,8 @@ class Dist:
 
 
 class Mode(Enum):
-    TUNE: auto()
+    TUNE: int = 0
+    VISUALIZE: int = 1
 
 
 @dataclass
