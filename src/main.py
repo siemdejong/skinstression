@@ -1,11 +1,20 @@
-import os
+"""SHG-strain-stress
+author: Siem de Jong
+year: 2022
+
+This is the main entry point for the THG strain stress project.
+Can
+    1. calculate model parameters for a predefined convolutional
+       neural network, estimating parameters describing the strain-stress
+       curve of skin tissue from single SHG images;
+    2. calculate appropriate hyperparameters for this model.
+
+Configurations must be made in conf/config.yaml.
+"""
+
 import logging
-from pathlib import Path
 import hydra
 from hydra.core.config_store import ConfigStore
-
-# from ds.dataset import create_dataloader
-from ds.tensorboard import tensorboard_dev_upload
 from ds.hyperparameters import tune_hyperparameters
 from ds.visualization import visualize
 from conf.config import THGStrainStressConfig, Mode
@@ -27,8 +36,6 @@ def main(cfg: THGStrainStressConfig) -> None:
     # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
     #     optimizer, cfg.params.scheduler.T_0
     # )
-    if cfg.tensorboard_dev.upload:
-        tensorboard_dev_upload(cfg)
 
     if cfg.mode == Mode.TUNE.name:
         tune_hyperparameters(cfg)

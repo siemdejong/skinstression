@@ -18,6 +18,15 @@ optuna.logging.disable_default_handler()  # Stop showing logs in sys.stderr.
 
 
 def train(trial, hparams, model):
+    """Train the model with given trial hyperparameters.
+    Args:
+        trial: the Optuna trial of the current training
+        hparams: the hyperparameters that are used during optimization
+        model: the model that is optimized
+
+    Returns:
+        loss: the loss defined by the loss function (MAE)
+    """
 
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
@@ -101,6 +110,9 @@ def build_model(trial, hparams):
     Args:
         trial: Optuna trial
         hparams: list of parameters (including those to be optimized by Optuna)
+
+    Returns:
+        model: `nn.Sequential` of all parameterized layers
     """
 
     layers = []
@@ -141,7 +153,10 @@ def build_model(trial, hparams):
 def objective(trial):
     """Function for Optuna to optimize.
     Args:
-        trial: Optuna trial.
+        trial: Optuna trial
+
+    Returns:
+        loss: loss calculated in train()
     """
 
     # Define hyperparameter space.
@@ -169,6 +184,7 @@ def tune_hyperparameters(cfg: THGStrainStressConfig):
     """Optimize parameters using an objective function and Optuna.
     All configurations are overwritten during optimization.
     Number of Optuna trials is given by cfg.optuna.trials.
+    Optimal hyperparameters are logged.
 
     Args:
         cfg: hydra configuration object. Only uses cfg.optuna.trials.
@@ -212,4 +228,3 @@ def tune_hyperparameters(cfg: THGStrainStressConfig):
     log.info("  Params: ")
     for key, value in study.best_trial.params.items():
         log.info("    {}: {}".format(key, value))
-

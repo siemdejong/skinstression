@@ -13,14 +13,18 @@ log = logging.getLogger(__name__)
 
 
 def visualize(cfg: THGStrainStressConfig):
+    """Visualize Optuna optimization output.
+    Plots are opened in an external browser at ports opened by Plotly.
+
+    Args:
+        cfg: hydra configuration object. cfg.paths.optuna_db must be provided.
+    """
 
     database = cfg.paths.optuna_db
     study_name = os.path.basename(database).split(".")[0]
-    print(study_name, database)
     study = optuna.create_study(
         study_name=study_name,
         storage=f"sqlite:///{database}",
-        # storage="sqlite:////scistor/guest/sjg203/projects/thg-strain-stress/outputs/2022-10-14/16-31-41/thg-strain-stress.db",
         load_if_exists=True,
     )
 
