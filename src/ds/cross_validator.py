@@ -20,7 +20,7 @@ def k_fold(
     optimizer: torch.optim.Optimizer,
     device: torch.device,
     batch_size: int,
-    dataset: Dataset[Any],
+    dataset: Dataset,
     groups: np.ndarray,
 ) -> Generator[Tuple[Runner, Runner], None, None]:
 

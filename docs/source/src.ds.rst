@@ -4,14 +4,6 @@ src.ds package
 Submodules
 ----------
 
-src.ds.create\_labels module
-----------------------------
-
-.. automodule:: src.ds.create_labels
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 src.ds.cross\_validator module
 ------------------------------
 

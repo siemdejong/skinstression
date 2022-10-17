@@ -71,8 +71,8 @@ class THGStrainStressDataset(Dataset[Any]):
             targets_path: the path to the file containing the target data.
 
         Returns:
-            dataset: a concatenated dataset including all data indexed by targets_path.
-            groups: array of indices denoting to what group subsets of the dataset belong to.
+            (tuple): tuple containing a concatenated dataset including all data indexed by targets_path,
+            and an array of indices denoting to what group subsets of the dataset belong to.
         """
         data_transform = Compose(
             [
