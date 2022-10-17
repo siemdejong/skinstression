@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 import matplotlib.pyplot as plt
 import matplotlib
-from torch.utils.tensorboard import SummaryWriter
+from torch.utils.tensorboard.writer import SummaryWriter
 
 from ds.tracking import Stage
 from ds.utils import create_experiment_log_dir
@@ -15,7 +15,7 @@ from typing import Optional
 
 
 class TensorboardExperiment:
-    def __init__(self, log_path: str, create: bool = True):
+    def __init__(self, log_path: str, create: bool = True) -> None:
 
         log_dir = create_experiment_log_dir(root=log_path)
         self.stage = Stage.TRAIN
@@ -32,14 +32,14 @@ class TensorboardExperiment:
         layout = {"THG-STRAIN-STRESS": charts}
         self._writer.add_custom_scalars(layout)
 
-    def set_stage(self, stage: Stage):
+    def set_stage(self, stage: Stage) -> None:
         self.stage = stage
 
-    def flush(self):
+    def flush(self) -> None:
         self._writer.flush()
 
     @staticmethod
-    def _validate_log_dir(log_dir: str, create: bool = True):
+    def _validate_log_dir(log_dir: str, create: bool = True) -> None:
         log_path = Path(log_dir).resolve()
         if log_path.exists():
             return
@@ -48,17 +48,17 @@ class TensorboardExperiment:
         else:
             raise NotADirectoryError(f"log_dir {log_dir} does not exist.")
 
-    def add_batch_metric(self, name: str, value: float, step: int):
+    def add_batch_metric(self, name: str, value: float, step: int) -> None:
         tag = f"{self.stage.name}/batch/{name}"
         self._writer.add_scalar(tag, value, step)
 
-    def add_epoch_metric(self, name: str, value: float, step: int):
+    def add_epoch_metric(self, name: str, value: float, step: int) -> None:
         tag = f"{self.stage.name}/epoch/{name}"
         self._writer.add_scalar(tag, value, step)
 
     def add_epoch_metrics(
         self, name: str, tag_scalar_dict: dict[str, float], step: int
-    ):
+    ) -> None:
         main_tag = f"epoch/{name}"
         self._writer.add_scalars(
             main_tag=main_tag, tag_scalar_dict=tag_scalar_dict, global_step=step
@@ -66,12 +66,12 @@ class TensorboardExperiment:
 
     def add_train_val_epoch_metrics(
         self, name: str, train_value: float, val_value: float, step: int
-    ):
+    ) -> None:
         main_tag = f"{Stage.TRAIN.name}-{Stage.VAL.name}/epoch/{name}"
         scalars = {"train": train_value, "val": val_value}
         self._writer.add_scalars(main_tag, scalars, step)
 
-    def add_fold_metric(self, name: str, value: float, step: int):
+    def add_fold_metric(self, name: str, value: float, step: int) -> None:
         tag = f"{self.stage.name}/fold/{name}"
         self._writer.add_scalar(tag, value, step)
 

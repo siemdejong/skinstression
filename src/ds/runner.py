@@ -1,10 +1,12 @@
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import numpy as np
 import torch
 from torch.utils.data.dataloader import DataLoader
 from tqdm import tqdm
+
+from torch.optim.lr_scheduler import _LRScheduler, ReduceLROnPlateau
 
 from ds.metrics import Metric
 from ds.tracking import ExperimentTracker, Stage
@@ -76,19 +78,24 @@ class Runner:
         self.loss_metric = Metric()
 
     def save_checkpoint(self):
-        torch.save(
-            {
-                "epoch": self.epoch_count,
-                "model_state_dict": self.model.state_dict(),
-                "optimizer_state_dict": self.optimizer.state_dict(),
-            },
-            f"{os.getcwd()}/checkpoint.pt",  # os.getcwd() is set by Hydra to 'outputs'.
-        )
+        state: dict[str, Union[int, dict[str, Any]]] = {
+            "epoch": self.epoch_count,
+            "model_state_dict": self.model.state_dict(),
+        }
+
+        if self.optimizer:
+            state["optimizer_state_dict"] = self.optimizer.state_dict()
+
+            torch.save(
+                state,
+                f"{os.getcwd()}/checkpoint.pt",  # os.getcwd() is set by Hydra to 'outputs'.
+            )
 
     def load_checkpoint(self, path: str):
         checkpoint = torch.load(path)
         self.model.load_state_dict(checkpoint["model_state_dict"])
-        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        if self.optimizer:
+            self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         self.epoch_count = checkpoint["epoch"]
 
 
@@ -134,7 +141,7 @@ def run_fold(
     val_runner: Runner,
     train_runner: Runner,
     experiment: ExperimentTracker,
-    scheduler: torch.optim.lr_scheduler,
+    scheduler: Union[_LRScheduler, ReduceLROnPlateau],
     fold_id: int,
     epoch_count: int,
 ) -> None:
@@ -178,11 +185,13 @@ def run_fold(
 def summary(
     *runners, epoch_id: Optional[int] = None, epoch_count: Optional[int] = None
 ) -> str:
-    if len(runners) > 1:
+    if len(runners) > 1 and epoch_id:
         summary = f"[Epoch: {epoch_id + 1}/{epoch_count}]"
     else:
         summary = f"Testing results after {epoch_count} epochs"
+
     for runner in runners:
+        loss_msg = ""
         if runner.stage == Stage.TRAIN:
             loss_msg = f"Train Loss: {runner.avg_loss: 0.4f}"
         elif runner.stage == Stage.VAL:

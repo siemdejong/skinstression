@@ -17,8 +17,9 @@ optuna.logging.enable_propagation()  # Propagate logs to the root logger.
 optuna.logging.disable_default_handler()  # Stop showing logs in sys.stderr.
 
 
-def train(trial, hparams, model):
+def train(trial: optuna.trial.Trial, hparams: dict, model: nn.Module) -> float:
     """Train the model with given trial hyperparameters.
+
     Args:
         trial: the Optuna trial of the current training
         hparams: the hyperparameters that are used during optimization

@@ -47,7 +47,7 @@ class THGStrainStressDataset(Dataset[Any]):
     def __len__(self):
         return self._length
 
-    def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor]:
+    def __getitem__(self, idx) -> tuple[Image.Image, np.ndarray]:
         # TODO: Make it work with z-stacks!!!
         # https://stackoverflow.com/a/60176057
         # Assuming images follow [0, n-1], so they can be accesed directly.

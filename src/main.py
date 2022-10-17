@@ -1,17 +1,3 @@
-"""SHG-strain-stress
-author: Siem de Jong
-year: 2022
-
-This is the main entry point for the THG strain stress project.
-Can
-    1. calculate model parameters for a predefined convolutional
-       neural network, estimating parameters describing the strain-stress
-       curve of skin tissue from single SHG images;
-    2. calculate appropriate hyperparameters for this model.
-
-Configurations must be made in conf/config.yaml.
-"""
-
 import logging
 import hydra
 from hydra.core.config_store import ConfigStore
@@ -30,6 +16,17 @@ log = logging.getLogger(__name__)
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: THGStrainStressConfig) -> None:
+    """
+    This is the main entry point for the THG strain stress project.
+    Can
+    1. calculate model parameters for a predefined convolutional
+    neural network, estimating parameters describing the strain-stress
+    curve of skin tissue from single SHG images;
+    2. calculate appropriate hyperparameters for this model;
+    3. visualize result of hyperparameter optimization.
+
+    Configurations must be made in conf/config.yaml.
+    """
 
     # TODO: Which LR scheduler to use?
     # CosineAnnealingLR, CyclicLR
