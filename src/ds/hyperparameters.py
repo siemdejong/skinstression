@@ -17,7 +17,7 @@ optuna.logging.enable_propagation()  # Propagate logs to the root logger.
 optuna.logging.disable_default_handler()  # Stop showing logs in sys.stderr.
 
 
-def train(trial: optuna.trial.Trial, hparams: dict, model: nn.Module) -> float:
+def train(trial: optuna.trial.Trial, hparams: dict, model: nn.Module, cfg: THGStrainStressConfig) -> float:
     """Train the model with given trial hyperparameters.
 
     Args:
@@ -42,8 +42,8 @@ def train(trial: optuna.trial.Trial, hparams: dict, model: nn.Module) -> float:
 
     # Split the dataset in train, validation and test (sub)sets.
     dataset, groups = THGStrainStressDataset.load_data(
-        data_path="/scistor/guest/sjg203/projects/thg-strain-stress/data/z-stacks",
-        targets_path="/scistor/guest/sjg203/projects/thg-strain-stress/data/z-stacks/sigmoid_labels.csv",
+        data_path=cfg.paths.data,
+        targets_path=cfg.paths.targets,
     )
 
     train_test_split = int(len(dataset) * 0.8)
@@ -151,7 +151,7 @@ def build_model(trial, hparams):
     return nn.Sequential(*layers)
 
 
-def objective(trial):
+def objective(trial, cfg):
     """Function for Optuna to optimize.
     Args:
         trial: Optuna trial
@@ -162,21 +162,21 @@ def objective(trial):
 
     # Define hyperparameter space.
     hparams = {
-        "lr": trial.suggest_float("lr", 1e-5, 1e-1, log=True),
-        "dropout_1": trial.suggest_float("dropout_1", 0.1, 0.5),
-        "dropout_2": trial.suggest_float("dropout_2", 0.1, 0.5),
-        "dropout_3": trial.suggest_float("dropout_3", 0.1, 0.5),
-        "dropout_4": trial.suggest_float("dropout_4", 0.1, 0.5),
-        "n_nodes": trial.suggest_categorical("n_nodes", [64, 256]),
+        "lr": trial.suggest_float("lr", 1e-5, 1e-3, log=True),
+        "dropout_1": trial.suggest_float("dropout_1", 0.1, 0.3),
+        "dropout_2": trial.suggest_float("dropout_2", 0.1, 0.3),
+        "dropout_3": trial.suggest_float("dropout_3", 0.1, 0.3),
+        "dropout_4": trial.suggest_float("dropout_4", 0.1, 0.3),
+        "n_nodes": trial.suggest_categorical("n_nodes", [64]),
         "num_output_features": 4,
-        "batch_size": trial.suggest_categorical("batch_size", [4, 8, 16, 32]),
+        "batch_size": trial.suggest_categorical("batch_size", [8, 16, 32]),
     }
 
     # Generate the model.
     model = build_model(trial, hparams)
 
     # Calculate loss and prune trials.
-    loss = train(trial, hparams, model)
+    loss = train(trial, hparams, model, cfg)
 
     return loss
 
@@ -198,13 +198,15 @@ def tune_hyperparameters(cfg: THGStrainStressConfig):
         storage=storage,
         load_if_exists=True,
         direction="minimize",
-        sampler=optuna.samplers.TPESampler(),
-        pruner=optuna.pruners.SuccessiveHalvingPruner(),
+        sampler=optuna.samplers.TPESampler(seed=42),
+        pruner=optuna.pruners.SuccessiveHalvingPruner(
+            min_resource=100, reduction_factor=2
+        ),
     )
 
     # Optimize objective in study.
     study.optimize(
-        objective,
+        lambda trial: objective(trial, cfg),
         show_progress_bar=True,
         callbacks=[
             MaxTrialsCallback(
