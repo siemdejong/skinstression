@@ -68,6 +68,10 @@ def build_model(
 
 
 class Objective:
+    """Provides the callable Optuna objective.
+    Data is loaded only once and attached to the objective.
+    """
+
     def __init__(self, dataset):
         # Split the dataset in train, validation and test (sub)sets.
         train_test_split = int(len(dataset) * 0.8)
