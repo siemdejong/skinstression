@@ -12,20 +12,17 @@ from optuna.visualization import (
 log = logging.getLogger(__name__)
 
 
-def visualize(cfg: THGStrainStressConfig):
+def visualize(database: str):
     """Visualize Optuna optimization output.
     Plots are opened in an external browser at ports opened by Plotly.
 
     Args:
         cfg: hydra configuration object. cfg.paths.optuna_db must be provided.
     """
-
-    database = cfg.paths.optuna_db
     study_name = os.path.basename(database).split(".")[0]
-    study = optuna.create_study(
+    study = optuna.load_study(
         study_name=study_name,
         storage=f"sqlite:///{database}",
-        load_if_exists=True,
     )
 
     intermediate_values = plot_intermediate_values(study)
