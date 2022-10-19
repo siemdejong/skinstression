@@ -53,6 +53,14 @@ class Mode(Enum):
 class Optuna:
     study_name: str
     trials: int
+    lr: list[float, float]
+    dropout_1: list[float, float]
+    dropout_2: list[float, float]
+    dropout_3: list[float, float]
+    dropout_4: list[float, float]
+    n_nodes: int
+    batch_size: list[int]
+    seed: int
 
 
 @dataclass
