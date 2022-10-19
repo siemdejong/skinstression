@@ -76,13 +76,8 @@ class THGStrainStressDataset(Dataset[Any]):
         """
         data_transform = Compose(
             [
-                # RandomCrop(size=(258, 258)),
-                Resize((258, 258)),
                 Grayscale(),
-                # AugMix(),
-                # RandAugment(num_ops=2),
                 ToTensor(),
-                # Lambda(lambda y: (y - y.mean()) / y.std()), # To normalize the image.
             ]
         )
         datasets = []
@@ -105,6 +100,16 @@ class THGStrainStressDataset(Dataset[Any]):
                 targets=targets,
                 data_transform=data_transform,
             )
+
+            # Dirty way of checking if data is compatible with model.
+            if not dataset[0][0].shape == (1, 1000, 1000):
+                log.info(
+                    f"{Path(data_path) / str(folder)} will be excluded "
+                    f"because the data of size {dataset[0][0].shape} "
+                    "is incompatible with the model."
+                )
+                continue
+
             datasets.append(dataset)
             groups.extend([folder] * len(dataset))
 

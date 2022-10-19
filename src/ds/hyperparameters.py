@@ -34,6 +34,13 @@ def build_model(
 
     layers = []
 
+    # Pre-blocks
+    preblock_kernel = {7: 106, 14: 53, 53: 14}.get(hparams["num_preblocks"])
+
+    for _ in range(hparams["num_preblocks"]):
+        layers.append(nn.Conv2d(1, 1, preblock_kernel))
+        layers.append(nn.ReLU())
+
     # Block 1
     layers.append(nn.Conv2d(1, 64, 3))
     layers.append(nn.ReLU())
@@ -104,6 +111,9 @@ class Objective:
         # Define hyperparameter space.
         hparams = {
             "lr": trial.suggest_float("lr", *cfg.optuna.hparams.lr, log=True),
+            "num_preblocks": trial.suggest_categorical(
+                "num_preblocks", cfg.optuna.hparams.num_preblocks
+            ),
             "dropout_1": trial.suggest_float(
                 "dropout_1", *cfg.optuna.hparams.dropout_1
             ),
@@ -137,10 +147,16 @@ class Objective:
 
         # Define dataloaders
         train_loader = torch.utils.data.DataLoader(
-            self.train_subset, batch_size=int(hparams["batch_size"]), num_workers=1
+            self.train_subset,
+            batch_size=int(hparams["batch_size"]),
+            num_workers=1,
+            pin_memory=True,
         )
         val_loader = torch.utils.data.DataLoader(
-            self.val_subset, batch_size=int(hparams["batch_size"]), num_workers=1
+            self.val_subset,
+            batch_size=int(hparams["batch_size"]),
+            num_workers=1,
+            pin_memory=True,
         )
 
         # Create the runners
