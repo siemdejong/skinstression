@@ -58,6 +58,7 @@ class Pruner:
 @dataclass
 class Hparams:
     lr: list[float, float]
+    T_mult: list[float, float]
     num_preblocks: int
     dropout_1: list[float, float]
     dropout_2: list[float, float]

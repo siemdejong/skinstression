@@ -24,14 +24,17 @@ class Runner:
         stage: Stage,
         optimizer: Optional[torch.optim.Optimizer] = None,
         device: Optional[torch.device] = torch.device("cpu"),
-        progress_bar: Optional[bool] = True,
+        scheduler: Optional[Union[_LRScheduler, ReduceLROnPlateau]] = None,
+        progress_bar: Optional[bool] = False,
     ) -> None:
         self.epoch_count = 0
         self.loader = loader
+        self.num_batches = len(self.loader)
         self.loss_metric = Metric()
         self.model = model
         self.compute_loss = loss_fn
         self.optimizer = optimizer
+        self.scheduler = scheduler
         self.device = device
         self.stage = stage
         self.disable_progress_bar = not progress_bar
@@ -45,8 +48,8 @@ class Runner:
         # Turn on eval or train mode.
         self.model.train(self.stage is Stage.TRAIN)
 
-        for x, y in tqdm(
-            self.loader, desc=desc, ncols=80, disable=self.disable_progress_bar
+        for iteration, x, y in enumerate(
+            tqdm(self.loader, desc=desc, ncols=80, disable=self.disable_progress_bar)
         ):
             x, y = x.to(self.device), y.to(self.device)
             loss, batch_loss = self._run_single(x, y)
@@ -59,8 +62,13 @@ class Runner:
                 loss.backward()
                 self.optimizer.step()
 
-    def _run_single(self, x: Any, y: Any):
+            if self.scheduler:
+                epoch_and_iter = self.epoch_count + iteration / self.num_batches
+                self.scheduler.step(epoch=epoch_and_iter)
+
         self.epoch_count += 1
+
+    def _run_single(self, x: Any, y: Any):
         batch_size: int = len(x)
         prediction = self.model(x)
         loss = self.compute_loss(prediction.float(), y.float())
@@ -72,6 +80,7 @@ class Runner:
 
         # Compute Batch Validation Metrics
         self.loss_metric.update(loss.item(), batch_size)
+
         return loss, batch_loss
 
     def reset(self):

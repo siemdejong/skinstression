@@ -1,8 +1,15 @@
+from ast import Constant
 from typing import Any
 from conf.config import THGStrainStressConfig
 from ds.dataset import THGStrainStressDataset
 from ds.runner import Runner, Stage, run_epoch
 from ds.tensorboard import TensorboardExperiment
+
+from torch.optim.lr_scheduler import (
+    ChainedScheduler,
+    LinearLR,
+    CosineAnnealingWarmRestarts,
+)
 
 import optuna
 from optuna.trial import TrialState
@@ -111,6 +118,7 @@ class Objective:
         # Define hyperparameter space.
         hparams = {
             "lr": trial.suggest_float("lr", *cfg.optuna.hparams.lr, log=True),
+            "T_mult": trial.suggest_float("T_mult", *cfg.optuna.hparams.T_mult),
             "num_preblocks": trial.suggest_categorical(
                 "num_preblocks", cfg.optuna.hparams.num_preblocks
             ),
@@ -143,7 +151,15 @@ class Objective:
             params=model.parameters(),
             lr=hparams["lr"],
             betas=(0.9, 0.999),
+            weight_decay=1e-5,
         )
+        warmup_scheduler = LinearLR(
+            optimizer=optimizer, start_factor=0.1, end_factor=1, total_iters=10
+        )
+        restart_scheduler = CosineAnnealingWarmRestarts(
+            optimizer=optimizer, T_0=400, T_mult=hparams["T_mult"]
+        )
+        scheduler = ChainedScheduler([warmup_scheduler, restart_scheduler])
 
         # Define dataloaders
         train_loader = torch.utils.data.DataLoader(
@@ -174,6 +190,7 @@ class Objective:
             loss_fn=loss_fn,
             stage=Stage.TRAIN,
             optimizer=optimizer,
+            scheduler=scheduler,
             device=device,
             progress_bar=False,
         )
@@ -211,6 +228,8 @@ def tune_hyperparameters(cfg: THGStrainStressConfig):
     """
     # Create study.
     study_name = cfg.optuna.study_name
+    # TODO: create database at shared location that can be used by multiple tasks
+    # on the same node for parallelization.
     storage = f"sqlite:///{study_name}.db"
     study = optuna.create_study(
         study_name=study_name,
