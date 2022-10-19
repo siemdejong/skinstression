@@ -57,6 +57,8 @@ class Pruner:
 
 @dataclass
 class Hparams:
+    optimizer_name: str
+    weight_decay: list[float, float]
     lr: list[float, float]
     T_mult: list[float, float]
     num_preblocks: int
