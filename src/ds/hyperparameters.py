@@ -99,14 +99,22 @@ class Objective:
 
         # Define hyperparameter space.
         hparams = {
-            "lr": trial.suggest_float("lr", *cfg.optuna.lr, log=True),
-            "dropout_1": trial.suggest_float("dropout_1", *cfg.optuna.dropout_1),
-            "dropout_2": trial.suggest_float("dropout_2", *cfg.optuna.dropout_2),
-            "dropout_3": trial.suggest_float("dropout_3", *cfg.optuna.dropout_3),
-            "dropout_4": trial.suggest_float("dropout_4", *cfg.optuna.dropout_4),
-            "n_nodes": trial.suggest_categorical("n_nodes", cfg.optuna.n_nodes),
+            "lr": trial.suggest_float("lr", *cfg.optuna.hparams.lr, log=True),
+            "dropout_1": trial.suggest_float(
+                "dropout_1", *cfg.optuna.hparams.dropout_1
+            ),
+            "dropout_2": trial.suggest_float(
+                "dropout_2", *cfg.optuna.hparams.dropout_2
+            ),
+            "dropout_3": trial.suggest_float(
+                "dropout_3", *cfg.optuna.hparams.dropout_3
+            ),
+            "dropout_4": trial.suggest_float(
+                "dropout_4", *cfg.optuna.hparams.dropout_4
+            ),
+            "n_nodes": trial.suggest_categorical("n_nodes", cfg.optuna.hparams.n_nodes),
             "batch_size": trial.suggest_categorical(
-                "batch_size", cfg.optuna.batch_size
+                "batch_size", cfg.optuna.hparams.batch_size
             ),
         }
 
@@ -155,7 +163,7 @@ class Objective:
         tracker = TensorboardExperiment(log_path=log_dir)
 
         # Run epochs.
-        for epoch_id in range(1):
+        for epoch_id in range(cfg.params.epoch_count):
             run_epoch(
                 val_runner=val_runner,
                 train_runner=train_runner,
@@ -188,10 +196,11 @@ def tune_hyperparameters(cfg: THGStrainStressConfig):
         study_name=study_name,
         storage=storage,
         load_if_exists=True,
-        direction="minimize",
+        direction=cfg.optuna.direction,
         sampler=optuna.samplers.TPESampler(seed=cfg.optuna.seed),
         pruner=optuna.pruners.SuccessiveHalvingPruner(
-            min_resource=1, reduction_factor=2
+            min_resource=cfg.optuna.pruner.min_resource,
+            reduction_factor=cfg.optuna.pruner.reduction_factor,
         ),
     )
 
@@ -205,7 +214,6 @@ def tune_hyperparameters(cfg: THGStrainStressConfig):
     # Optimize objective in study.
     study.optimize(
         lambda trial: objective(trial, cfg),
-        show_progress_bar=True,
         callbacks=[
             MaxTrialsCallback(
                 cfg.optuna.trials, states=(TrialState.COMPLETE, TrialState.PRUNED)

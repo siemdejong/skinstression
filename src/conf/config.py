@@ -50,9 +50,13 @@ class Mode(Enum):
 
 
 @dataclass
-class Optuna:
-    study_name: str
-    trials: int
+class Pruner:
+    min_resource: int
+    reduction_factor: int
+
+
+@dataclass
+class Hparams:
     lr: list[float, float]
     dropout_1: list[float, float]
     dropout_2: list[float, float]
@@ -60,7 +64,21 @@ class Optuna:
     dropout_4: list[float, float]
     n_nodes: int
     batch_size: list[int]
+
+
+# class Direction(Enum):
+#     minimize: int = 0
+#     maximize: int = 1
+
+
+@dataclass
+class Optuna:
+    study_name: str
+    trials: int
+    direction: str
+    hparams: Hparams
     seed: int
+    pruner: Pruner
 
 
 @dataclass
