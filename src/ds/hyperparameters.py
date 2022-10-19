@@ -117,8 +117,12 @@ class Objective:
 
         # Define hyperparameter space.
         hparams = {
-            "optimizer_name": trial.suggest_categorical("optimizer_name", *cfg.optuna.hparams.optimizer_name),
-            "weight_decay": trial.suggest_float("weight_decay", *cfg.optuna.hparams.weight_decay, log=True),
+            "optimizer_name": trial.suggest_categorical(
+                "optimizer_name", *cfg.optuna.hparams.optimizer_name
+            ),
+            "weight_decay": trial.suggest_float(
+                "weight_decay", *cfg.optuna.hparams.weight_decay, log=True
+            ),
             "lr": trial.suggest_float("lr", *cfg.optuna.hparams.lr, log=True),
             "T_mult": trial.suggest_float("T_mult", *cfg.optuna.hparams.T_mult),
             "num_preblocks": trial.suggest_categorical(
@@ -149,10 +153,9 @@ class Objective:
 
         model = model.to(device)
         loss_fn = nn.L1Loss()  # MAE.
-        optimizer = getattr(
-            torch.optim, hparams["optimizer_name"]
-        )(model.parameters(), lr=hparams["lr"], 
-            weight_decay=hparams['weight_decay'])
+        optimizer = getattr(torch.optim, hparams["optimizer_name"])(
+            model.parameters(), lr=hparams["lr"], weight_decay=hparams["weight_decay"]
+        )
         warmup_scheduler = LinearLR(
             optimizer=optimizer, start_factor=0.1, end_factor=1, total_iters=10
         )
