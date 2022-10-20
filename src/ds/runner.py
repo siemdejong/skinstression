@@ -27,7 +27,7 @@ class Runner:
         scheduler: Optional[Union[_LRScheduler, ReduceLROnPlateau]] = None,
         progress_bar: Optional[bool] = False,
     ) -> None:
-        self.epoch_count = 0
+        self.run_count = 0
         self.loader = loader
         self.num_batches = len(self.loader)
         self.loss_metric = Metric()
@@ -48,13 +48,13 @@ class Runner:
         # Turn on eval or train mode.
         self.model.train(self.stage is Stage.TRAIN)
 
-        for iteration, x, y in enumerate(
-            tqdm(self.loader, desc=desc, ncols=80, disable=self.disable_progress_bar)
+        for x, y in tqdm(
+            self.loader, desc=desc, ncols=80, disable=self.disable_progress_bar
         ):
             x, y = x.to(self.device), y.to(self.device)
             loss, batch_loss = self._run_single(x, y)
 
-            experiment.add_batch_metric("loss", batch_loss, self.epoch_count)
+            experiment.add_batch_metric("loss", batch_loss, self.run_count)
 
             if self.optimizer:
                 # Backpropagation
@@ -63,12 +63,11 @@ class Runner:
                 self.optimizer.step()
 
             if self.scheduler:
-                epoch_and_iter = self.epoch_count + iteration / self.num_batches
+                epoch_and_iter = self.run_count / self.num_batches
                 self.scheduler.step(epoch=epoch_and_iter)
 
-        self.epoch_count += 1
-
     def _run_single(self, x: Any, y: Any):
+        self.run_count += 1
         batch_size: int = len(x)
         prediction = self.model(x)
         loss = self.compute_loss(prediction.float(), y.float())
@@ -88,7 +87,7 @@ class Runner:
 
     def save_checkpoint(self):
         state: dict[str, Union[int, dict[str, Any]]] = {
-            "epoch": self.epoch_count,
+            "epoch": self.run_count,
             "model_state_dict": self.model.state_dict(),
         }
 
@@ -105,7 +104,7 @@ class Runner:
         self.model.load_state_dict(checkpoint["model_state_dict"])
         if self.optimizer:
             self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-        self.epoch_count = checkpoint["epoch"]
+        self.run_count = checkpoint["epoch"]
 
 
 def run_test(
