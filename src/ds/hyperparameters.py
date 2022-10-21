@@ -1,4 +1,3 @@
-from ast import Constant
 from typing import Any
 from conf.config import THGStrainStressConfig
 from ds.dataset import THGStrainStressDataset
@@ -118,13 +117,13 @@ class Objective:
         # Define hyperparameter space.
         hparams = {
             "optimizer_name": trial.suggest_categorical(
-                "optimizer_name", *cfg.optuna.hparams.optimizer_name
+                "optimizer_name", cfg.optuna.hparams.optimizer_name
             ),
             "weight_decay": trial.suggest_float(
                 "weight_decay", *cfg.optuna.hparams.weight_decay, log=True
             ),
             "lr": trial.suggest_float("lr", *cfg.optuna.hparams.lr, log=True),
-            "T_mult": trial.suggest_float("T_mult", *cfg.optuna.hparams.T_mult),
+            "T_mult": trial.suggest_int("T_mult", *cfg.optuna.hparams.T_mult),
             "num_preblocks": trial.suggest_categorical(
                 "num_preblocks", cfg.optuna.hparams.num_preblocks
             ),
@@ -147,6 +146,7 @@ class Objective:
         }
 
         use_cuda = torch.cuda.is_available()
+        log.info(f"CUDA available: {use_cuda}")
         device = torch.device("cuda" if use_cuda else "cpu")
 
         model = build_model(trial, hparams, cfg)
@@ -163,18 +163,19 @@ class Objective:
             optimizer=optimizer, T_0=400, T_mult=hparams["T_mult"]
         )
         scheduler = ChainedScheduler([warmup_scheduler, restart_scheduler])
+        scaler = torch.cuda.amp.GradScaler(enabled=cfg.use_amp)
 
         # Define dataloaders
         train_loader = torch.utils.data.DataLoader(
             self.train_subset,
             batch_size=int(hparams["batch_size"]),
-            num_workers=1,
+            num_workers=10,
             pin_memory=True,
         )
         val_loader = torch.utils.data.DataLoader(
             self.val_subset,
             batch_size=int(hparams["batch_size"]),
-            num_workers=1,
+            num_workers=10,
             pin_memory=True,
         )
 
@@ -186,6 +187,7 @@ class Objective:
             stage=Stage.VAL,
             device=device,
             progress_bar=False,
+            scaler=scaler,
         )
         train_runner = Runner(
             loader=train_loader,
@@ -196,6 +198,7 @@ class Objective:
             scheduler=scheduler,
             device=device,
             progress_bar=False,
+            scaler=scaler,
         )
 
         # Setup the experiment tracker
@@ -212,6 +215,8 @@ class Objective:
             )
 
             loss = val_runner.avg_loss
+            log.info(f"epoch: {epoch_id} | loss: {loss}")
+
             trial.report(loss, epoch_id)
 
             if trial.should_prune():
@@ -233,17 +238,21 @@ def tune_hyperparameters(cfg: THGStrainStressConfig):
     study_name = cfg.optuna.study_name
     # TODO: create database at shared location that can be used by multiple tasks
     # on the same node for parallelization.
-    storage = f"sqlite:///{study_name}.db"
+    if cfg.optuna.parallel:
+        storage = f"sqlite:///../../{study_name}.db"
+    else:
+        storage = f"sqlite:///{study_name}.db"
     study = optuna.create_study(
         study_name=study_name,
         storage=storage,
-        load_if_exists=True,
-        direction=cfg.optuna.direction,
+        # study_name="hello3",
+        # storage="sqlite:////scistor/guest/sjg203/projects/shg-strain-stress/outputs/hello3.db",
         sampler=optuna.samplers.TPESampler(seed=cfg.optuna.seed),
         pruner=optuna.pruners.SuccessiveHalvingPruner(
             min_resource=cfg.optuna.pruner.min_resource,
             reduction_factor=cfg.optuna.pruner.reduction_factor,
         ),
+        load_if_exists=True,
     )
 
     # Load dataset.

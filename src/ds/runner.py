@@ -22,6 +22,7 @@ class Runner:
         model: torch.nn.Module,
         loss_fn: torch.nn.Module,
         stage: Stage,
+        scaler,
         optimizer: Optional[torch.optim.Optimizer] = None,
         device: Optional[torch.device] = torch.device("cpu"),
         scheduler: Optional[Union[_LRScheduler, ReduceLROnPlateau]] = None,
@@ -29,7 +30,6 @@ class Runner:
     ) -> None:
         self.run_count = 0
         self.loader = loader
-        self.num_batches = len(self.loader)
         self.loss_metric = Metric()
         self.model = model
         self.compute_loss = loss_fn
@@ -38,6 +38,7 @@ class Runner:
         self.device = device
         self.stage = stage
         self.disable_progress_bar = not progress_bar
+        self.scaler = scaler
 
     @property
     def avg_loss(self):
@@ -51,20 +52,27 @@ class Runner:
         for x, y in tqdm(
             self.loader, desc=desc, ncols=80, disable=self.disable_progress_bar
         ):
-            x, y = x.to(self.device), y.to(self.device)
-            loss, batch_loss = self._run_single(x, y)
+            with torch.autocast(
+                device_type="cuda",
+                dtype=torch.float16,
+                enabled=self.scaler.is_enabled(),
+            ):
+
+                x, y = x.to(self.device), y.to(self.device)
+                loss, batch_loss = self._run_single(x, y)
 
             experiment.add_batch_metric("loss", batch_loss, self.run_count)
 
             if self.optimizer:
                 # Backpropagation
-                self.model.zero_grad(set_to_none=True)
-                loss.backward()
-                self.optimizer.step()
+                self.scaler.scale(loss).backward()
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
 
-            if self.scheduler:
-                epoch_and_iter = self.run_count / self.num_batches
-                self.scheduler.step(epoch=epoch_and_iter)
+                self.model.zero_grad(set_to_none=True)
+
+        if self.scheduler:
+            self.scheduler.step()
 
     def _run_single(self, x: Any, y: Any):
         self.run_count += 1
@@ -94,10 +102,13 @@ class Runner:
         if self.optimizer:
             state["optimizer_state_dict"] = self.optimizer.state_dict()
 
-            torch.save(
-                state,
-                f"{os.getcwd()}/checkpoint.pt",  # os.getcwd() is set by Hydra to 'outputs'.
-            )
+        if self.scaler.is_enabled():
+            state["scaler_state_dict"] = self.scaler.state_dict()
+
+        torch.save(
+            state,
+            f"{os.getcwd()}/checkpoint.pt",  # os.getcwd() is set by Hydra to 'outputs'.
+        )
 
     def load_checkpoint(self, path: str):
         checkpoint = torch.load(path)

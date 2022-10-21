@@ -83,6 +83,7 @@ class Optuna:
     hparams: Hparams
     seed: int
     pruner: Pruner
+    parallel: bool
 
 
 @dataclass
@@ -92,3 +93,4 @@ class THGStrainStressConfig:
     dist: Dist
     mode: Mode
     optuna: Optuna
+    use_amp: bool
