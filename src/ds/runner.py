@@ -59,9 +59,9 @@ class Runner:
             ):
 
                 x, y = x.to(self.device), y.to(self.device)
-                loss, batch_loss = self._run_single(x, y)
+                loss = self._run_single(x, y)
 
-            experiment.add_batch_metric("loss", batch_loss, self.run_count)
+            experiment.add_batch_metric("loss", loss, self.run_count)
 
             if self.optimizer:
                 # Backpropagation
@@ -78,17 +78,12 @@ class Runner:
         self.run_count += 1
         batch_size: int = len(x)
         prediction = self.model(x)
-        loss = self.compute_loss(prediction.float(), y.float())
-
-        self.prediction = prediction.detach().cpu().numpy()
-        self.target = y.detach().cpu().numpy()
-
-        batch_loss = loss.detach().cpu().numpy().mean()
+        loss = self.compute_loss(prediction, y)
 
         # Compute Batch Validation Metrics
-        self.loss_metric.update(loss.item(), batch_size)
+        self.loss_metric.update(loss, batch_size)
 
-        return loss, batch_loss
+        return loss
 
     def reset(self):
         self.loss_metric = Metric()
