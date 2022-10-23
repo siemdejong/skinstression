@@ -148,6 +148,7 @@ _For more examples, please refer to the [documentation](https://siemdejong.githu
 - [x] Hyperparameter optimization with Optuna
 - [ ] Model training with Pytorch
 - [ ] Inference
+- [ ] Explainable AI
 - [ ] Documentation
 
 See the [open issues](https://github.com/siemdejong/shg-strain-stress/issues) for a full list of proposed features (and known issues).
