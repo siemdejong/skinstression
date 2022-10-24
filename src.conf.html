@@ -287,6 +287,11 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
 <p>An enumeration.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Mode.TRAIN">
+<span class="sig-name descname"><span class="pre">TRAIN</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#src.conf.config.Mode.TRAIN" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="src.conf.config.Mode.TUNE">
 <span class="sig-name descname"><span class="pre">TUNE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#src.conf.config.Mode.TUNE" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
@@ -300,11 +305,31 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="src.conf.config.Model">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.conf.config.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_output_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.conf.config.Model" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.conf.config.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dropout_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout_3</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout_4</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="m"><span class="pre">64</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_output_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.conf.config.Model" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="src.conf.config.Model.dropout">
-<span class="sig-name descname"><span class="pre">dropout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#src.conf.config.Model.dropout" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="src.conf.config.Model.dropout_1">
+<span class="sig-name descname"><span class="pre">dropout_1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#src.conf.config.Model.dropout_1" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Model.dropout_2">
+<span class="sig-name descname"><span class="pre">dropout_2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#src.conf.config.Model.dropout_2" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Model.dropout_3">
+<span class="sig-name descname"><span class="pre">dropout_3</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#src.conf.config.Model.dropout_3" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Model.dropout_4">
+<span class="sig-name descname"><span class="pre">dropout_4</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#src.conf.config.Model.dropout_4" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Model.n_nodes">
+<span class="sig-name descname"><span class="pre">n_nodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="m"><span class="pre">64</span></span></em><a class="headerlink" href="#src.conf.config.Model.n_nodes" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -316,8 +341,13 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="src.conf.config.Optimizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.conf.config.</span></span><span class="sig-name descname"><span class="pre">Optimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.conf.config.Optimizer" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.conf.config.</span></span><span class="sig-name descname"><span class="pre">Optimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_decay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T_mult</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.conf.config.Optimizer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Optimizer.T_mult">
+<span class="sig-name descname"><span class="pre">T_mult</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#src.conf.config.Optimizer.T_mult" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.conf.config.Optimizer.beta_1">
 <span class="sig-name descname"><span class="pre">beta_1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#src.conf.config.Optimizer.beta_1" title="Permalink to this definition">#</a></dt>
@@ -336,6 +366,11 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.conf.config.Optimizer.name">
 <span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#src.conf.config.Optimizer.name" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Optimizer.weight_decay">
+<span class="sig-name descname"><span class="pre">weight_decay</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#src.conf.config.Optimizer.weight_decay" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -587,20 +622,27 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#src.conf.config.Mode"><code class="docutils literal notranslate"><span class="pre">Mode</span></code></a><ul>
+<li><a class="reference internal" href="#src.conf.config.Mode.TRAIN"><code class="docutils literal notranslate"><span class="pre">Mode.TRAIN</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Mode.TUNE"><code class="docutils literal notranslate"><span class="pre">Mode.TUNE</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Mode.VISUALIZE"><code class="docutils literal notranslate"><span class="pre">Mode.VISUALIZE</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#src.conf.config.Model"><code class="docutils literal notranslate"><span class="pre">Model</span></code></a><ul>
-<li><a class="reference internal" href="#src.conf.config.Model.dropout"><code class="docutils literal notranslate"><span class="pre">Model.dropout</span></code></a></li>
+<li><a class="reference internal" href="#src.conf.config.Model.dropout_1"><code class="docutils literal notranslate"><span class="pre">Model.dropout_1</span></code></a></li>
+<li><a class="reference internal" href="#src.conf.config.Model.dropout_2"><code class="docutils literal notranslate"><span class="pre">Model.dropout_2</span></code></a></li>
+<li><a class="reference internal" href="#src.conf.config.Model.dropout_3"><code class="docutils literal notranslate"><span class="pre">Model.dropout_3</span></code></a></li>
+<li><a class="reference internal" href="#src.conf.config.Model.dropout_4"><code class="docutils literal notranslate"><span class="pre">Model.dropout_4</span></code></a></li>
+<li><a class="reference internal" href="#src.conf.config.Model.n_nodes"><code class="docutils literal notranslate"><span class="pre">Model.n_nodes</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Model.num_output_features"><code class="docutils literal notranslate"><span class="pre">Model.num_output_features</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#src.conf.config.Optimizer"><code class="docutils literal notranslate"><span class="pre">Optimizer</span></code></a><ul>
+<li><a class="reference internal" href="#src.conf.config.Optimizer.T_mult"><code class="docutils literal notranslate"><span class="pre">Optimizer.T_mult</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Optimizer.beta_1"><code class="docutils literal notranslate"><span class="pre">Optimizer.beta_1</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Optimizer.beta_2"><code class="docutils literal notranslate"><span class="pre">Optimizer.beta_2</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Optimizer.lr"><code class="docutils literal notranslate"><span class="pre">Optimizer.lr</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Optimizer.name"><code class="docutils literal notranslate"><span class="pre">Optimizer.name</span></code></a></li>
+<li><a class="reference internal" href="#src.conf.config.Optimizer.weight_decay"><code class="docutils literal notranslate"><span class="pre">Optimizer.weight_decay</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#src.conf.config.Optuna"><code class="docutils literal notranslate"><span class="pre">Optuna</span></code></a><ul>
