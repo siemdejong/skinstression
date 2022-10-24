@@ -3,6 +3,7 @@ import hydra
 from hydra.core.config_store import ConfigStore
 from ds.hyperparameters import tune_hyperparameters
 from ds.visualization import visualize
+from ds.training import train
 from conf.config import THGStrainStressConfig, Mode
 
 cs = ConfigStore.instance()
@@ -19,11 +20,11 @@ def main(cfg: THGStrainStressConfig) -> None:
     """
     This is the main entry point for the THG strain stress project.
     Can
-    1. calculate model parameters for a predefined convolutional
-    neural network, estimating parameters describing the strain-stress
-    curve of skin tissue from single SHG images;
-    2. calculate appropriate hyperparameters for this model;
-    3. visualize result of hyperparameter optimization.
+    1. calculate appropriate hyperparameters for a model;
+    2. visualize result of hyperparameter optimization.
+    3. calculate model parameters for the model,
+       estimating parameters describing the strain-stress
+       curve of skin tissue from single SHG images;
 
     Configurations must be made in conf/config.yaml.
     """
@@ -38,6 +39,8 @@ def main(cfg: THGStrainStressConfig) -> None:
         tune_hyperparameters(cfg)
     elif cfg.mode == Mode.VISUALIZE.name:
         visualize(cfg.paths.optuna_db)
+    elif cfg.mode == Mode.TRAIN.name:
+        train(cfg)
 
 
 if __name__ == "__main__":

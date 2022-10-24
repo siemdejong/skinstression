@@ -61,7 +61,7 @@ class Runner:
                 x, y = x.to(self.device), y.to(self.device)
                 loss = self._run_single(x, y)
 
-            experiment.add_batch_metric("loss", loss, self.run_count)
+            experiment.add_batch_metric("loss", loss.detach(), self.run_count)
 
             if self.optimizer:
                 # Backpropagation
@@ -77,11 +77,12 @@ class Runner:
     def _run_single(self, x: Any, y: Any):
         self.run_count += 1
         batch_size: int = len(x)
-        prediction = self.model(x)
-        loss = self.compute_loss(prediction, y)
+        self.prediction = self.model(x)
+        self.target = y
+        loss = self.compute_loss(self.prediction, y)
 
         # Compute Batch Validation Metrics
-        self.loss_metric.update(loss, batch_size)
+        self.loss_metric.update(loss.detach(), batch_size)
 
         return loss
 
@@ -122,7 +123,9 @@ def run_test(
     test_runner.run("Test Batches", experiment)
 
     # Log Testing Epoch Metrics
-    experiment.add_epoch_sigmoid(test_runner.prediction, test_runner.target)
+    experiment.add_epoch_sigmoid(
+        test_runner.prediction.detach(), test_runner.target.detach()
+    )
 
 
 def run_epoch(
@@ -136,7 +139,11 @@ def run_epoch(
     train_runner.run("Train Batches", experiment)
 
     # Log Training Epoch Metrics
-    experiment.add_epoch_sigmoid(train_runner.prediction, train_runner.target, epoch_id)
+    experiment.add_epoch_sigmoid(
+        train_runner.prediction.detach().cpu(),
+        train_runner.target.detach().cpu(),
+        epoch_id,
+    )
 
     # Validation Loop
     experiment.set_stage(Stage.VAL)
@@ -144,7 +151,9 @@ def run_epoch(
         val_runner.run("Validation Batches", experiment)
 
     # Log Validation Epoch Metrics
-    experiment.add_epoch_sigmoid(val_runner.prediction, val_runner.target, epoch_id)
+    experiment.add_epoch_sigmoid(
+        val_runner.prediction.detach().cpu(), val_runner.target.detach().cpu(), epoch_id
+    )
 
     # Combine training and validation loss in one plot.
     loss_value_dict = {"train": train_runner.avg_loss, "val": val_runner.avg_loss}

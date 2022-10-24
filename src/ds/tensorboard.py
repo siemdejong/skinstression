@@ -13,6 +13,8 @@ from ds.utils import create_experiment_log_dir
 from ds.functions import sigmoid
 from typing import Optional
 
+import torch
+
 
 class TensorboardExperiment:
     def __init__(self, log_path: str, create: bool = True) -> None:
@@ -107,9 +109,9 @@ class TensorboardExperiment:
         self._writer.add_figure(tag, fig, step)
 
     def create_sigmoid(
-        self, prediction: np.ndarray, target: np.ndarray, step: Optional[int] = None
+        self, prediction: torch.tensor, target: torch.tensor, step: Optional[int] = None
     ) -> matplotlib.figure.Figure:
-        x = np.linspace(1, 2.5, 1000)
+        x = torch.linspace(1, 2.5, 1000)
 
         fig, ax = plt.subplots(1, 1)
 

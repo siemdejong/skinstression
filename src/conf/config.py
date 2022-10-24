@@ -4,7 +4,11 @@ from enum import Enum, auto
 
 @dataclass
 class Model:
-    dropout: float
+    dropout_1: float
+    dropout_2: float
+    dropout_3: float
+    dropout_4: float
+    n_nodes: 64
     num_output_features: int
 
 
@@ -12,6 +16,8 @@ class Model:
 class Optimizer:
     name: str
     lr: float
+    weight_decay: float
+    T_mult: int
     beta_1: float
     beta_2: float
 
@@ -47,6 +53,7 @@ class Dist:
 class Mode(Enum):
     TUNE: int = 0
     VISUALIZE: int = 1
+    TRAIN: int = 2
 
 
 @dataclass
