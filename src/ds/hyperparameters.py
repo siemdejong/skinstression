@@ -237,18 +237,9 @@ def tune_hyperparameters(cfg: THGStrainStressConfig):
         cfg: hydra configuration object. Only uses cfg.optuna.trials.
     """
     # Create study.
-    study_name = cfg.optuna.study_name
-    # TODO: create database at shared location that can be used by multiple tasks
-    # on the same node for parallelization.
-    if cfg.optuna.parallel:
-        storage = f"sqlite:///../../{study_name}.db"
-    else:
-        storage = f"sqlite:///{study_name}.db"
     study = optuna.create_study(
-        study_name=study_name,
-        storage=storage,
-        # study_name="hello3",
-        # storage="sqlite:////scistor/guest/sjg203/projects/shg-strain-stress/outputs/hello3.db",
+        study_name=cfg.optuna.study_name,
+        storage=f"sqlite:///{cfg.paths.optuna_db}",
         sampler=optuna.samplers.TPESampler(seed=cfg.optuna.seed),
         pruner=optuna.pruners.SuccessiveHalvingPruner(
             min_resource=cfg.optuna.pruner.min_resource,
