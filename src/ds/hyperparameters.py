@@ -220,8 +220,10 @@ class Objective:
             trial.report(loss, epoch_id)
 
             if trial.should_prune():
+                tracker.add_hparams(hparams)
                 raise optuna.exceptions.TrialPruned()
 
+        tracker.add_hparams(hparams, loss)
         return loss
 
 

@@ -130,3 +130,6 @@ class TensorboardExperiment:
         ax.legend()
 
         return fig
+
+    def add_hparams(self, hparams: dict[str, float], loss: Optional[float]):
+        self._writer.add_hparams(hparams, {"hparam/loss": loss if loss else "Pruned"})
