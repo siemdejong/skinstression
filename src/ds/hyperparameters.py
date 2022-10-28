@@ -199,6 +199,7 @@ class Objective:
             device=device,
             progress_bar=False,
             scaler=scaler,
+            dry_run=cfg.dry_run,
         )
         train_runner = Runner(
             loader=train_loader,
@@ -210,6 +211,7 @@ class Objective:
             device=device,
             progress_bar=False,
             scaler=scaler,
+            dry_run=cfg.dry_run,
         )
 
         # Setup the experiment tracker
@@ -217,7 +219,8 @@ class Objective:
         tracker = TensorboardExperiment(log_path=log_dir)
 
         # Run epochs.
-        for epoch_id in range(cfg.params.epoch_count):
+        max_epoch = cfg.params.epoch_count if not cfg.dry_run else 1
+        for epoch_id in range(max_epoch):
             run_epoch(
                 val_runner=val_runner,
                 train_runner=train_runner,

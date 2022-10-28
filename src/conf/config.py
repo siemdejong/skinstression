@@ -102,3 +102,4 @@ class THGStrainStressConfig:
     optuna: Optuna
     use_amp: bool
     seed: int
+    dry_run: bool
