@@ -15,8 +15,9 @@ from optuna.trial import TrialState
 from optuna.study import MaxTrialsCallback
 import logging
 from torch import nn
+from torch.utils.data import Subset
 import torch
-from torch.utils.data import random_split
+from sklearn.model_selection import train_test_split
 import os
 
 log = logging.getLogger(__name__)
@@ -85,17 +86,27 @@ class Objective:
     Data is loaded only once and attached to the objective.
     """
 
-    def __init__(self, dataset):
-        # Split the dataset in train, validation and test (sub)sets.
-        train_test_split = int(len(dataset) * 0.8)
-        train_set, test_set = random_split(
-            dataset, [train_test_split, len(dataset) - train_test_split]
+    def __init__(self, cfg: THGStrainStressConfig, data_cls: nn.Module):
+
+        # Load dataset.
+        dataset, person_ids = data_cls.load_data(
+            split="train",
+            data_path=cfg.paths.data,
+            targets_path=cfg.paths.targets,
         )
 
-        train_val_split = int(len(train_set) * 0.8)
-        self.train_subset, self.val_subset = random_split(
-            train_set, [train_val_split, len(train_set) - train_val_split]
+        # Split the dataset in train, validation and test (sub)sets.
+        train_size = int(len(dataset) * 0.8)
+        train_idx, val_idx = train_test_split(
+            dataset,
+            train_size=train_size,
+            stratify=person_ids,
+            shuffle=True,
+            random_state=cfg.seed,
         )
+
+        self.train_subset = Subset(dataset, train_idx)
+        self.val_subset = Subset(dataset, val_idx)
 
     def __call__(
         self,
@@ -248,12 +259,7 @@ def tune_hyperparameters(cfg: THGStrainStressConfig):
         load_if_exists=True,
     )
 
-    # Load dataset.
-    dataset, groups = THGStrainStressDataset.load_data(
-        data_path=cfg.paths.data,
-        targets_path=cfg.paths.targets,
-    )
-    objective = Objective(dataset=dataset)
+    objective = Objective(cfg=cfg, data_cls=THGStrainStressDataset)
 
     # Optimize objective in study.
     study.optimize(
