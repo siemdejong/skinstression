@@ -251,8 +251,6 @@
 </li>
         <li><a href="src.conf.html#src.conf.config.Optimizer.beta_2">beta_2 (src.conf.config.Optimizer attribute)</a>
 </li>
-        <li><a href="src.ds.html#src.ds.hyperparameters.build_model">build_model() (in module src.ds.hyperparameters)</a>
-</li>
     </ul></td>
   </tr></table>
 </section>
@@ -351,6 +349,10 @@
   <h2>G</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="src.ds.html#src.ds.utils.get_lds_kernel_window">get_lds_kernel_window() (in module src.ds.utils)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="src.conf.html#src.conf.config.Dist.gpus">gpus (src.conf.config.Dist attribute)</a>
 </li>
     </ul></td>
@@ -391,10 +393,6 @@
   <h2>K</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="src.ds.html#src.ds.cross_validator.k_fold">k_fold() (in module src.ds.cross_validator)</a>
-</li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="src.conf.html#src.conf.config.Params.k_folds">k_folds (src.conf.config.Params attribute)</a>
 </li>
     </ul></td>
@@ -406,8 +404,6 @@
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="src.ds.html#src.ds.runner.Runner.load_checkpoint">load_checkpoint() (src.ds.runner.Runner method)</a>
-</li>
-        <li><a href="src.ds.html#src.ds.dataset.THGStrainStressDataset.load_data">load_data() (src.ds.dataset.THGStrainStressDataset static method)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
@@ -425,8 +421,6 @@
   <h2>M</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="src.html#src.main.main">main() (in module src.main)</a>
-</li>
         <li><a href="src.ds.html#src.ds.metrics.Metric">Metric (class in src.ds.metrics)</a>
 </li>
         <li><a href="src.conf.html#src.conf.config.Pruner.min_resource">min_resource (src.conf.config.Pruner attribute)</a>
@@ -451,13 +445,7 @@
 </li>
           <li><a href="src.ds.html#module-src.ds">src.ds</a>
 </li>
-          <li><a href="src.ds.html#module-src.ds.cross_validator">src.ds.cross_validator</a>
-</li>
-          <li><a href="src.ds.html#module-src.ds.dataset">src.ds.dataset</a>
-</li>
           <li><a href="src.ds.html#module-src.ds.functions">src.ds.functions</a>
-</li>
-          <li><a href="src.ds.html#module-src.ds.hyperparameters">src.ds.hyperparameters</a>
 </li>
           <li><a href="src.ds.html#module-src.ds.metrics">src.ds.metrics</a>
 </li>
@@ -472,8 +460,6 @@
           <li><a href="src.ds.html#module-src.ds.utils">src.ds.utils</a>
 </li>
           <li><a href="src.ds.html#module-src.ds.visualization">src.ds.visualization</a>
-</li>
-          <li><a href="src.html#module-src.main">src.main</a>
 </li>
         </ul></li>
     </ul></td>
@@ -508,16 +494,14 @@
   <h2>O</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="src.ds.html#src.ds.hyperparameters.Objective">Objective (class in src.ds.hyperparameters)</a>
-</li>
         <li><a href="src.conf.html#src.conf.config.Optimizer">Optimizer (class in src.conf.config)</a>
 </li>
         <li><a href="src.conf.html#src.conf.config.Params.optimizer">optimizer (src.conf.config.Params attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="src.conf.html#src.conf.config.Hparams.optimizer_name">optimizer_name (src.conf.config.Hparams attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="src.conf.html#src.conf.config.Optuna">Optuna (class in src.conf.config)</a>
 </li>
         <li><a href="src.conf.html#src.conf.config.THGStrainStressConfig.optuna">optuna (src.conf.config.THGStrainStressConfig attribute)</a>
@@ -589,7 +573,11 @@
         <li><a href="src.conf.html#src.conf.config.Params.scheduler">scheduler (src.conf.config.Params attribute)</a>
 </li>
         <li><a href="src.conf.html#src.conf.config.Optuna.seed">seed (src.conf.config.Optuna attribute)</a>
+
+        <ul>
+          <li><a href="src.conf.html#src.conf.config.THGStrainStressConfig.seed">(src.conf.config.THGStrainStressConfig attribute)</a>
 </li>
+        </ul></li>
         <li><a href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.set_stage">set_stage() (src.ds.tensorboard.TensorboardExperiment method)</a>
 
         <ul>
@@ -627,20 +615,6 @@
 </li>
         </ul></li>
         <li>
-    src.ds.cross_validator
-
-        <ul>
-          <li><a href="src.ds.html#module-src.ds.cross_validator">module</a>
-</li>
-        </ul></li>
-        <li>
-    src.ds.dataset
-
-        <ul>
-          <li><a href="src.ds.html#module-src.ds.dataset">module</a>
-</li>
-        </ul></li>
-        <li>
     src.ds.functions
 
         <ul>
@@ -649,13 +623,6 @@
         </ul></li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li>
-    src.ds.hyperparameters
-
-        <ul>
-          <li><a href="src.ds.html#module-src.ds.hyperparameters">module</a>
-</li>
-        </ul></li>
         <li>
     src.ds.metrics
 
@@ -705,16 +672,11 @@
           <li><a href="src.ds.html#module-src.ds.visualization">module</a>
 </li>
         </ul></li>
-        <li>
-    src.main
-
-        <ul>
-          <li><a href="src.html#module-src.main">module</a>
-</li>
-        </ul></li>
         <li><a href="src.ds.html#src.ds.tracking.Stage">Stage (class in src.ds.tracking)</a>
 </li>
         <li><a href="src.conf.html#src.conf.config.Optuna.study_name">study_name (src.conf.config.Optuna attribute)</a>
+</li>
+        <li><a href="src.ds.html#src.ds.utils.sturge">sturge() (in module src.ds.utils)</a>
 </li>
         <li><a href="src.ds.html#src.ds.runner.summary">summary() (in module src.ds.runner)</a>
 </li>
@@ -740,13 +702,11 @@
 </li>
         <li><a href="src.ds.html#src.ds.tracking.Stage.TEST">TEST (src.ds.tracking.Stage attribute)</a>
 </li>
-        <li><a href="src.ds.html#src.ds.models.THGStrainStressCNN">THGStrainStressCNN (class in src.ds.models)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="src.conf.html#src.conf.config.THGStrainStressConfig">THGStrainStressConfig (class in src.conf.config)</a>
+        <li><a href="src.ds.html#src.ds.models.THGStrainStressCNN">THGStrainStressCNN (class in src.ds.models)</a>
 </li>
-        <li><a href="src.ds.html#src.ds.dataset.THGStrainStressDataset">THGStrainStressDataset (class in src.ds.dataset)</a>
+        <li><a href="src.conf.html#src.conf.config.THGStrainStressConfig">THGStrainStressConfig (class in src.conf.config)</a>
 </li>
         <li><a href="src.conf.html#src.conf.config.Mode.TRAIN">TRAIN (src.conf.config.Mode attribute)</a>
 
@@ -759,8 +719,6 @@
         <li><a href="src.conf.html#src.conf.config.Optuna.trials">trials (src.conf.config.Optuna attribute)</a>
 </li>
         <li><a href="src.conf.html#src.conf.config.Mode.TUNE">TUNE (src.conf.config.Mode attribute)</a>
-</li>
-        <li><a href="src.ds.html#src.ds.hyperparameters.tune_hyperparameters">tune_hyperparameters() (in module src.ds.hyperparameters)</a>
 </li>
     </ul></td>
   </tr></table>
