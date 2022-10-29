@@ -138,6 +138,7 @@ class Objective:
                 "weight_decay", *cfg.optuna.hparams.weight_decay, log=True
             ),
             "lr": trial.suggest_float("lr", *cfg.optuna.hparams.lr, log=True),
+            "T_mult": trial.suggest_int("T_0", *cfg.optuna.hparams.T_0),
             "T_mult": trial.suggest_int("T_mult", *cfg.optuna.hparams.T_mult),
             "num_preblocks": trial.suggest_categorical(
                 "num_preblocks", cfg.optuna.hparams.num_preblocks
@@ -175,7 +176,9 @@ class Objective:
             optimizer=optimizer, start_factor=0.1, end_factor=1, total_iters=10
         )
         restart_scheduler = CosineAnnealingWarmRestarts(
-            optimizer=optimizer, T_0=400, T_mult=hparams["T_mult"]
+            optimizer=optimizer,
+            T_0=cfg.params.optimizer.T_0,
+            T_mult=cfg.params.optimizer.T_mult,
         )
         scheduler = ChainedScheduler([warmup_scheduler, restart_scheduler])
         scaler = torch.cuda.amp.GradScaler(enabled=cfg.use_amp)
@@ -223,7 +226,7 @@ class Objective:
         tracker = TensorboardExperiment(log_path=log_dir)
 
         # Run epochs.
-        max_epoch = cfg.params.epoch_count# if not cfg.dry_run else 1
+        max_epoch = cfg.params.epoch_count  # if not cfg.dry_run else 1
         for epoch_id in range(max_epoch):
             run_epoch(
                 val_runner=val_runner,

@@ -17,6 +17,7 @@ class Optimizer:
     name: str
     lr: float
     weight_decay: float
+    T_0: int
     T_mult: int
     beta_1: float
     beta_2: float
@@ -67,7 +68,8 @@ class Hparams:
     optimizer_name: str
     weight_decay: list[float, float]
     lr: list[float, float]
-    T_mult: list[float, float]
+    T_mult: list[int, int]
+    T_0: list[int, int]
     num_preblocks: int
     dropout_1: list[float, float]
     dropout_2: list[float, float]
