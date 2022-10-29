@@ -202,14 +202,57 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">#</a></h2>
 </section>
-<section id="src-ds-cross-validator-module">
-<h2>src.ds.cross_validator module<a class="headerlink" href="#src-ds-cross-validator-module" title="Permalink to this heading">#</a></h2>
+<section id="module-src.ds.cross_validator">
+<span id="src-ds-cross-validator-module"></span><h2>src.ds.cross_validator module<a class="headerlink" href="#module-src.ds.cross_validator" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.ds.cross_validator.k_fold">
+<span class="sig-prename descclassname"><span class="pre">src.ds.cross_validator.</span></span><span class="sig-name descname"><span class="pre">k_fold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_splits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#src.ds.runner.Runner" title="src.ds.runner.Runner"><span class="pre">Runner</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#src.ds.runner.Runner" title="src.ds.runner.Runner"><span class="pre">Runner</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.ds.cross_validator.k_fold" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="src-ds-dataset-module">
-<h2>src.ds.dataset module<a class="headerlink" href="#src-ds-dataset-module" title="Permalink to this heading">#</a></h2>
+<section id="module-src.ds.dataset">
+<span id="src-ds-dataset-module"></span><h2>src.ds.dataset module<a class="headerlink" href="#module-src.ds.dataset" title="Permalink to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.ds.dataset.THGStrainStressDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.ds.dataset.</span></span><span class="sig-name descname"><span class="pre">THGStrainStressDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bmp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.dataset.THGStrainStressDataset" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code>]</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.ds.dataset.THGStrainStressDataset.get_transform">
+<span class="sig-name descname"><span class="pre">get_transform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.dataset.THGStrainStressDataset.get_transform" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.ds.dataset.THGStrainStressDataset.load_data">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reweight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lds_kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lds_ks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lds_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.utils.data.dataset.Dataset</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.ds.dataset.THGStrainStressDataset.load_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Gather all data and construct a full dataset object.
+Return person_ids with it for stratification purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_path</strong> – the path to the directory containing the data.</p></li>
+<li><p><strong>targets_path</strong> – the path to the file containing the target data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple containing a concatenated dataset including all data indexed by targets_path,
+and an array of indices denoting to what group subsets of the dataset belong to.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(tuple)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="module-src.ds.functions">
 <span id="src-ds-functions-module"></span><h2>src.ds.functions module<a class="headerlink" href="#module-src.ds.functions" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.ds.functions.logistic">
+<span class="sig-prename descclassname"><span class="pre">src.ds.functions.</span></span><span class="sig-name descname"><span class="pre">logistic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xc</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.functions.logistic" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="src.ds.functions.sigmoid">
 <span class="sig-prename descclassname"><span class="pre">src.ds.functions.</span></span><span class="sig-name descname"><span class="pre">sigmoid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#src.ds.functions.sigmoid" title="Permalink to this definition">#</a></dt>
@@ -217,8 +260,51 @@
 </dd></dl>
 
 </section>
-<section id="src-ds-hyperparameters-module">
-<h2>src.ds.hyperparameters module<a class="headerlink" href="#src-ds-hyperparameters-module" title="Permalink to this heading">#</a></h2>
+<section id="module-src.ds.hyperparameters">
+<span id="src-ds-hyperparameters-module"></span><h2>src.ds.hyperparameters module<a class="headerlink" href="#module-src.ds.hyperparameters" title="Permalink to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.ds.hyperparameters.Objective">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.ds.hyperparameters.</span></span><span class="sig-name descname"><span class="pre">Objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig" title="src.conf.config.THGStrainStressConfig"><span class="pre">THGStrainStressConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.hyperparameters.Objective" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Provides the callable Optuna objective.
+Data is loaded only once and attached to the objective.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.ds.hyperparameters.build_model">
+<span class="sig-prename descclassname"><span class="pre">src.ds.hyperparameters.</span></span><span class="sig-name descname"><span class="pre">build_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Trial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hparams</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig" title="src.conf.config.THGStrainStressConfig"><span class="pre">THGStrainStressConfig</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.hyperparameters.build_model" title="Permalink to this definition">#</a></dt>
+<dd><p>Build model within an Optuna trial.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trial</strong> – Optuna trial</p></li>
+<li><p><strong>hparams</strong> – dict of parameters (including those to be optimized by Optuna)</p></li>
+<li><p><strong>cfg</strong> – configuration object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>nn.Sequential</cite> of all parameterized layers</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.ds.hyperparameters.tune_hyperparameters">
+<span class="sig-prename descclassname"><span class="pre">src.ds.hyperparameters.</span></span><span class="sig-name descname"><span class="pre">tune_hyperparameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig" title="src.conf.config.THGStrainStressConfig"><span class="pre">THGStrainStressConfig</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.hyperparameters.tune_hyperparameters" title="Permalink to this definition">#</a></dt>
+<dd><p>Optimize parameters using an objective function and Optuna.
+All configurations are overwritten during optimization.
+Number of Optuna trials is given by cfg.optuna.trials.
+Optimal hyperparameters are logged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cfg</strong> – hydra configuration object. Only uses cfg.optuna.trials.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-src.ds.metrics">
 <span id="src-ds-metrics-module"></span><h2>src.ds.metrics module<a class="headerlink" href="#module-src.ds.metrics" title="Permalink to this heading">#</a></h2>
@@ -293,7 +379,7 @@ registered hooks while the latter silently ignores them.</p>
 <span id="src-ds-runner-module"></span><h2>src.ds.runner module<a class="headerlink" href="#module-src.ds.runner" title="Permalink to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="src.ds.runner.Runner">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.ds.runner.</span></span><span class="sig-name descname"><span class="pre">Runner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataLoader</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.ds.tracking.Stage" title="src.ds.tracking.Stage"><span class="pre">Stage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Optimizer</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">device(type='cpu')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">_LRScheduler</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ReduceLROnPlateau</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress_bar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.runner.Runner" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.ds.runner.</span></span><span class="sig-name descname"><span class="pre">Runner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataLoader</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.ds.tracking.Stage" title="src.ds.tracking.Stage"><span class="pre">Stage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Optimizer</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">device</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">device(type='cpu')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">_LRScheduler</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ReduceLROnPlateau</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress_bar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.runner.Runner" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py property">
 <dt class="sig sig-object py" id="src.ds.runner.Runner.avg_loss">
@@ -355,6 +441,11 @@ registered hooks while the latter silently ignores them.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="src.ds.tensorboard.TensorboardExperiment.add_epoch_logistic_curve">
+<span class="sig-name descname"><span class="pre">add_epoch_logistic_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.ds.tensorboard.TensorboardExperiment.add_epoch_logistic_curve" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="src.ds.tensorboard.TensorboardExperiment.add_epoch_metric">
 <span class="sig-name descname"><span class="pre">add_epoch_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.ds.tensorboard.TensorboardExperiment.add_epoch_metric" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
@@ -382,6 +473,11 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.ds.tensorboard.TensorboardExperiment.add_train_val_epoch_metrics">
 <span class="sig-name descname"><span class="pre">add_train_val_epoch_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.ds.tensorboard.TensorboardExperiment.add_train_val_epoch_metrics" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.ds.tensorboard.TensorboardExperiment.create_logistic_curve">
+<span class="sig-name descname"><span class="pre">create_logistic_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Figure</span></span></span><a class="headerlink" href="#src.ds.tensorboard.TensorboardExperiment.create_logistic_curve" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -563,13 +659,29 @@ Plots are opened in an external browser at ports opened by Plotly.</p>
             <ul>
 <li><a class="reference internal" href="#">src.ds package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#src-ds-cross-validator-module">src.ds.cross_validator module</a></li>
-<li><a class="reference internal" href="#src-ds-dataset-module">src.ds.dataset module</a></li>
+<li><a class="reference internal" href="#module-src.ds.cross_validator">src.ds.cross_validator module</a><ul>
+<li><a class="reference internal" href="#src.ds.cross_validator.k_fold"><code class="docutils literal notranslate"><span class="pre">k_fold()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-src.ds.dataset">src.ds.dataset module</a><ul>
+<li><a class="reference internal" href="#src.ds.dataset.THGStrainStressDataset"><code class="docutils literal notranslate"><span class="pre">THGStrainStressDataset</span></code></a><ul>
+<li><a class="reference internal" href="#src.ds.dataset.THGStrainStressDataset.get_transform"><code class="docutils literal notranslate"><span class="pre">THGStrainStressDataset.get_transform()</span></code></a></li>
+<li><a class="reference internal" href="#src.ds.dataset.THGStrainStressDataset.load_data"><code class="docutils literal notranslate"><span class="pre">THGStrainStressDataset.load_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-src.ds.functions">src.ds.functions module</a><ul>
+<li><a class="reference internal" href="#src.ds.functions.logistic"><code class="docutils literal notranslate"><span class="pre">logistic()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.functions.sigmoid"><code class="docutils literal notranslate"><span class="pre">sigmoid()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#src-ds-hyperparameters-module">src.ds.hyperparameters module</a></li>
+<li><a class="reference internal" href="#module-src.ds.hyperparameters">src.ds.hyperparameters module</a><ul>
+<li><a class="reference internal" href="#src.ds.hyperparameters.Objective"><code class="docutils literal notranslate"><span class="pre">Objective</span></code></a></li>
+<li><a class="reference internal" href="#src.ds.hyperparameters.build_model"><code class="docutils literal notranslate"><span class="pre">build_model()</span></code></a></li>
+<li><a class="reference internal" href="#src.ds.hyperparameters.tune_hyperparameters"><code class="docutils literal notranslate"><span class="pre">tune_hyperparameters()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-src.ds.metrics">src.ds.metrics module</a><ul>
 <li><a class="reference internal" href="#src.ds.metrics.Metric"><code class="docutils literal notranslate"><span class="pre">Metric</span></code></a><ul>
 <li><a class="reference internal" href="#src.ds.metrics.Metric.average"><code class="docutils literal notranslate"><span class="pre">Metric.average</span></code></a></li>
@@ -608,12 +720,14 @@ Plots are opened in an external browser at ports opened by Plotly.</p>
 <li><a class="reference internal" href="#module-src.ds.tensorboard">src.ds.tensorboard module</a><ul>
 <li><a class="reference internal" href="#src.ds.tensorboard.TensorboardExperiment"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment</span></code></a><ul>
 <li><a class="reference internal" href="#src.ds.tensorboard.TensorboardExperiment.add_batch_metric"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_batch_metric()</span></code></a></li>
+<li><a class="reference internal" href="#src.ds.tensorboard.TensorboardExperiment.add_epoch_logistic_curve"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_epoch_logistic_curve()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.tensorboard.TensorboardExperiment.add_epoch_metric"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_epoch_metric()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.tensorboard.TensorboardExperiment.add_epoch_metrics"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_epoch_metrics()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.tensorboard.TensorboardExperiment.add_epoch_sigmoid"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_epoch_sigmoid()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.tensorboard.TensorboardExperiment.add_fold_metric"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_fold_metric()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.tensorboard.TensorboardExperiment.add_hparams"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_hparams()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.tensorboard.TensorboardExperiment.add_train_val_epoch_metrics"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_train_val_epoch_metrics()</span></code></a></li>
+<li><a class="reference internal" href="#src.ds.tensorboard.TensorboardExperiment.create_logistic_curve"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.create_logistic_curve()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.tensorboard.TensorboardExperiment.create_sigmoid"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.create_sigmoid()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.tensorboard.TensorboardExperiment.flush"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.flush()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.tensorboard.TensorboardExperiment.set_stage"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.set_stage()</span></code></a></li>

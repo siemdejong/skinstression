@@ -285,6 +285,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig.dist"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.dist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig.dry_run"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.dry_run</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig.mode"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.mode</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig.optuna"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.optuna</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig.params"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.params</span></code></a></li>
@@ -300,13 +301,29 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="src.ds.html">src.ds package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="src.ds.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.ds.html#src-ds-cross-validator-module">src.ds.cross_validator module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.ds.html#src-ds-dataset-module">src.ds.dataset module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.cross_validator">src.ds.cross_validator module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.cross_validator.k_fold"><code class="docutils literal notranslate"><span class="pre">k_fold()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.dataset">src.ds.dataset module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.dataset.THGStrainStressDataset"><code class="docutils literal notranslate"><span class="pre">THGStrainStressDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.dataset.THGStrainStressDataset.get_transform"><code class="docutils literal notranslate"><span class="pre">THGStrainStressDataset.get_transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.dataset.THGStrainStressDataset.load_data"><code class="docutils literal notranslate"><span class="pre">THGStrainStressDataset.load_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.functions">src.ds.functions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.functions.logistic"><code class="docutils literal notranslate"><span class="pre">logistic()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.functions.sigmoid"><code class="docutils literal notranslate"><span class="pre">sigmoid()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="src.ds.html#src-ds-hyperparameters-module">src.ds.hyperparameters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.hyperparameters">src.ds.hyperparameters module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.hyperparameters.Objective"><code class="docutils literal notranslate"><span class="pre">Objective</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.hyperparameters.build_model"><code class="docutils literal notranslate"><span class="pre">build_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.hyperparameters.tune_hyperparameters"><code class="docutils literal notranslate"><span class="pre">tune_hyperparameters()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.metrics">src.ds.metrics module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.metrics.Metric"><code class="docutils literal notranslate"><span class="pre">Metric</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.metrics.Metric.average"><code class="docutils literal notranslate"><span class="pre">Metric.average</span></code></a></li>
@@ -345,12 +362,14 @@
 <li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.tensorboard">src.ds.tensorboard module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.tensorboard.TensorboardExperiment"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.add_batch_metric"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_batch_metric()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.add_epoch_logistic_curve"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_epoch_logistic_curve()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.add_epoch_metric"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_epoch_metric()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.add_epoch_metrics"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_epoch_metrics()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.add_epoch_sigmoid"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_epoch_sigmoid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.add_fold_metric"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_fold_metric()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.add_hparams"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_hparams()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.add_train_val_epoch_metrics"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.add_train_val_epoch_metrics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.create_logistic_curve"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.create_logistic_curve()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.create_sigmoid"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.create_sigmoid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.flush"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.flush()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.set_stage"><code class="docutils literal notranslate"><span class="pre">TensorboardExperiment.set_stage()</span></code></a></li>
@@ -396,8 +415,23 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">#</a></h2>
 </section>
-<section id="src-main-module">
-<h2>src.main module<a class="headerlink" href="#src-main-module" title="Permalink to this heading">#</a></h2>
+<section id="module-src.main">
+<span id="src-main-module"></span><h2>src.main module<a class="headerlink" href="#module-src.main" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.main.main">
+<span class="sig-prename descclassname"><span class="pre">src.main.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig" title="src.conf.config.THGStrainStressConfig"><span class="pre">THGStrainStressConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.main.main" title="Permalink to this definition">#</a></dt>
+<dd><p>This is the main entry point for the THG strain stress project.
+Can
+1. calculate appropriate hyperparameters for a model;
+2. visualize result of hyperparameter optimization.
+3. calculate model parameters for the model,</p>
+<blockquote>
+<div><p>estimating parameters describing the strain-stress
+curve of skin tissue from single SHG images;</p>
+</div></blockquote>
+<p>Configurations must be made in conf/config.yaml.</p>
+</dd></dl>
+
 </section>
 <section id="module-src">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-src" title="Permalink to this heading">#</a></h2>
@@ -464,7 +498,10 @@
 <li><a class="reference internal" href="#">src package</a><ul>
 <li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#src-main-module">src.main module</a></li>
+<li><a class="reference internal" href="#module-src.main">src.main module</a><ul>
+<li><a class="reference internal" href="#src.main.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-src">Module contents</a></li>
 </ul>
 </li>
