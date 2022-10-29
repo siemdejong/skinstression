@@ -3,6 +3,7 @@ from conf.config import THGStrainStressConfig
 from ds.dataset import THGStrainStressDataset
 from ds.runner import Runner, Stage, run_epoch
 from ds.tensorboard import TensorboardExperiment
+from ds.loss import weighted_l1_loss
 
 from torch.optim.lr_scheduler import (
     ChainedScheduler,
@@ -19,6 +20,7 @@ from torch.utils.data import Subset
 import torch
 from sklearn.model_selection import train_test_split
 import os
+import numpy as np
 
 log = logging.getLogger(__name__)
 optuna.logging.enable_propagation()  # Propagate logs to the root logger.
@@ -93,12 +95,14 @@ class Objective:
             split="train",
             data_path=cfg.paths.data,
             targets_path=cfg.paths.targets,
+            reweight="sqrt_inv",
+            lds=True,
         )
 
         # Split the dataset in train, validation and test (sub)sets.
         train_size = int(len(dataset) * 0.8)
         train_idx, val_idx = train_test_split(
-            dataset,
+            np.arange(len(dataset)),
             train_size=train_size,
             stratify=person_ids,
             shuffle=True,
@@ -163,7 +167,7 @@ class Objective:
         model = build_model(trial, hparams, cfg)
 
         model = model.to(device)
-        loss_fn = nn.L1Loss()  # MAE.
+        loss_fn = weighted_l1_loss  # MAE.
         optimizer = getattr(torch.optim, hparams["optimizer_name"])(
             model.parameters(), lr=hparams["lr"], weight_decay=hparams["weight_decay"]
         )
@@ -180,13 +184,13 @@ class Objective:
         train_loader = torch.utils.data.DataLoader(
             self.train_subset,
             batch_size=int(hparams["batch_size"]),
-            num_workers=10,
+            num_workers=2,
             pin_memory=True,
         )
         val_loader = torch.utils.data.DataLoader(
             self.val_subset,
             batch_size=int(hparams["batch_size"]),
-            num_workers=10,
+            num_workers=2,
             pin_memory=True,
         )
 
@@ -219,7 +223,7 @@ class Objective:
         tracker = TensorboardExperiment(log_path=log_dir)
 
         # Run epochs.
-        max_epoch = cfg.params.epoch_count if not cfg.dry_run else 1
+        max_epoch = cfg.params.epoch_count# if not cfg.dry_run else 1
         for epoch_id in range(max_epoch):
             run_epoch(
                 val_runner=val_runner,
@@ -254,6 +258,7 @@ def tune_hyperparameters(cfg: THGStrainStressConfig):
     study = optuna.create_study(
         study_name=cfg.optuna.study_name,
         storage=f"sqlite:///{cfg.paths.optuna_db}",
+        direction=cfg.optuna.direction,
         sampler=optuna.samplers.TPESampler(seed=cfg.optuna.seed),
         pruner=optuna.pruners.SuccessiveHalvingPruner(
             min_resource=cfg.optuna.pruner.min_resource,

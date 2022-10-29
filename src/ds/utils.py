@@ -63,5 +63,5 @@ def sturge(n):
     assuming a normal distribution.
     https://en.wikipedia.org/wiki/Histogram#Number_of_bins_and_width
     """
-    k = np.ceil(np.log2(n)) + 1
+    k = int(np.ceil(np.log2(n)) + 1)
     return k

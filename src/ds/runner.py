@@ -24,9 +24,10 @@ class Runner:
         stage: Stage,
         scaler,
         optimizer: Optional[torch.optim.Optimizer] = None,
-        device: Optional[torch.device] = torch.device("cpu"),
+        device: torch.device = torch.device("cpu"),
         scheduler: Optional[Union[_LRScheduler, ReduceLROnPlateau]] = None,
-        progress_bar: Optional[bool] = False,
+        progress_bar: bool = False,
+        dry_run: bool = False,
     ) -> None:
         self.run_count = 0
         self.loader = loader
@@ -39,6 +40,7 @@ class Runner:
         self.stage = stage
         self.disable_progress_bar = not progress_bar
         self.scaler = scaler
+        self.dry_run = dry_run
 
     @property
     def avg_loss(self):
@@ -49,17 +51,20 @@ class Runner:
         # Turn on eval or train mode.
         self.model.train(self.stage is Stage.TRAIN)
 
-        for x, y in tqdm(
+        for x, y, w in tqdm(
             self.loader, desc=desc, ncols=80, disable=self.disable_progress_bar
         ):
+            # if self.dry_run and self.run_count:
+            #     break
+
             with torch.autocast(
                 device_type="cuda",
                 dtype=torch.float16,
                 enabled=self.scaler.is_enabled(),
             ):
 
-                x, y = x.to(self.device), y.to(self.device)
-                loss = self._run_single(x, y)
+                x, y, w = x.to(self.device), y.to(self.device), w.to(self.device)
+                loss = self._run_single(x, y, w)
 
             experiment.add_batch_metric("loss", loss.detach(), self.run_count)
 
@@ -74,12 +79,16 @@ class Runner:
         if self.scheduler:
             self.scheduler.step()
 
-    def _run_single(self, x: Any, y: Any):
+    def _run_single(self, x: Any, y: Any, w: float):
+        """
+        Args:
+            w: weighting of the loss function.
+        """
         self.run_count += 1
         batch_size: int = len(x)
         self.prediction = self.model(x)
         self.target = y
-        loss = self.compute_loss(self.prediction, y)
+        loss = self.compute_loss(self.prediction, self.target, w)
 
         # Compute Batch Validation Metrics
         self.loss_metric.update(loss.detach(), batch_size)
@@ -123,7 +132,7 @@ def run_test(
     test_runner.run("Test Batches", experiment)
 
     # Log Testing Epoch Metrics
-    experiment.add_epoch_sigmoid(
+    experiment.add_epoch_logistic_curve(
         test_runner.prediction.detach(), test_runner.target.detach()
     )
 
@@ -139,7 +148,7 @@ def run_epoch(
     train_runner.run("Train Batches", experiment)
 
     # Log Training Epoch Metrics
-    experiment.add_epoch_sigmoid(
+    experiment.add_epoch_logistic_curve(
         train_runner.prediction.detach().cpu(),
         train_runner.target.detach().cpu(),
         epoch_id,
@@ -151,7 +160,7 @@ def run_epoch(
         val_runner.run("Validation Batches", experiment)
 
     # Log Validation Epoch Metrics
-    experiment.add_epoch_sigmoid(
+    experiment.add_epoch_logistic_curve(
         val_runner.prediction.detach().cpu(), val_runner.target.detach().cpu(), epoch_id
     )
 

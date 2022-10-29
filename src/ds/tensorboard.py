@@ -10,7 +10,7 @@ from torch.utils.tensorboard.writer import SummaryWriter
 
 from ds.tracking import Stage
 from ds.utils import create_experiment_log_dir
-from ds.functions import sigmoid
+from ds.functions import sigmoid, logistic
 from typing import Optional
 
 import torch
@@ -97,6 +97,41 @@ class TensorboardExperiment:
     #     cm = ConfusionMatrixDisplay(confusion_matrix(y_true, y_pred)).plot(cmap="Blues")
     #     cm.ax_.set_title(f"{self.stage.name} Epoch: {step}")
     #     return cm.figure_
+
+    def add_epoch_logistic_curve(
+        self,
+        prediction: np.ndarray,
+        target: np.ndarray,
+        step=None,
+    ) -> None:
+        fig = self.create_logistic_curve(
+            prediction=prediction, target=target, step=step
+        )
+        tag = f"{self.stage.name}/epoch/logistic_curve"
+        self._writer.add_figure(tag, fig, step)
+
+    def create_logistic_curve(
+        self, prediction: torch.tensor, target: torch.tensor, step: Optional[int] = None
+    ) -> matplotlib.figure.Figure:
+        x = torch.linspace(1, 2.5, 1000)
+
+        fig, ax = plt.subplots(1, 1)
+
+        if step:
+            ax.set_title(f"{self.stage.name} Epoch: {step}")
+        else:
+            ax.set_title(f"{self.stage.name}")
+
+        # TODO: Fix colors.
+        for idx, (y_prediction, y_target) in enumerate(zip(prediction, target)):
+            ax.plot(x, logistic(x, *y_prediction), "--", label="prediction")
+            ax.plot(x, logistic(x, *y_target), "-", label="target")
+
+        ax.set_xlim(0.8, 2.6)
+        ax.set_ylim(0, 7)
+        ax.legend()
+
+        return fig
 
     def add_epoch_sigmoid(
         self,

@@ -4,7 +4,7 @@ import os
 import logging
 
 from scipy.ndimage import convolve, convolve1d
-from utils import get_lds_kernel_window, sturge
+from ds.utils import get_lds_kernel_window, sturge
 
 import pandas as pd
 import numpy as np
@@ -24,13 +24,9 @@ class THGStrainStressDataset(Dataset[Any]):
         root_data_dir: str,
         folder: int,
         targets: np.ndarray,
+        weights: Optional[np.ndarray],
         extension: str = "bmp",
         target_transform=None,
-        reweight="none",
-        lds=False,
-        lds_kernel="gaussian",
-        lds_ks=5,
-        lds_sigma=2,
     ):
         # header = 0, assume there is a header in the labels.csv file.
         self.split = split
@@ -42,41 +38,36 @@ class THGStrainStressDataset(Dataset[Any]):
         self.target_transform = target_transform
         self._length = sum(1 for _ in os.listdir(self._data))
 
-        self.weights = self._prepare_weights(
-            reweight=reweight,
-            lds=lds,
-            lds_kernel=lds_kernel,
-            lds_ks=lds_ks,
-            lds_sigma=lds_sigma,
-            param_ids=["a", "k", "xc"],
-        )
+        self.weights = weights
 
     def __len__(self):
         return self._length
 
-    def __getitem__(self, idx) -> tuple[Image.Image, np.ndarray]:
+    def __getitem__(self, idx) -> tuple[torch.tensor, np.ndarray, np.ndarray]:
         # TODO: Make it work with z-stacks!!!
         # https://stackoverflow.com/a/60176057
         # Assuming images follow [0, n-1], so they can be accesed directly.
         # data_path = self.data_dir / (str(int(self.labels["index"].iloc[idx])) + ".tif")
         image = Image.open(self._data / f"{str(idx)}.{self.extension}")
+        targets = self.targets
+
+        weight = self.weights  # (
+        #     np.asarray([self.weights]).astype("float32")
+        #     if self.weights is not None
+        #     else np.asarray([np.float32(1.0)])
+        # )
 
         if self.transform:
             image = self.transform(image)
 
         if self.target_transform:
-            targets = self.target_transform(self.targets)
-
-        weight = (
-            np.asarray([self.weights[idx]]).astype("float32")
-            if self.weights is not None
-            else np.asarray([np.float32(1.0)])
-        )
+            targets = self.target_transform(targets)
 
         return image, targets, weight
 
+    @staticmethod
     def _prepare_weights(
-        self,
+        targets: np.ndarray,
         reweight: str,
         lds: bool = False,
         lds_kernel: str = "gaussian",
@@ -101,55 +92,87 @@ class THGStrainStressDataset(Dataset[Any]):
             reweight != "none" if lds else True
         ), "Set reweight to 'sqrt_inv' (default) or 'inverse' when using LDS"
 
+        # targets = targets.T
+
+        # Dictionary for the LDS below
+        # targets = np.ndarray([a1, k1, xc1], [a2, k2, xc2], ...])
+        # num_per_target = target
+
         # Calculate count statistic.
-        hist = []
-        for column in param_ids:
-            param_data = self.df[column].to_numpy()
+        bin_edges_list = []
+        bin_count_list = []
+        for param_data in targets.T:
             bins = sturge(len(param_data))
-            column_hist, _ = np.histogram(param_data, bins=bins)
-            hist.append(column_hist)
+            bin_edges = np.histogram_bin_edges(param_data, bins=bins)
+            bin_edges_list.append(bin_edges)
+
+            idcs = np.digitize(param_data, bin_edges)
+            bin_count = np.bincount(idcs)
+            bin_count_list.append(bin_count)
+        bin_count_list = np.asarray(bin_count_list)
 
         if reweight == "sqrt_inv":
-            hist = np.sqrt(hist)
+            bin_count_list = np.sqrt(bin_count_list)
         elif reweight == "inverse":
             # clip weights for inverse re-weight
-            hist = np.clip(hist, -np.inf, np.inf)
+            bin_count_list = np.clip(bin_count_list, -np.inf, np.inf)
             raise NotImplementedError
+
+        idcs_list = []
+        num_per_target = []
+        num_per_bin_list = []
+        for i, target in enumerate(targets.T):
+            idcs = np.digitize(target, bin_edges_list[i])
+            idcs_list.append(idcs)
+
+            num_per_bin = np.bincount(idcs)
+            num_per_bin_list.append(num_per_bin)
+
+            target_as_bin_count = num_per_bin[idcs]
+            num_per_target.append(target_as_bin_count)
 
         print(f"Using re-weighting: [{reweight.upper()}]")
 
+        # TODO: FIX THE NUM_PER_LABEL HIEROOO
         if lds:
             lds_kernel_window = get_lds_kernel_window(lds_kernel, lds_ks, lds_sigma)
             print(f"Using LDS: [{lds_kernel.upper()}] ({lds_ks}/{lds_sigma})")
-            for i, label_count in enumerate(hist):
-                hist[i] = convolve1d(
-                    label_count,
+            num_per_target = []
+            for i, target in enumerate(targets.T):
+                num_per_bin = num_per_bin_list[i]
+                smoothed_num_per_bin = convolve1d(
+                    num_per_bin,
                     weights=lds_kernel_window,
                     mode="constant",
                 )
 
-        weights = 1 / hist
-        scaling = weights.size[1] / np.sum(weights, axis=0)
-        scaled_weights = scaling * weights
-        transposed_scaled_weights = scaled_weights.T
+                # Bin edges haven't changed. No need to redigitize target.
+                idcs = idcs_list[i]
+                target_as_smoothed_bin_count = smoothed_num_per_bin[idcs]
+                num_per_target.append(target_as_smoothed_bin_count)
 
-        return transposed_scaled_weights
+        num_per_target = np.asarray(num_per_target).T
+        weights = 1 / num_per_target
+        scaling = weights.shape[1] / np.sum(weights, axis=0)
+        scaled_weights = scaling * weights
+
+        return scaled_weights
 
     def get_transform(self):
         if self.split == "train":
             transform = transforms.Compose(
                 [
                     # TODO: Insert some data augmentation transforms.
+                    transforms.Grayscale(),
                     transforms.ToTensor(),
-                    transforms.Grayscale()
                     # transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
                 ]
             )
         else:
             transform = transforms.Compose(
                 [
+                    transforms.Grayscale(),
                     transforms.ToTensor(),
-                    transforms.Grayscale()
                     # transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
                 ]
             )
@@ -157,7 +180,14 @@ class THGStrainStressDataset(Dataset[Any]):
 
     @staticmethod
     def load_data(
-        split: str, data_path: str, targets_path: str
+        split: str,
+        data_path: str,
+        targets_path: str,
+        reweight="none",
+        lds=False,
+        lds_kernel="gaussian",
+        lds_ks=5,
+        lds_sigma=2,
     ) -> tuple[Dataset, np.ndarray]:
         """Gather all data and construct a full dataset object.
         Return person_ids with it for stratification purposes.
@@ -171,13 +201,31 @@ class THGStrainStressDataset(Dataset[Any]):
             and an array of indices denoting to what group subsets of the dataset belong to.
         """
         assert split in {"train", "validation", "test"}
+
+        # Pre-calculate weights.
+        targets_list = []
+        for _, labels in pd.read_csv(targets_path).iterrows():
+            targets_list.append(labels[["a", "k", "xc"]].to_numpy())
+        targets_list = np.asarray(targets_list)
+
+        weights = THGStrainStressDataset._prepare_weights(
+            targets=targets_list,
+            reweight=reweight,
+            lds=lds,
+            lds_kernel=lds_kernel,
+            lds_ks=lds_ks,
+            lds_sigma=lds_sigma,
+            param_ids=["a", "k", "xc"],
+        )
+
+        # Build dataset.
         datasets = []
         person_ids = []
-        for _, labels in pd.read_csv(targets_path).iterrows():
+        for (_, labels), weights in zip(pd.read_csv(targets_path).iterrows(), weights):
 
             folder = int(labels["index"])
-            targets = labels[["a", "k", "xc"]].to_numpy(dtype=float)
             person_id = labels[["person_id"]].to_numpy(dtype=float)
+            targets = labels[["a", "k", "xc"]].to_numpy(dtype=float)
 
             if not (Path(data_path) / str(folder)).is_dir():
                 log.info(
@@ -191,6 +239,7 @@ class THGStrainStressDataset(Dataset[Any]):
                 root_data_dir=data_path,
                 folder=folder,
                 targets=targets,
+                weights=weights,
             )
 
             # Dirty way of checking if data is compatible with model.
@@ -205,7 +254,7 @@ class THGStrainStressDataset(Dataset[Any]):
                 continue
 
             datasets.append(dataset)
-            person_ids.append(person_id)
+            person_ids.extend([person_id] * len(dataset))
 
         person_ids = np.array(person_ids)
         dataset = ConcatDataset(datasets)
