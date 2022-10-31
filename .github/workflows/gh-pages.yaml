@@ -5,25 +5,31 @@ on:
     branches:
       - main
   pull_request:
+    branches:
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    name: Deploy
+    runs-on: "ubuntu-latest"
     defaults:
       run:
         shell: bash -l {0}
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.9.13
-        uses: actions/setup-python@v3
+      - uses: actions/checkout@v2
+
+      - name: Create environment
+        uses: conda-incubator/setup-miniconda@v2
         with:
+          activate-environment: anaconda-client-env
+          environment-file: environment.yml
           python-version: 3.9.13
-      - name: Install dependencies
-        run: |
-          $CONDA/bin/conda env update --file environment.yml --name base
+          # condarc-file: econdarc.yml
+          auto-activate-base: false
 
       - name: Make HTML docs
-        run: cd docs && make html
+        run: |
+          cd docs && make html
 
       - name: Deploy docs
         uses: peaceiris/actions-gh-pages@v3
