@@ -1,4 +1,4 @@
-import logging
+import logging as log
 from typing import Any, Optional, Union
 
 import numpy as np
@@ -12,8 +12,6 @@ from ds.metrics import Metric
 from ds.tracking import ExperimentTracker, Stage
 import os
 
-log = logging.getLogger(__name__)
-
 
 class Runner:
     def __init__(
@@ -23,8 +21,9 @@ class Runner:
         loss_fn: torch.nn.Module,
         stage: Stage,
         scaler,
+        rank: int,
+        device: int,
         optimizer: Optional[torch.optim.Optimizer] = None,
-        device: torch.device = torch.device("cpu"),
         scheduler: Optional[Union[_LRScheduler, ReduceLROnPlateau]] = None,
         progress_bar: bool = False,
         dry_run: bool = False,
@@ -34,6 +33,7 @@ class Runner:
         self.loss_metric = Metric()
         self.model = model
         self.compute_loss = loss_fn
+        self.lowest_loss = np.inf
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.device = device
@@ -76,6 +76,11 @@ class Runner:
 
                 self.model.zero_grad(set_to_none=True)
 
+            # Only let 1 process save checkpoints.
+            if self.rank == 0:
+                if self.should_save(loss):
+                    self.save_checkpoint()
+
         if self.scheduler:
             self.scheduler.step()
 
@@ -98,10 +103,16 @@ class Runner:
     def reset(self):
         self.loss_metric = Metric()
 
+    def should_save(self, loss):
+        if loss < self.min_loss:
+            return True
+        else:
+            return False
+
     def save_checkpoint(self):
         state: dict[str, Union[int, dict[str, Any]]] = {
             "epoch": self.run_count,
-            "model_state_dict": self.model.state_dict(),
+            "model_state_dict": self.model.module.state_dict(),
         }
 
         if self.optimizer:
@@ -109,6 +120,9 @@ class Runner:
 
         if self.scaler.is_enabled():
             state["scaler_state_dict"] = self.scaler.state_dict()
+
+        if self.scheduler:
+            state["scheduler_state_dict"] = self.scheduler.state_dict()
 
         torch.save(
             state,
@@ -121,6 +135,12 @@ class Runner:
         if self.optimizer:
             self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         self.run_count = checkpoint["epoch"]
+
+        # Might be needed in the future (https://github.com/pytorch/pytorch/issues/2830):
+        # for state in optimizer.state.values():
+        #     for k, v in state.items():
+        #         if isinstance(v, torch.Tensor):
+        #             state[k] = v.cuda(gpus)
 
 
 def run_test(
@@ -154,6 +174,7 @@ def run_epoch(
         epoch_id,
     )
 
+    # TODO: Possibly only do validation once every x epochs.
     # Validation Loop
     experiment.set_stage(Stage.VAL)
     with torch.no_grad():
@@ -161,7 +182,9 @@ def run_epoch(
 
     # Log Validation Epoch Metrics
     experiment.add_epoch_logistic_curve(
-        val_runner.prediction.detach().cpu(), val_runner.target.detach().cpu(), epoch_id
+        val_runner.prediction.detach().cpu(),
+        val_runner.target.detach().cpu(),
+        epoch_id,
     )
 
     # Combine training and validation loss in one plot.
@@ -186,6 +209,8 @@ def run_fold(
 
         if val_runner.avg_loss < _lowest_loss:
             _lowest_loss = val_runner.avg_loss
+
+            # TODO: Only save checkpoints at rank 0.
             train_runner.save_checkpoint()
 
         experiment.add_fold_metric("loss", val_runner.avg_loss, fold_id)

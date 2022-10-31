@@ -1,20 +1,20 @@
-import logging
 import hydra
 from hydra.core.config_store import ConfigStore
+from ds.utils import seed_all
 from ds.hyperparameters import tune_hyperparameters
 from ds.visualization import visualize
 from ds.training import train
 from conf.config import THGStrainStressConfig, Mode
+import torch.multiprocessing as mp
+from ds.logging_setup import setup_primary_logging
+from argparse import ArgumentParser
+import os
 
 cs = ConfigStore.instance()
 cs.store(name="thg_strain_stress_config", node=THGStrainStressConfig)
 
-log = logging.getLogger(__name__)
 
-# For reproducibility
-# https://pytorch.org/docs/stable/notes/randomness.html
-
-
+# @hydra.main(config_path="conf", config_name="config")
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: THGStrainStressConfig) -> None:
     """
@@ -28,19 +28,40 @@ def main(cfg: THGStrainStressConfig) -> None:
 
     Configurations must be made in conf/config.yaml.
     """
+    # Sources:
+    #   https://tuni-itc.github.io/wiki/Technical-Notes/Distributed_dataparallel_pytorch/
+    #   https://yangkky.github.io/2019/07/08/distributed-pytorch-tutorial.html
 
-    # TODO: Which LR scheduler to use?
-    # CosineAnnealingLR, CyclicLR
-    # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
-    #     optimizer, cfg.params.scheduler.T_0
-    # )
+    parser = ArgumentParser()
+    parser.add_argument("--nodes", default=1, type=int)
+    parser.add_argument(
+        "--ip_adress", type=str, required=True, help="ip address of the host node"
+    )
+    parser.add_argument("--ngpus", default=1, type=int, help="number of gpus per node")
 
-    if cfg.mode == Mode.TUNE.name:
-        tune_hyperparameters(cfg)
-    elif cfg.mode == Mode.VISUALIZE.name:
-        visualize(cfg.paths.optuna_db)
+    args = parser.parse_args()
+
+    # Total number of GPUs availabe.
+    args.world_size = args.ngpu * args.nodes
+
+    # Add the ip address to the environment variable so it can be easily available.
+    os.environ["MASTER_ADDR"] = args.ip_adress
+    os.environ["MASTER_PORT"] = "8888"
+    os.environ["WORLD_SIZE"] = str(args.world_size)
+
+    if cfg.mode == Mode.VISUALIZE.name:
+        fn = visualize
+    elif cfg.mode == Mode.TUNE.name:
+        fn = tune_hyperparameters
     elif cfg.mode == Mode.TRAIN.name:
-        train(cfg)
+        fn = train
+
+    # Initialize the primary logging handlers. Use the returned `log_queue`
+    # to which the worker processes would use to push their messages
+    log_queue = setup_primary_logging("out.log", "error.log")
+
+    # nprocs: number of process which is equal to args.ngpu here
+    mp.spawn(fn, nprocs=args.ngpus, args=(args, cfg, log_queue))
 
 
 if __name__ == "__main__":

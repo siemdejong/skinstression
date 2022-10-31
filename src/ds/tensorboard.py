@@ -1,9 +1,7 @@
-from array import array
 from pathlib import Path
 
 import numpy as np
 from matplotlib import pyplot as plt
-from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 import matplotlib.pyplot as plt
 import matplotlib
 from torch.utils.tensorboard.writer import SummaryWriter
@@ -128,7 +126,7 @@ class TensorboardExperiment:
             ax.plot(x, logistic(x, *y_target), "-", label="target")
 
         ax.set_xlim(0.8, 2.6)
-        ax.set_ylim(0, 7)
+        ax.set_ylim(0, 14)
         ax.legend()
 
         return fig
@@ -161,10 +159,10 @@ class TensorboardExperiment:
             ax.plot(x, sigmoid(x, *y_target), "-", label="target")
 
         ax.set_xlim(0.8, 2.6)
-        ax.set_ylim(0, 7)
+        ax.set_ylim(0, 14)
         ax.legend()
 
         return fig
 
-    def add_hparams(self, hparams: dict[str, float], loss: Optional[float]):
+    def add_hparams(self, hparams: dict[str, float], loss: Optional[float] = None):
         self._writer.add_hparams(hparams, {"hparam/loss": loss if loss else "Pruned"})

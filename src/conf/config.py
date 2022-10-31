@@ -68,13 +68,9 @@ class Hparams:
     optimizer_name: str
     weight_decay: list[float, float]
     lr: list[float, float]
-    T_mult: list[int, int]
     T_0: list[int, int]
-    num_preblocks: int
-    dropout_1: list[float, float]
-    dropout_2: list[float, float]
-    dropout_3: list[float, float]
-    dropout_4: list[float, float]
+    T_mult: list[int, int]
+    num_preblocks: list[int]
     n_nodes: int
     batch_size: list[int]
 
@@ -88,7 +84,7 @@ class Hparams:
 class Optuna:
     study_name: str
     trials: int
-    direction: str
+    direction: str # Use Direction class?
     hparams: Hparams
     seed: int
     pruner: Pruner

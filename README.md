@@ -1,11 +1,11 @@
 <a name="readme-top"></a>
 
 <!-- PROJECT SHIELDS -->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![GNU License][license-shield]][license-url]
+<!-- [![Contributors][contributors-shield]][contributors-url] -->
+<!-- [![Forks][forks-shield]][forks-url] -->
+<!-- [![Stargazers][stars-shield]][stars-url] -->
+<!-- [![Issues][issues-shield]][issues-url] -->
+<!-- [![GNU License][license-shield]][license-url] -->
 <!-- [![LinkedIn][linkedin-shield]][linkedin-url] -->
 
 
@@ -91,7 +91,7 @@ This section includes instructions on setting up the project locally.
 
 ### Prerequisites
 #### CUDA
-The implementation allows use of CUDA enabled GPUs. 
+This project expects CUDA enabled GPUs. 
 Run `nvidia-smi` to see if there are CUDA enabled GPUs available.
 
 #### Data
@@ -135,6 +135,12 @@ TODO
 ## Usage
 
 TODO: show examples of optuna optimization, model training, and inference.
+
+Run
+```bash
+srun -N 2 --gpus-per-node=2 python src/main.py
+```
+to run two instances of the python script on separate nodes, using two GPUs per node.
 
 _For more examples, please refer to the [documentation](https://siemdejong.github.io/shg-strain-stress)._
 

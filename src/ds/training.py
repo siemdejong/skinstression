@@ -66,13 +66,13 @@ class Trainer:
         train_loader = torch.utils.data.DataLoader(
             self.train_subset,
             batch_size=int(cfg.params.batch_size),
-            num_workers=10,
+            num_workers=2,
             pin_memory=True,
         )
         val_loader = torch.utils.data.DataLoader(
             self.val_subset,
             batch_size=int(cfg.params.batch_size),
-            num_workers=10,
+            num_workers=2,
             pin_memory=True,
         )
 

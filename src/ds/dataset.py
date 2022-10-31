@@ -1,20 +1,20 @@
 from pathlib import Path
 from typing import Any, Optional
 import os
-import logging
+import logging as log
 
-from scipy.ndimage import convolve, convolve1d
+from scipy.ndimage import convolve1d
 from ds.utils import get_lds_kernel_window, sturge
 
 import pandas as pd
 import numpy as np
 import torch
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset, ConcatDataset
+from torch.utils.data import Dataset, ConcatDataset
 import torchvision.transforms as transforms
 
 
-log = logging.getLogger(__name__)
+# log = logging.getLogger(__name__)
 
 
 class THGStrainStressDataset(Dataset[Any]):
@@ -133,7 +133,6 @@ class THGStrainStressDataset(Dataset[Any]):
 
         print(f"Using re-weighting: [{reweight.upper()}]")
 
-        # TODO: FIX THE NUM_PER_LABEL HIEROOO
         if lds:
             lds_kernel_window = get_lds_kernel_window(lds_kernel, lds_ks, lds_sigma)
             print(f"Using LDS: [{lds_kernel.upper()}] ({lds_ks}/{lds_sigma})")

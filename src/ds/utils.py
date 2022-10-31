@@ -1,8 +1,12 @@
 import pathlib
 
-from scipy.ndimage import gaussian_filter, gaussian_filter1d
+import torch
+from scipy.ndimage import gaussian_filter1d
 from scipy.signal.windows import triang
 import numpy as np
+
+import torch.distributed as dist
+import logging as log
 
 
 def create_experiment_log_dir(root: str, parents: bool = True) -> str:
@@ -12,7 +16,10 @@ def create_experiment_log_dir(root: str, parents: bool = True) -> str:
         if not root_path.exists()
         else create_from_existing(root_path)
     )
-    child.mkdir(parents=parents)
+    try:
+        child.mkdir(parents=parents)
+    except FileExistsError:
+        log.info("Using existing log dir for this process.")
     return child.as_posix()
 
 
@@ -65,3 +72,32 @@ def sturge(n):
     """
     k = int(np.ceil(np.log2(n)) + 1)
     return k
+
+
+def ddp_setup(rank, world_size):
+    """Setup a process group at a specific rank, being world-aware.
+    Args:
+        rank: Unique identifier of each process.
+        world_size: Total number of processes.
+    """
+    # initialize the process group
+    dist.init_process_group(
+        "nccl", init_method="env://", rank=rank, world_size=world_size
+    )
+    log.info(f"Process group initialized on rank {rank} of {world_size}.")
+
+
+def ddp_cleanup():
+    """Destroy the current process group."""
+    dist.destroy_process_group()
+
+
+def seed_all(seed=42):
+    """Seed the current device.
+    Used to make the optimalization determinant.
+    However, not 100% determinant: https://pytorch.org/docs/stable/notes/randomness.html.
+    Args:
+        seed: seed to set the current device to.
+    """
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)

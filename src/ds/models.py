@@ -1,6 +1,6 @@
 from conf.config import THGStrainStressConfig
 import torch
-from torch import Tensor, nn
+from torch import nn
 
 
 def init_weights(m):
@@ -30,7 +30,7 @@ class THGStrainStressCNN(nn.Module):
         layers.append(nn.Conv2d(1, 64, 3, bias=False))
         layers.append(nn.BatchNorm2d(64))
         layers.append(nn.ReLU())
-        layers.append(nn.Dropout2d(cfg.params.model.dropout_1))
+        # layers.append(nn.Dropout2d(cfg.params.model.dropout_1))
         for _ in range(3):
             layers.append(nn.MaxPool2d(2))
 
@@ -38,21 +38,21 @@ class THGStrainStressCNN(nn.Module):
         layers.append(nn.Conv2d(64, 64, 5, bias=False))
         layers.append(nn.BatchNorm2d(64))
         layers.append(nn.ReLU())
-        layers.append(nn.Dropout2d(cfg.params.model.dropout_2))
+        # layers.append(nn.Dropout2d(cfg.params.model.dropout_2))
         layers.append(nn.MaxPool2d(2))
 
         # Block 3
         layers.append(nn.Conv2d(64, 64, 3, bias=False))
         layers.append(nn.BatchNorm2d(64))
         layers.append(nn.ReLU())
-        layers.append(nn.Dropout2d(cfg.params.model.dropout_3))
+        # layers.append(nn.Dropout2d(cfg.params.model.dropout_3))
         layers.append(nn.MaxPool2d(2))
 
         # Block 4
         layers.append(nn.Conv2d(64, 64, 6, bias=False))
         layers.append(nn.BatchNorm2d(64))
         layers.append(nn.ReLU())
-        layers.append(nn.Dropout2d(cfg.params.model.dropout_4))
+        # layers.append(nn.Dropout2d(cfg.params.model.dropout_4))
 
         # MLP
         layers.append(nn.Flatten())

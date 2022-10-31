@@ -1,8 +1,6 @@
 from enum import Enum, auto
 from typing import Protocol
 
-import numpy as np
-
 
 class Stage(Enum):
     TRAIN = auto()
