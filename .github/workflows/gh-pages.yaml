@@ -7,19 +7,17 @@ on:
   pull_request:
 
 jobs:
-  deploy:
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+  Deploy Github Pages:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: conda-incubator/setup-miniconda@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3
         with:
-          activate-environment: anaconda-client-env
           python-version: 3.9.13
-          environment-file: environment.yml
+      - name: Install dependencies
+        run: |
+          $CONDA/bin/conda env update --file environment.yml --name base
 
       - name: Make HTML docs
         run: cd docs && make html
