@@ -272,18 +272,17 @@ Data is loaded only once and attached to the objective.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.ds.hyperparameters.build_model">
-<span class="sig-prename descclassname"><span class="pre">src.ds.hyperparameters.</span></span><span class="sig-name descname"><span class="pre">build_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Trial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hparams</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig" title="src.conf.config.THGStrainStressConfig"><span class="pre">THGStrainStressConfig</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.hyperparameters.build_model" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">src.ds.hyperparameters.</span></span><span class="sig-name descname"><span class="pre">build_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hparams</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig" title="src.conf.config.THGStrainStressConfig"><span class="pre">THGStrainStressConfig</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.hyperparameters.build_model" title="Permalink to this definition">#</a></dt>
 <dd><p>Build model within an Optuna trial.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>trial</strong> – Optuna trial</p></li>
-<li><p><strong>hparams</strong> – dict of parameters (including those to be optimized by Optuna)</p></li>
-<li><p><strong>cfg</strong> – configuration object</p></li>
+<li><p><strong>hparams</strong> – Dict of parameters (including those to be optimized by Optuna).</p></li>
+<li><p><strong>cfg</strong> – Configuration object.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><cite>nn.Sequential</cite> of all parameterized layers</p>
+<dd class="field-even"><p>A <cite>nn.Sequential</cite> of all parameterized layers.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>model</p>
@@ -293,14 +292,17 @@ Data is loaded only once and attached to the objective.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.ds.hyperparameters.tune_hyperparameters">
-<span class="sig-prename descclassname"><span class="pre">src.ds.hyperparameters.</span></span><span class="sig-name descname"><span class="pre">tune_hyperparameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig" title="src.conf.config.THGStrainStressConfig"><span class="pre">THGStrainStressConfig</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.hyperparameters.tune_hyperparameters" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">src.ds.hyperparameters.</span></span><span class="sig-name descname"><span class="pre">tune_hyperparameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gpu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig" title="src.conf.config.THGStrainStressConfig"><span class="pre">THGStrainStressConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_queue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Queue</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.hyperparameters.tune_hyperparameters" title="Permalink to this definition">#</a></dt>
 <dd><p>Optimize parameters using an objective function and Optuna.
 All configurations are overwritten during optimization.
 Number of Optuna trials is given by cfg.optuna.trials.
 Optimal hyperparameters are logged.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>cfg</strong> – hydra configuration object. Only uses cfg.optuna.trials.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> – hydra configuration object. Only uses cfg.optuna.trials.</p></li>
+<li><p><strong>rank</strong> – device rank.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -379,7 +381,7 @@ registered hooks while the latter silently ignores them.</p>
 <span id="src-ds-runner-module"></span><h2>src.ds.runner module<a class="headerlink" href="#module-src.ds.runner" title="Permalink to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="src.ds.runner.Runner">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.ds.runner.</span></span><span class="sig-name descname"><span class="pre">Runner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataLoader</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.ds.tracking.Stage" title="src.ds.tracking.Stage"><span class="pre">Stage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Optimizer</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">device</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">device(type='cpu')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">_LRScheduler</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ReduceLROnPlateau</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress_bar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.runner.Runner" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.ds.runner.</span></span><span class="sig-name descname"><span class="pre">Runner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataLoader</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.ds.tracking.Stage" title="src.ds.tracking.Stage"><span class="pre">Stage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Optimizer</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">_LRScheduler</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ReduceLROnPlateau</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress_bar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.runner.Runner" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py property">
 <dt class="sig sig-object py" id="src.ds.runner.Runner.avg_loss">
@@ -404,6 +406,11 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.ds.runner.Runner.save_checkpoint">
 <span class="sig-name descname"><span class="pre">save_checkpoint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.runner.Runner.save_checkpoint" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.ds.runner.Runner.should_save">
+<span class="sig-name descname"><span class="pre">should_save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.runner.Runner.should_save" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -467,7 +474,7 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.ds.tensorboard.TensorboardExperiment.add_hparams">
-<span class="sig-name descname"><span class="pre">add_hparams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hparams</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.tensorboard.TensorboardExperiment.add_hparams" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add_hparams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hparams</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.tensorboard.TensorboardExperiment.add_hparams" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -565,6 +572,20 @@ registered hooks while the latter silently ignores them.</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="src.ds.utils.ddp_cleanup">
+<span class="sig-prename descclassname"><span class="pre">src.ds.utils.</span></span><span class="sig-name descname"><span class="pre">ddp_cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.utils.ddp_cleanup" title="Permalink to this definition">#</a></dt>
+<dd><p>Destroy the current process group.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.ds.utils.ddp_setup">
+<span class="sig-prename descclassname"><span class="pre">src.ds.utils.</span></span><span class="sig-name descname"><span class="pre">ddp_setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">world_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.utils.ddp_setup" title="Permalink to this definition">#</a></dt>
+<dd><p>Setup a process group at a specific rank, being world-aware.
+:param rank: Unique identifier of each process.
+:param world_size: Total number of processes.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="src.ds.utils.get_lds_kernel_window">
 <span class="sig-prename descclassname"><span class="pre">src.ds.utils.</span></span><span class="sig-name descname"><span class="pre">get_lds_kernel_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.utils.get_lds_kernel_window" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
@@ -578,6 +599,15 @@ registered hooks while the latter silently ignores them.</p>
 <dt class="sig sig-object py" id="src.ds.utils.is_first_experiment">
 <span class="sig-prename descclassname"><span class="pre">src.ds.utils.</span></span><span class="sig-name descname"><span class="pre">is_first_experiment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">children</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#src.ds.utils.is_first_experiment" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.ds.utils.seed_all">
+<span class="sig-prename descclassname"><span class="pre">src.ds.utils.</span></span><span class="sig-name descname"><span class="pre">seed_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.utils.seed_all" title="Permalink to this definition">#</a></dt>
+<dd><p>Seed the current device.
+Used to make the optimalization determinant.
+However, not 100% determinant: <a class="reference external" href="https://pytorch.org/docs/stable/notes/randomness.html">https://pytorch.org/docs/stable/notes/randomness.html</a>.
+:param seed: seed to set the current device to.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.ds.utils.sturge">
@@ -709,6 +739,7 @@ Plots are opened in an external browser at ports opened by Plotly.</p>
 <li><a class="reference internal" href="#src.ds.runner.Runner.reset"><code class="docutils literal notranslate"><span class="pre">Runner.reset()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.runner.Runner.run"><code class="docutils literal notranslate"><span class="pre">Runner.run()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.runner.Runner.save_checkpoint"><code class="docutils literal notranslate"><span class="pre">Runner.save_checkpoint()</span></code></a></li>
+<li><a class="reference internal" href="#src.ds.runner.Runner.should_save"><code class="docutils literal notranslate"><span class="pre">Runner.should_save()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#src.ds.runner.run_epoch"><code class="docutils literal notranslate"><span class="pre">run_epoch()</span></code></a></li>
@@ -754,9 +785,12 @@ Plots are opened in an external browser at ports opened by Plotly.</p>
 <li><a class="reference internal" href="#src.ds.utils.create_experiment_log_dir"><code class="docutils literal notranslate"><span class="pre">create_experiment_log_dir()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.utils.create_from_existing"><code class="docutils literal notranslate"><span class="pre">create_from_existing()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.utils.create_from_missing"><code class="docutils literal notranslate"><span class="pre">create_from_missing()</span></code></a></li>
+<li><a class="reference internal" href="#src.ds.utils.ddp_cleanup"><code class="docutils literal notranslate"><span class="pre">ddp_cleanup()</span></code></a></li>
+<li><a class="reference internal" href="#src.ds.utils.ddp_setup"><code class="docutils literal notranslate"><span class="pre">ddp_setup()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.utils.get_lds_kernel_window"><code class="docutils literal notranslate"><span class="pre">get_lds_kernel_window()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.utils.increment_experiment_number"><code class="docutils literal notranslate"><span class="pre">increment_experiment_number()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.utils.is_first_experiment"><code class="docutils literal notranslate"><span class="pre">is_first_experiment()</span></code></a></li>
+<li><a class="reference internal" href="#src.ds.utils.seed_all"><code class="docutils literal notranslate"><span class="pre">seed_all()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.utils.sturge"><code class="docutils literal notranslate"><span class="pre">sturge()</span></code></a></li>
 </ul>
 </li>
