@@ -185,25 +185,21 @@ class Objective:
         )
         scheduler = ChainedScheduler([warmup_scheduler, restart_scheduler])
 
-        train_sampler = DistributedSampler(
-            self.train_subset, num_replicas=args.world_size, rank=rank
-        )
-        val_sampler = DistributedSampler(
-            self.val_subset, num_replicas=args.world_size, rank=rank
-        )
+        train_sampler = DistributedSampler(self.train_subset)
+        val_sampler = DistributedSampler(self.val_subset)
 
         # Define dataloaders
         train_loader = torch.utils.data.DataLoader(
             self.train_subset,
-            batch_size=int(hparams["batch_size"]) // args.ngpus,
-            num_workers=args.cpus_per_gpu,
+            batch_size=int(hparams["batch_size"]),
+            num_workers=0,
             pin_memory=True,
             shuffle=False,
             sampler=train_sampler,
         )
         val_loader = torch.utils.data.DataLoader(
             self.val_subset,
-            batch_size=int(hparams["batch_size"]) // args.ngpus,
+            batch_size=int(hparams["batch_size"]),
             num_workers=0,
             pin_memory=True,
             shuffle=False,
