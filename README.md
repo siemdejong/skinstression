@@ -117,9 +117,9 @@ TODO
     conda create -n <env_name>
     conda activate <env_name>
     ```
-3.  Install dependencies from `requirements.txt`.
+3.  Install dependencies from `environment.yml`.
     ```bash
-    pip install -r requirements.txt
+    conda env create -f environment.yml
     ```
 4.  Check if CUDA is available for the installed Pytorch distribution.
     In a Python shell, executre
