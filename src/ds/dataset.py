@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Optional
 import os
-import logging as log
+import logging
 
 from scipy.ndimage import convolve1d
 from ds.utils import get_lds_kernel_window, sturge
@@ -12,9 +12,6 @@ import torch
 from PIL import Image
 from torch.utils.data import Dataset, ConcatDataset
 import torchvision.transforms as transforms
-
-
-# log = logging.getLogger(__name__)
 
 
 class THGStrainStressDataset(Dataset[Any]):
@@ -41,7 +38,8 @@ class THGStrainStressDataset(Dataset[Any]):
         self.weights = weights
 
     def __len__(self):
-        return self._length
+        # return self._length
+        return 2
 
     def __getitem__(self, idx) -> tuple[torch.tensor, np.ndarray, np.ndarray]:
         # TODO: Make it work with z-stacks!!!
@@ -131,11 +129,13 @@ class THGStrainStressDataset(Dataset[Any]):
             target_as_bin_count = num_per_bin[idcs]
             num_per_target.append(target_as_bin_count)
 
-        print(f"Using re-weighting: [{reweight.upper()}]")
+        logging.info(f"Using re-weighting: [{reweight.upper()}]")
 
         if lds:
             lds_kernel_window = get_lds_kernel_window(lds_kernel, lds_ks, lds_sigma)
-            print(f"Using LDS: [{lds_kernel.upper()}] ({lds_ks}/{lds_sigma})")
+            logging.info(
+                f"Using LDS: {lds_kernel.upper()} | kernel size={lds_ks} | sigma={lds_sigma})"
+            )
             num_per_target = []
             for i, target in enumerate(targets.T):
                 num_per_bin = num_per_bin_list[i]
@@ -227,7 +227,7 @@ class THGStrainStressDataset(Dataset[Any]):
             targets = labels[["a", "k", "xc"]].to_numpy(dtype=float)
 
             if not (Path(data_path) / str(folder)).is_dir():
-                log.info(
+                logging.error(
                     f"{Path(data_path) / str(folder)} will be excluded "
                     f"because it is not found."
                 )
@@ -244,7 +244,7 @@ class THGStrainStressDataset(Dataset[Any]):
             # Dirty way of checking if data is compatible with model.
             valid_shape = (1, 1000, 1000)
             if not dataset[0][0].shape == valid_shape:
-                log.info(
+                logging.error(
                     f"{Path(data_path) / str(folder)} will be excluded "
                     f"because the data of size {dataset[0][0].shape} "
                     "is incompatible with the model."

@@ -47,8 +47,9 @@ class Params:
 
 @dataclass
 class Dist:
-    cpus: int
-    gpus: int
+    nodes: int
+    gpus_per_node: int
+    cpus_per_gpu: int
 
 
 class Mode(Enum):
@@ -84,7 +85,7 @@ class Hparams:
 class Optuna:
     study_name: str
     trials: int
-    direction: str # Use Direction class?
+    direction: str  # Use Direction class?
     hparams: Hparams
     seed: int
     pruner: Pruner
@@ -97,6 +98,7 @@ class THGStrainStressConfig:
     params: Params
     dist: Dist
     mode: Mode
+    debug: bool
     optuna: Optuna
     use_amp: bool
     seed: int

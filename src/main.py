@@ -1,14 +1,15 @@
 import hydra
 from hydra.core.config_store import ConfigStore
-from ds.utils import seed_all
+from ds.utils import get_ip, get_free_port
 from ds.hyperparameters import tune_hyperparameters
 from ds.visualization import visualize
 from ds.training import train
 from conf.config import THGStrainStressConfig, Mode
 import torch.multiprocessing as mp
 from ds.logging_setup import setup_primary_logging
-from argparse import ArgumentParser
 import os
+import torch
+import logging
 
 cs = ConfigStore.instance()
 cs.store(name="thg_strain_stress_config", node=THGStrainStressConfig)
@@ -28,41 +29,39 @@ def main(cfg: THGStrainStressConfig) -> None:
 
     Configurations must be made in conf/config.yaml.
     """
+    torch.multiprocessing.set_start_method("spawn", force=True)
     # Sources:
     #   https://tuni-itc.github.io/wiki/Technical-Notes/Distributed_dataparallel_pytorch/
     #   https://yangkky.github.io/2019/07/08/distributed-pytorch-tutorial.html
 
-    parser = ArgumentParser()
-    parser.add_argument("--nodes", default=1, type=int)
-    parser.add_argument(
-        "--ip_adress", type=str, required=True, help="ip address of the host node"
-    )
-    parser.add_argument("--ngpus", default=1, type=int, help="number of gpus per node")
-
-    args = parser.parse_args()
-
-    # Total number of GPUs availabe.
-    args.world_size = args.ngpu * args.nodes
-
-    # Add the ip address to the environment variable so it can be easily available.
-    os.environ["MASTER_ADDR"] = args.ip_adress
-    os.environ["MASTER_PORT"] = "8888"
-    os.environ["WORLD_SIZE"] = str(args.world_size)
-
-    if cfg.mode == Mode.VISUALIZE.name:
-        fn = visualize
-    elif cfg.mode == Mode.TUNE.name:
-        fn = tune_hyperparameters
-    elif cfg.mode == Mode.TRAIN.name:
-        fn = train
-
     # Initialize the primary logging handlers. Use the returned `log_queue`
     # to which the worker processes would use to push their messages
-    log_queue = setup_primary_logging("out.log", "error.log")
+    log_queue = setup_primary_logging("out.log", "error.log", cfg.debug)
 
-    # nprocs: number of process which is equal to args.ngpu here
-    mp.spawn(fn, nprocs=args.ngpus, args=(args, cfg, log_queue))
+    # Add the ip address to the environment variable so it can be easily available.
+    ip = get_ip()
+    port = get_free_port(ip)
+    os.environ["MASTER_ADDR"] = str(ip)
+    os.environ["MASTER_PORT"] = str(port)
+    logging.info(
+        f"Processes spawned from {ip} at port {port}. "
+        "See Hydra output for worker log messages."
+    )
+
+    if cfg.mode == Mode.VISUALIZE.name:
+        visualize(cfg.paths.optuna_db)
+    elif cfg.mode == Mode.TUNE.name:
+        mp.spawn(
+            fn=tune_hyperparameters,
+            nprocs=cfg.dist.gpus_per_node,
+            args=(cfg.dist.gpus_per_node, cfg, log_queue),
+        )
+    elif cfg.mode == Mode.TRAIN.name:
+        pass
+
+    logging.info("All processes exited without critical errors.")
 
 
 if __name__ == "__main__":
+
     main()

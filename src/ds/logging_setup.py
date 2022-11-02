@@ -7,7 +7,7 @@ from logging.handlers import QueueHandler, QueueListener
 from torch.multiprocessing import Queue
 
 
-def setup_primary_logging(log_file_path: str, error_log_file_path: str) -> Queue:
+def setup_primary_logging(log_file_path: str, error_log_file_path: str, debug: bool) -> Queue:
     """
     Global logging is setup using this method. In a distributed setup, a multiprocessing queue is setup
     which can be used by the workers to write their log messages. This initializers respective handlers
@@ -37,7 +37,7 @@ def setup_primary_logging(log_file_path: str, error_log_file_path: str) -> Queue
     output_file_log_handler.setFormatter(formatter)
     error_file_log_handler.setFormatter(formatter)
 
-    output_file_log_handler.setLevel(logging.INFO)
+    output_file_log_handler.setLevel(logging.DEBUG if debug else logging.INFO)
     error_file_log_handler.setLevel(logging.ERROR)
 
     # This listener listens to the `log_queue` and pushes the messages to the list of
@@ -65,7 +65,7 @@ class WorkerLogFilter(Filter):
         return True
 
 
-def setup_worker_logging(rank: int, log_queue: Queue):
+def setup_worker_logging(rank: int, log_queue: Queue, debug: bool):
     """
     Method to initialize worker's logging in a distributed setup. The worker processes
     always write their logs to the `log_queue`. Messages in this queue in turn gets picked
@@ -88,7 +88,7 @@ def setup_worker_logging(rank: int, log_queue: Queue):
     worker_filter = WorkerLogFilter(rank)
     queue_handler.addFilter(worker_filter)
 
-    queue_handler.setLevel(logging.INFO)
+    queue_handler.setLevel(logging.DEBUG if debug else logging.INFO)
 
     root_logger = logging.getLogger()
     root_logger.addHandler(queue_handler)
@@ -96,4 +96,4 @@ def setup_worker_logging(rank: int, log_queue: Queue):
     # Default logger level is WARNING, hence the change. Otherwise, any worker logs
     # are not going to get bubbled up to the parent's logger handlers from where the
     # actual logs are written to the output
-    root_logger.setLevel(logging.INFO)
+    root_logger.setLevel(logging.DEBUG if debug else logging.INFO)

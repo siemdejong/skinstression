@@ -17,9 +17,6 @@ import torch
 from torch.utils.data import random_split
 import os
 
-log = logging.getLogger(__name__)
-
-
 class Trainer:
     def __init__(self, dataset):
         # Split the dataset in train, validation and test (sub)sets.
@@ -39,7 +36,7 @@ class Trainer:
             cfg: hydra configuration object.
         """
         use_cuda = torch.cuda.is_available()
-        log.info(f"CUDA available: {use_cuda}")
+        logging.info(f"CUDA available: {use_cuda}")
         device = torch.device("cuda" if use_cuda else "cpu")
 
         model = THGStrainStressCNN(cfg)
@@ -112,7 +109,7 @@ class Trainer:
             )
 
             loss = val_runner.avg_loss
-            log.info(f"epoch: {epoch_id} | loss: {loss}")
+            logging.info(f"epoch: {epoch_id} | loss: {loss}")
 
 
 def train(cfg: THGStrainStressConfig):

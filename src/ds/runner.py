@@ -1,4 +1,4 @@
-import logging as log
+import logging
 from typing import Any, Optional, Union
 
 import numpy as np
@@ -11,6 +11,7 @@ from torch.optim.lr_scheduler import _LRScheduler, ReduceLROnPlateau
 from ds.metrics import Metric
 from ds.tracking import ExperimentTracker, Stage
 import os
+import torch.distributed as dist
 
 
 class Runner:
@@ -21,8 +22,7 @@ class Runner:
         loss_fn: torch.nn.Module,
         stage: Stage,
         scaler,
-        rank: int,
-        device: int,
+        local_rank: int,
         optimizer: Optional[torch.optim.Optimizer] = None,
         scheduler: Optional[Union[_LRScheduler, ReduceLROnPlateau]] = None,
         progress_bar: bool = False,
@@ -36,7 +36,7 @@ class Runner:
         self.lowest_loss = np.inf
         self.optimizer = optimizer
         self.scheduler = scheduler
-        self.device = device
+        self.local_rank = local_rank
         self.stage = stage
         self.disable_progress_bar = not progress_bar
         self.scaler = scaler
@@ -63,10 +63,12 @@ class Runner:
                 enabled=self.scaler.is_enabled(),
             ):
 
-                x, y, w = x.to(self.device), y.to(self.device), w.to(self.device)
+                x, y, w = (
+                    x.to(self.local_rank),
+                    y.to(self.local_rank),
+                    w.to(self.local_rank),
+                )
                 loss = self._run_single(x, y, w)
-
-            experiment.add_batch_metric("loss", loss.detach(), self.run_count)
 
             if self.optimizer:
                 # Backpropagation
@@ -75,11 +77,22 @@ class Runner:
                 self.scaler.update()
 
                 self.model.zero_grad(set_to_none=True)
+            else:
+                # The distributed validation losses must be reduced to the same loss.
+                dist.all_reduce(loss)
+                logging.debug(f"all_reduce is called from {self.local_rank}")
 
-            # Only let 1 process save checkpoints.
-            if self.rank == 0:
-                if self.should_save(loss):
-                    self.save_checkpoint()
+            # Compute Batch Validation Metrics
+            self.loss_metric.update(loss.detach(), len(x))
+
+            if self.local_rank == 0:
+                experiment.add_batch_metric("loss", loss.detach(), self.run_count)
+
+        # Only let 1 process save checkpoints.
+        # Check only every epoch.
+        if self.local_rank == 0:
+            if self.should_save(loss):
+                self.save_checkpoint()
 
         if self.scheduler:
             self.scheduler.step()
@@ -90,13 +103,9 @@ class Runner:
             w: weighting of the loss function.
         """
         self.run_count += 1
-        batch_size: int = len(x)
         self.prediction = self.model(x)
         self.target = y
         loss = self.compute_loss(self.prediction, self.target, w)
-
-        # Compute Batch Validation Metrics
-        self.loss_metric.update(loss.detach(), batch_size)
 
         return loss
 
@@ -104,7 +113,8 @@ class Runner:
         self.loss_metric = Metric()
 
     def should_save(self, loss):
-        if loss < self.min_loss:
+        if loss < self.lowest_loss:
+            self.lowest_loss = loss
             return True
         else:
             return False
@@ -128,6 +138,7 @@ class Runner:
             state,
             f"{os.getcwd()}/checkpoint.pt",  # os.getcwd() is set by Hydra to 'outputs'.
         )
+        logging.info("Checkpoint saved.")
 
     def load_checkpoint(self, path: str):
         checkpoint = torch.load(path)
@@ -162,34 +173,38 @@ def run_epoch(
     train_runner: Runner,
     experiment: ExperimentTracker,
     epoch_id: int,
+    local_rank: int,
 ) -> None:
     # Training Loop
     experiment.set_stage(Stage.TRAIN)
     train_runner.run("Train Batches", experiment)
 
-    # Log Training Epoch Metrics
-    experiment.add_epoch_logistic_curve(
-        train_runner.prediction.detach().cpu(),
-        train_runner.target.detach().cpu(),
-        epoch_id,
-    )
+    if local_rank == 0:
+        # Log Training Epoch Metrics
+        experiment.add_epoch_logistic_curve(
+            train_runner.prediction.detach().cpu(),
+            train_runner.target.detach().cpu(),
+            epoch_id,
+        )
 
+    
     # TODO: Possibly only do validation once every x epochs.
     # Validation Loop
     experiment.set_stage(Stage.VAL)
     with torch.no_grad():
         val_runner.run("Validation Batches", experiment)
 
-    # Log Validation Epoch Metrics
-    experiment.add_epoch_logistic_curve(
-        val_runner.prediction.detach().cpu(),
-        val_runner.target.detach().cpu(),
-        epoch_id,
-    )
+    if local_rank == 0:
+        # Log Validation Epoch Metrics
+        experiment.add_epoch_logistic_curve(
+            val_runner.prediction.detach().cpu(),
+            val_runner.target.detach().cpu(),
+            epoch_id,
+        )
 
-    # Combine training and validation loss in one plot.
-    loss_value_dict = {"train": train_runner.avg_loss, "val": val_runner.avg_loss}
-    experiment.add_epoch_metrics("loss", loss_value_dict, epoch_id)
+        # Combine training and validation loss in one plot.
+        loss_value_dict = {"train": train_runner.avg_loss, "val": val_runner.avg_loss}
+        experiment.add_epoch_metrics("loss", loss_value_dict, epoch_id)
 
 
 def run_fold(
@@ -215,7 +230,7 @@ def run_fold(
 
         experiment.add_fold_metric("loss", val_runner.avg_loss, fold_id)
 
-        log.info(
+        logging.info(
             summary(
                 train_runner,
                 val_runner,

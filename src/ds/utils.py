@@ -7,6 +7,7 @@ import numpy as np
 
 import torch.distributed as dist
 import logging as log
+import socket
 
 
 def create_experiment_log_dir(root: str, parents: bool = True) -> str:
@@ -76,15 +77,12 @@ def sturge(n):
 
 def ddp_setup(rank, world_size):
     """Setup a process group at a specific rank, being world-aware.
+
     Args:
         rank: Unique identifier of each process.
         world_size: Total number of processes.
     """
-    # initialize the process group
-    dist.init_process_group(
-        "nccl", init_method="env://", rank=rank, world_size=world_size
-    )
-    log.info(f"Process group initialized on rank {rank} of {world_size}.")
+    dist.init_process_group("nccl", rank=rank, world_size=world_size)
 
 
 def ddp_cleanup():
@@ -92,10 +90,25 @@ def ddp_cleanup():
     dist.destroy_process_group()
 
 
+def get_ip():
+    hostname = socket.gethostname()
+    ip_addr = socket.gethostbyname(hostname)
+    return ip_addr
+
+
+def get_free_port(host: str):
+    sock = socket.socket()
+    sock.bind((host, 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    return port
+
+
 def seed_all(seed=42):
     """Seed the current device.
-    Used to make the optimalization determinant.
-    However, not 100% determinant: https://pytorch.org/docs/stable/notes/randomness.html.
+    Used to make the optimalization deterministic.
+    However, not 100% deterministic: https://pytorch.org/docs/stable/notes/randomness.html.
+
     Args:
         seed: seed to set the current device to.
     """
