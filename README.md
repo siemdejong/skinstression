@@ -17,7 +17,9 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a> -->
 
-<h3 align="center">Strain-Stress Curve Regression From SHG Images</h3>
+
+<h2 align="center">Restression</h2>
+<h3 align="center">Perform strain-stress curve regression on SHG images</h3>
 
   <p align="center">
     This project is a deep learning application to learn strain-stress curves from SHG skin tissue data.
