@@ -86,6 +86,7 @@ Using a large set of strain-stress and SHG of human skin tissue, a deep neural n
 [![Numpy][Numpy]][Numpy-url]
 [![scipy][scipy]][scipy-url]
 [![Hydra][Hydra]][Hydra-url]
+[![Jupyter][Jupyter]][Jupyter-url]
 [![tqdm][tqdm]][tqdm-url]
 [![matplotlib][matplotlib]][matplotlib-url]
 [![plotly][plotly]][plotly-url]
@@ -252,6 +253,8 @@ Project Link: [https://github.com/siemdejong/shg-strain-stress](https://github.c
 [scikit-learn-url]: https://scikit-learn.org/stable/index.html
 [Hydra]: https://img.shields.io/badge/hydra-87CEEB?style=for-the-badge&logo=hydra&logoColor=white
 [Hydra-url]: https://hydra.cc/docs/intro/
+[Jupyter]: https://img.shields.io/badge/jupyter-F37626?style=for-the-badge&logo=jupyter&logoColor=white
+[Jupyter-url]: https://jupyter.org/
 [tqdm]: https://img.shields.io/badge/tqdm-FFC107?style=for-the-badge&logo=tqdm&logoColor=white
 [tqdm-url]: https://tqdm.github.io/
 [matplotlib]: https://img.shields.io/badge/matplotlib-white?style=for-the-badge&logo=matplotlib&logoColor=white
