@@ -283,7 +283,11 @@ class Objective:
 
             loss = val_runner.avg_loss
             trial.report(loss, epoch_id)
-            logging.info(f"epoch: {epoch_id} | loss: {loss}")
+
+            # Losses across ranks are equal thanks to all_reduce
+            # Only log once.
+            if local_rank == 0:
+                logging.info(f"epoch: {epoch_id} | loss: {loss}")
 
             if trial.should_prune():
                 # TODO: compile Pytorch with Caffe2.
