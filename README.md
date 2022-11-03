@@ -108,6 +108,9 @@ The tree below describes how the data should be organized.
 TODO
 ```
 
+#### SLURM
+Not necessarily needed, but the project provides jobscripts for easy job submission.
+
 ### Installation
 
 1.  Clone this repository.
@@ -138,11 +141,13 @@ TODO
 
 TODO: show examples of optuna optimization, model training, and inference.
 
-Run
-```bash
-srun -N 2 --gpus-per-node=2 python src/main.py
-```
-to run two instances of the python script on separate nodes, using two GPUs per node.
+### Optuna hyperparameter optimization
+
+The `shg-optuna.sbatch` jobscript contains `sbatch` directives used by SLURM to initialize Optuna processes.
+Every Optuna process is responsible for their own Trials.
+Every Trial makes use of `TorchDistributedTrial` to make use of Pytorch DistributedDataParallel.
+Configure the jobscript to use appropriate resources.
+Run `sbatch shg-optuna.sbatch` to initialize the hyperparameter optimization.
 
 _For more examples, please refer to the [documentation](https://siemdejong.github.io/shg-strain-stress)._
 
