@@ -143,6 +143,8 @@ class Runner:
         logging.info("Checkpoint saved.")
 
     def load_checkpoint(self, path: str):
+        # NOTE: consume_prefix_in_state_dict_if_present() should be used
+        # if loading from a DDP saved checkpoint.
         checkpoint = torch.load(path)
         self.model.load_state_dict(checkpoint["model_state_dict"])
         if self.optimizer:

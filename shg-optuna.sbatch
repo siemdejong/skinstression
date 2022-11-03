@@ -2,7 +2,7 @@
 #SBATCH --job-name=shg
 #SBATCH --output=/scistor/guest/sjg203/projects/shg-strain-stress/slurm/%j.out
 #SBATCH --error=/scistor/guest/sjg203/projects/shg-strain-stress/slurm/%j.err
-#SBATCH --nodes=2
+#SBATCH --nodes=3
 #SBATCH --gpus-per-node 2
 #SBATCH --mem-per-gpu 5G
 #SBATCH --cpus-per-gpu 10

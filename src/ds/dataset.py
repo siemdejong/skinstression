@@ -38,8 +38,7 @@ class THGStrainStressDataset(Dataset[Any]):
         self.weights = weights
 
     def __len__(self):
-        # return self._length
-        return 2
+        return self._length
 
     def __getitem__(self, idx) -> tuple[torch.tensor, np.ndarray, np.ndarray]:
         # TODO: Make it work with z-stacks!!!

@@ -21,7 +21,10 @@ def main(cfg: THGStrainStressConfig) -> None:
     """
     This is the main entry point for the THG strain stress project.
     Can
-    1. calculate appropriate hyperparameters for a model;
+    1. calculate appropriate hyperparameters for a model.
+       To be instantiated with `sbatch shg-optuna.sbatch` as it makes
+       use of Pytorch DistributedDataParallel and allows for multiple
+       nodes using their own GPUs to divide the data.
     2. visualize result of hyperparameter optimization.
     3. calculate model parameters for the model,
        estimating parameters describing the strain-stress
@@ -29,16 +32,17 @@ def main(cfg: THGStrainStressConfig) -> None:
 
     Configurations must be made in conf/config.yaml.
     """
-    torch.multiprocessing.set_start_method("spawn", force=True)
     # Sources:
     #   https://tuni-itc.github.io/wiki/Technical-Notes/Distributed_dataparallel_pytorch/
     #   https://yangkky.github.io/2019/07/08/distributed-pytorch-tutorial.html
 
-    # Initialize the primary logging handlers. Use the returned `log_queue`
-    # to which the worker processes would use to push their messages
+    # Initialize the primary logging handlers. Worker processes may use
+    # the `log_queue` to push their messages to the same log file.
+    # Logging processes need to be initialized with the `spawn` method.
+    torch.multiprocessing.set_start_method("spawn", force=True)
     log_queue = setup_primary_logging("out.log", "error.log", cfg.debug)
 
-    # Add the ip address to the environment variable so it can be easily available.
+    # IP and port need to be available for dist.init_process_group().
     ip = get_ip()
     port = get_free_port(ip)
     os.environ["MASTER_ADDR"] = str(ip)
@@ -63,5 +67,4 @@ def main(cfg: THGStrainStressConfig) -> None:
 
 
 if __name__ == "__main__":
-
     main()

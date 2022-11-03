@@ -100,9 +100,20 @@ class Objective:
     """
 
     def __init__(self, cfg: THGStrainStressConfig, data_cls: nn.Module):
+        """Initialize the objective to preload data
+        and share train/validation splits across trials.
+
+        Args:
+            cfg: configuration object containing cfg.paths.[data, target]
+                 and optuna hyperparameter space.
+            data_cls: Pytorch Dataset class with a load_data method to obtain
+                      the full dataset and ids to stratify on.
+        """
+        self.cfg = cfg
 
         # Load dataset.
-        dataset, person_ids = data_cls.load_data(
+        # class_ids are persons we need to stratify on.
+        dataset, class_ids = data_cls.load_data(
             split="train",
             data_path=cfg.paths.data,
             targets_path=cfg.paths.targets,
@@ -115,75 +126,95 @@ class Objective:
         train_idx, val_idx = train_test_split(
             np.arange(len(dataset)),
             train_size=train_size,
-            stratify=person_ids,
+            stratify=class_ids,
             shuffle=True,
             random_state=cfg.seed,
         )
 
+        # Repack the training and validation sets so they can be used
+        # like Datasets in a Dataloader.
         self.train_subset = Subset(dataset, train_idx)
         self.val_subset = Subset(dataset, val_idx)
 
     def __call__(
         self,
         single_trial: optuna.trial.Trial,
-        cfg: THGStrainStressConfig,
         local_rank: int,
         world_size: int,
     ) -> float:
         """Train the model with given trial hyperparameters.
 
         Args:
-            trial: the Optuna trial of the current training
-            hparams: the hyperparameters that are used during optimization
-            model: the model that is optimized
-            cfg: configuration object containing cfg.paths.[data, target]
+            single_trial: the Optuna trial of the current training.
+            local_rank: the rank in the current process group.
+            world_size: the world size of the current process group.
 
         Returns:
-            loss: the loss defined by the loss function (MAE)
+            loss: the optimization loss.
         """
 
+        # Convert trials to a distributed trial so Optuna knows that multiple
+        # GPUs in its process group are used per trial.
+        # Watch https://github.com/optuna/optuna/pull/4106 for an interesting discussion
+        # on the use of the `device` keyword argument.
         trial = optuna.integration.TorchDistributedTrial(single_trial, local_rank)
 
         # Define hyperparameter space.
         hparams = {
             "optimizer_name": trial.suggest_categorical(
-                "optimizer_name", cfg.optuna.hparams.optimizer_name
+                "optimizer_name", self.cfg.optuna.hparams.optimizer_name
             ),
             "weight_decay": trial.suggest_float(
-                "weight_decay", *cfg.optuna.hparams.weight_decay, log=True
+                "weight_decay", *self.cfg.optuna.hparams.weight_decay, log=True
             ),
-            "lr": trial.suggest_float("lr", *cfg.optuna.hparams.lr, log=True),
-            "T_0": trial.suggest_int("T_0", *cfg.optuna.hparams.T_0),
-            "T_mult": trial.suggest_int("T_mult", *cfg.optuna.hparams.T_mult),
+            "lr": trial.suggest_float("lr", *self.cfg.optuna.hparams.lr, log=True),
+            "T_0": trial.suggest_int("T_0", *self.cfg.optuna.hparams.T_0),
+            "T_mult": trial.suggest_int("T_mult", *self.cfg.optuna.hparams.T_mult),
             "num_preblocks": trial.suggest_categorical(
-                "num_preblocks", cfg.optuna.hparams.num_preblocks
+                "num_preblocks", self.cfg.optuna.hparams.num_preblocks
             ),
-            "n_nodes": trial.suggest_categorical("n_nodes", cfg.optuna.hparams.n_nodes),
+            "n_nodes": trial.suggest_categorical(
+                "n_nodes", self.cfg.optuna.hparams.n_nodes
+            ),
             "batch_size": trial.suggest_categorical(
-                "batch_size", cfg.optuna.hparams.batch_size
+                "batch_size", self.cfg.optuna.hparams.batch_size
             ),
         }
 
-        model = build_model(hparams, cfg)
+        # Build the model with hparams defined by Optuna.
+        # Use SyncBatchNorm to sync statistics between parallel models.
+        # Cast the model to a DistributedDataParallel model where every GPU
+        # has the full model.
+        model = build_model(hparams, self.cfg)
         model_sync_bathchnorm = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
         model = DDP(model_sync_bathchnorm.to(local_rank), device_ids=[local_rank])
 
+        # Choose optimizer with learning rates picked by Optuna.
         loss_fn = weighted_l1_loss  # MAE.
         optimizer = getattr(torch.optim, hparams["optimizer_name"])(
             model.parameters(), lr=hparams["lr"], weight_decay=hparams["weight_decay"]
         )
-        scaler = torch.cuda.amp.GradScaler(enabled=cfg.use_amp)
 
+        # Used for automatic mixed precision (AMP) to prevent underflow.
+        scaler = torch.cuda.amp.GradScaler(enabled=self.cfg.use_amp)
+
+        # Stabilize the initial model.
         warmup_scheduler = LinearLR(
-            optimizer=optimizer, start_factor=0.1, end_factor=1, total_iters=10
+            optimizer=optimizer, start_factor=0.1, end_factor=1, total_iters=30
         )
+
+        # Cosine annealing is used as a way to get to local minima.
+        # Warm restarts are used to try and find neighbouring local minima.
+        # https://arxiv.org/abs/1608.03983
         restart_scheduler = CosineAnnealingWarmRestarts(
             optimizer=optimizer,
-            T_0=cfg.params.optimizer.T_0,
-            T_mult=cfg.params.optimizer.T_mult,
+            T_0=self.cfg.params.optimizer.T_0,
+            T_mult=self.cfg.params.optimizer.T_mult,
         )
+
         scheduler = ChainedScheduler([warmup_scheduler, restart_scheduler])
 
+        # Distributed the workload across the GPUs.
         train_sampler = DistributedSampler(self.train_subset)
         val_sampler = DistributedSampler(self.val_subset)
 
@@ -191,7 +222,6 @@ class Objective:
         train_loader = torch.utils.data.DataLoader(
             self.train_subset,
             batch_size=int(hparams["batch_size"]),
-            # num_workers=cfg.dist.cpus_per_gpu,
             num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
             persistent_workers=True,
             pin_memory=True,
@@ -201,7 +231,6 @@ class Objective:
         val_loader = torch.utils.data.DataLoader(
             self.val_subset,
             batch_size=int(hparams["batch_size"]),
-            # num_workers=cfg.dist.cpus_per_gpu,
             num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
             pin_memory=True,
             persistent_workers=True,
@@ -218,7 +247,7 @@ class Objective:
             local_rank=local_rank,
             progress_bar=False,
             scaler=scaler,
-            dry_run=cfg.dry_run,
+            dry_run=self.cfg.dry_run,
         )
         train_runner = Runner(
             loader=train_loader,
@@ -230,7 +259,7 @@ class Objective:
             local_rank=local_rank,
             progress_bar=False,
             scaler=scaler,
-            dry_run=cfg.dry_run,
+            dry_run=self.cfg.dry_run,
         )
 
         # Setup the experiment tracker
@@ -238,7 +267,7 @@ class Objective:
         tracker = TensorboardExperiment(log_path=log_dir)
 
         # Run epochs.
-        max_epoch = cfg.params.epoch_count  # if not cfg.dry_run else 1
+        max_epoch = self.cfg.params.epoch_count  # if not cfg.dry_run else 1
         for epoch_id in range(max_epoch):
             train_runner.loader.sampler.set_epoch(epoch_id)
             val_runner.loader.sampler.set_epoch(epoch_id)
@@ -252,12 +281,10 @@ class Objective:
 
             loss = val_runner.avg_loss
             trial.report(loss, epoch_id)
-            logging.info(f"Optuna received the losses!")
-
-            if local_rank == 0:
-                logging.info(f"epoch: {epoch_id} | loss: {loss}")
+            logging.info(f"epoch: {epoch_id} | loss: {loss}")
 
             if trial.should_prune():
+                # TODO: compile Pytorch with Caffe2.
                 # tracker.add_hparams(hparams)
                 raise optuna.exceptions.TrialPruned()
 
@@ -274,15 +301,16 @@ def tune_hyperparameters(
     Optimal hyperparameters are logged.
 
     Args:
-        cfg: hydra configuration object. Only uses cfg.optuna.trials.
-        rank: device rank.
+        local_rank: the GPU rank on the node.
+        world_size: the number of GPUs on the node.
+        cfg: configuration object containing cfg.paths.[data, target]
+             and optuna hyperparameter space.
+        log_queue: a queue for logging to push their messages to.
+                   Can be created by `setup_primary_logging()`.
     """
 
     # Setup logging.
     setup_worker_logging(local_rank, log_queue, cfg.debug)
-    logging.info("Test worker log")
-    logging.error("Test worker error log")
-    logging.debug("Test worker debug log")
 
     # Set and seed device
     torch.cuda.set_device(local_rank)
@@ -292,8 +320,10 @@ def tune_hyperparameters(
     # Initialize process group
     ddp_setup(local_rank, world_size)
 
+    # Load data into objective, so it doesn't need to load every trial.
     objective = Objective(cfg=cfg, data_cls=THGStrainStressDataset)
 
+    # Callbacks are needed in both GPU processes.
     maxtrials = MaxTrialsCallback(
         cfg.optuna.trials, states=(TrialState.COMPLETE, TrialState.PRUNED)
     )
@@ -315,13 +345,16 @@ def tune_hyperparameters(
 
         # Optimize objective in study.
         study.optimize(
-            lambda trial: objective(trial, cfg, local_rank, world_size),
+            lambda trial: objective(trial, local_rank, world_size),
             callbacks=[maxtrials],
         )
     else:
+
+        # Other nodes work with rank 0 to get the trial done
+        # as fast as possible.
         for _ in range(cfg.optuna.trials):
             try:
-                objective(None, cfg, local_rank, world_size)
+                objective(None, local_rank, world_size)
                 maxtrials()
             except optuna.TrialPruned:
                 pass
@@ -342,4 +375,5 @@ def tune_hyperparameters(
         for key, value in study.best_trial.params.items():
             logging.info("    {}: {}".format(key, value))
 
+    # Exit subprocesses.
     ddp_cleanup()
