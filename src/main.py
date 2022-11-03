@@ -44,7 +44,7 @@ def main(cfg: THGStrainStressConfig) -> None:
     os.environ["MASTER_ADDR"] = str(ip)
     os.environ["MASTER_PORT"] = str(port)
     logging.info(
-        f"Processes spawned from {ip} at port {port}. "
+        f"Processes will spawn from {ip}:{port}. "
         "See Hydra output for worker log messages."
     )
 

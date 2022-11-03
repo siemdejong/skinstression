@@ -51,12 +51,11 @@ class Runner:
         # Turn on eval or train mode.
         self.model.train(self.stage is Stage.TRAIN)
 
-        for x, y, w in tqdm(
-            self.loader, desc=desc, ncols=80, disable=self.disable_progress_bar
+        for batch_num, (x, y, w) in enumerate(
+            tqdm(self.loader, desc=desc, ncols=80, disable=self.disable_progress_bar)
         ):
             # if self.dry_run and self.run_count:
             #     break
-
             with torch.autocast(
                 device_type="cuda",
                 dtype=torch.float16,
@@ -77,10 +76,13 @@ class Runner:
                 self.scaler.update()
 
                 self.model.zero_grad(set_to_none=True)
-            else:
-                # The distributed validation losses must be reduced to the same loss.
-                dist.all_reduce(loss)
-                logging.debug(f"all_reduce is called from {self.local_rank}")
+
+            # The distributed validation losses must be reduced to the same loss.
+            dist.all_reduce(
+                loss
+            )  # TODO: MAKE SURE THIS ALL REDUCE LOSS IS WHAT WE WANT (AND NOT E.G. AVG)
+
+            logging.debug(f"    iteration: {batch_num} | loss: {loss}")
 
             # Compute Batch Validation Metrics
             self.loss_metric.update(loss.detach(), len(x))
@@ -94,7 +96,7 @@ class Runner:
             if self.should_save(loss):
                 self.save_checkpoint()
 
-        if self.scheduler:
+        if self.scheduler and self.optimizer:
             self.scheduler.step()
 
     def _run_single(self, x: Any, y: Any, w: float):
@@ -187,7 +189,6 @@ def run_epoch(
             epoch_id,
         )
 
-    
     # TODO: Possibly only do validation once every x epochs.
     # Validation Loop
     experiment.set_stage(Stage.VAL)

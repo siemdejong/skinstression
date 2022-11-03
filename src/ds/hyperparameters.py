@@ -192,7 +192,7 @@ class Objective:
             self.train_subset,
             batch_size=int(hparams["batch_size"]),
             # num_workers=cfg.dist.cpus_per_gpu,
-            num_workers=int(os.environ.get("SLURM_JOB_CPUS_PER_NODE")) // world_size,
+            num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
             persistent_workers=True,
             pin_memory=True,
             shuffle=False,  # The distributed sampler shuffles for us.
@@ -202,7 +202,7 @@ class Objective:
             self.val_subset,
             batch_size=int(hparams["batch_size"]),
             # num_workers=cfg.dist.cpus_per_gpu,
-            num_workers=int(os.environ.get("SLURM_JOB_CPUS_PER_NODE")) // world_size,
+            num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
             pin_memory=True,
             persistent_workers=True,
             shuffle=False,
@@ -250,10 +250,12 @@ class Objective:
                 local_rank=local_rank,
             )
 
+            loss = val_runner.avg_loss
+            trial.report(loss, epoch_id)
+            logging.info(f"Optuna received the losses!")
+
             if local_rank == 0:
-                loss = val_runner.avg_loss
                 logging.info(f"epoch: {epoch_id} | loss: {loss}")
-                trial.report(loss, epoch_id)
 
             if trial.should_prune():
                 # tracker.add_hparams(hparams)
@@ -289,9 +291,12 @@ def tune_hyperparameters(
 
     # Initialize process group
     ddp_setup(local_rank, world_size)
-    logging.info(f"Process group initialized on rank {local_rank} of {world_size}.")
 
     objective = Objective(cfg=cfg, data_cls=THGStrainStressDataset)
+
+    maxtrials = MaxTrialsCallback(
+        cfg.optuna.trials, states=(TrialState.COMPLETE, TrialState.PRUNED)
+    )
 
     study = None
     if local_rank == 0:
@@ -311,19 +316,15 @@ def tune_hyperparameters(
         # Optimize objective in study.
         study.optimize(
             lambda trial: objective(trial, cfg, local_rank, world_size),
-            callbacks=[
-                MaxTrialsCallback(
-                    cfg.optuna.trials, states=(TrialState.COMPLETE, TrialState.PRUNED)
-                )
-            ],
+            callbacks=[maxtrials],
         )
     else:
-        for trial in range(cfg.optuna.trials):
-            logging.debug(f"Trying trial {trial}")
+        for _ in range(cfg.optuna.trials):
             try:
                 objective(None, cfg, local_rank, world_size)
+                maxtrials()
             except optuna.TrialPruned:
-                logging.debug(f"Trial {trial} was pruned.")
+                pass
 
     if local_rank == 0:
         assert study is not None

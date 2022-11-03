@@ -6,8 +6,9 @@ from scipy.signal.windows import triang
 import numpy as np
 
 import torch.distributed as dist
-import logging as log
+import logging
 import socket
+import os
 
 
 def create_experiment_log_dir(root: str, parents: bool = True) -> str:
@@ -19,8 +20,9 @@ def create_experiment_log_dir(root: str, parents: bool = True) -> str:
     )
     try:
         child.mkdir(parents=parents)
+        logging.info("Logging directory created.")
     except FileExistsError:
-        log.info("Using existing log dir for this process.")
+        logging.info("Using existing log dir for this process.")
     return child.as_posix()
 
 
@@ -83,6 +85,10 @@ def ddp_setup(rank, world_size):
         world_size: Total number of processes.
     """
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
+    logging.info(
+        f"{os.environ['MASTER_ADDR']}:{os.environ['MASTER_PORT']}: "
+        f"group {rank + 1}/{world_size} initialized."
+    )
 
 
 def ddp_cleanup():
