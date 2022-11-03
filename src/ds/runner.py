@@ -93,7 +93,7 @@ class Runner:
 
         # Only let 1 process save checkpoints.
         # Check only every epoch.
-        if self.local_rank == 0:
+        if self.local_rank == 0 and self.optimizer:
             if self.should_save(loss):
                 self.save_checkpoint()
 
