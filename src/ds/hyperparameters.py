@@ -281,13 +281,16 @@ class Objective:
                 local_rank=local_rank,
             )
 
-            loss = val_runner.avg_loss
-            trial.report(loss, epoch_id)
+            train_loss = train_runner.avg_loss
+            val_loss = val_runner.avg_loss
+
+            trial.report(val_loss, epoch_id)
 
             # Losses across ranks are equal thanks to all_reduce
             # Only log once.
             if local_rank == 0:
-                logging.info(f"epoch: {epoch_id} | loss: {loss}")
+                logging.info(f"epoch: {epoch_id} | train loss: {train_loss}")
+                logging.info(f"epoch: {epoch_id} | validation loss: {val_loss}")
 
             if trial.should_prune():
                 # TODO: compile Pytorch with Caffe2.
@@ -295,7 +298,7 @@ class Objective:
                 raise optuna.exceptions.TrialPruned()
 
         # tracker.add_hparams(hparams, loss)
-        return loss
+        return val_loss
 
 
 def tune_hyperparameters(
