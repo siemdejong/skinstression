@@ -1,6 +1,7 @@
-from conf.config import THGStrainStressConfig
 import torch
 from torch import nn
+
+from conf.config import THGStrainStressConfig
 
 
 def init_weights(m):

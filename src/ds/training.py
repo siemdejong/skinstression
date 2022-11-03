@@ -1,21 +1,19 @@
+import logging
+import os
 from typing import Any
+
+import torch
+from torch import nn
+from torch.optim.lr_scheduler import (ChainedScheduler,
+                                      CosineAnnealingWarmRestarts, LinearLR)
+from torch.utils.data import random_split
+
 from conf.config import THGStrainStressConfig
 from ds.dataset import THGStrainStressDataset
+from ds.models import THGStrainStressCNN
 from ds.runner import Runner, Stage, run_epoch
 from ds.tensorboard import TensorboardExperiment
-from ds.models import THGStrainStressCNN
 
-from torch.optim.lr_scheduler import (
-    ChainedScheduler,
-    LinearLR,
-    CosineAnnealingWarmRestarts,
-)
-
-import logging
-from torch import nn
-import torch
-from torch.utils.data import random_split
-import os
 
 class Trainer:
     def __init__(self, dataset):

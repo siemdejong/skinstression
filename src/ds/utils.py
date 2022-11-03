@@ -1,14 +1,13 @@
+import logging
+import os
 import pathlib
+import socket
 
+import numpy as np
 import torch
+import torch.distributed as dist
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal.windows import triang
-import numpy as np
-
-import torch.distributed as dist
-import logging
-import socket
-import os
 
 
 def create_experiment_log_dir(root: str, parents: bool = True) -> str:

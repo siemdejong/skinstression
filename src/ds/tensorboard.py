@@ -1,17 +1,16 @@
 from pathlib import Path
-
-import numpy as np
-from matplotlib import pyplot as plt
-import matplotlib.pyplot as plt
-import matplotlib
-from torch.utils.tensorboard.writer import SummaryWriter
-
-from ds.tracking import Stage
-from ds.utils import create_experiment_log_dir
-from ds.functions import sigmoid, logistic
 from typing import Optional
 
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
+from matplotlib import pyplot as plt
+from torch.utils.tensorboard.writer import SummaryWriter
+
+from ds.functions import logistic, sigmoid
+from ds.tracking import Stage
+from ds.utils import create_experiment_log_dir
 
 
 class TensorboardExperiment:

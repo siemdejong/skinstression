@@ -1,14 +1,16 @@
-from sklearn.model_selection import KFold, StratifiedGroupKFold
-from pathlib import Path
-import numpy as np
-from torch.utils.data import DataLoader, Subset, Dataset, SequentialSampler
-from torchvision.transforms import Compose, Grayscale, RandomCrop, ToTensor
-from ds.runner import Runner
-import torch
-from ds.tracking import Stage
-from ds.dataset import THGStrainStressDataset
-from typing import Generator, Tuple
 import logging
+from pathlib import Path
+from typing import Generator, Tuple
+
+import numpy as np
+import torch
+from sklearn.model_selection import KFold, StratifiedGroupKFold
+from torch.utils.data import DataLoader, Dataset, SequentialSampler, Subset
+from torchvision.transforms import Compose, Grayscale, RandomCrop, ToTensor
+
+from ds.dataset import THGStrainStressDataset
+from ds.runner import Runner
+from ds.tracking import Stage
 
 log = logging.getLogger(__name__)
 

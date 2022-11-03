@@ -1,32 +1,28 @@
+import logging
+import os
 from typing import Any
+
+import numpy as np
+import optuna
+import torch
+from optuna.study import MaxTrialsCallback
+from optuna.trial import TrialState
+from sklearn.model_selection import train_test_split
+from torch import nn
+from torch.multiprocessing import Queue
+from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.optim.lr_scheduler import (ChainedScheduler,
+                                      CosineAnnealingWarmRestarts, LinearLR)
+from torch.utils.data import Subset
+from torch.utils.data.distributed import DistributedSampler
+
 from conf.config import THGStrainStressConfig
 from ds.dataset import THGStrainStressDataset
+from ds.logging_setup import setup_worker_logging
+from ds.loss import weighted_l1_loss
 from ds.runner import Runner, Stage, run_epoch
 from ds.tensorboard import TensorboardExperiment
-from ds.loss import weighted_l1_loss
-from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.optim.lr_scheduler import (
-    ChainedScheduler,
-    LinearLR,
-    CosineAnnealingWarmRestarts,
-)
-from torch.multiprocessing import Queue
-from ds.logging_setup import setup_worker_logging
-from torch.utils.data.distributed import DistributedSampler
 from ds.utils import ddp_cleanup, ddp_setup, seed_all
-
-import os
-
-import optuna
-from optuna.trial import TrialState
-from optuna.study import MaxTrialsCallback
-import logging
-from torch import nn
-from torch.utils.data import Subset
-import torch
-from sklearn.model_selection import train_test_split
-import os
-import numpy as np
 
 optuna.logging.enable_propagation()  # Propagate logs to the root logger.
 optuna.logging.disable_default_handler()  # Stop showing logs in sys.stderr.

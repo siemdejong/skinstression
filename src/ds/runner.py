@@ -1,17 +1,16 @@
 import logging
+import os
 from typing import Any, Optional, Union
 
 import numpy as np
 import torch
+import torch.distributed as dist
+from torch.optim.lr_scheduler import ReduceLROnPlateau, _LRScheduler
 from torch.utils.data.dataloader import DataLoader
 from tqdm import tqdm
 
-from torch.optim.lr_scheduler import _LRScheduler, ReduceLROnPlateau
-
 from ds.metrics import Metric
 from ds.tracking import ExperimentTracker, Stage
-import os
-import torch.distributed as dist
 
 
 class Runner:
