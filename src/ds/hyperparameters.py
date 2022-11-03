@@ -11,8 +11,11 @@ from sklearn.model_selection import train_test_split
 from torch import nn
 from torch.multiprocessing import Queue
 from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.optim.lr_scheduler import (ChainedScheduler,
-                                      CosineAnnealingWarmRestarts, LinearLR)
+from torch.optim.lr_scheduler import (
+    ChainedScheduler,
+    CosineAnnealingWarmRestarts,
+    LinearLR,
+)
 from torch.utils.data import Subset
 from torch.utils.data.distributed import DistributedSampler
 

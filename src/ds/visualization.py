@@ -2,9 +2,12 @@ import logging
 import os
 
 import optuna
-from optuna.visualization import (plot_contour, plot_intermediate_values,
-                                  plot_parallel_coordinate,
-                                  plot_param_importances)
+from optuna.visualization import (
+    plot_contour,
+    plot_intermediate_values,
+    plot_parallel_coordinate,
+    plot_param_importances,
+)
 
 from conf.config import THGStrainStressConfig
 

@@ -8,7 +8,9 @@ from logging.handlers import QueueHandler, QueueListener
 from torch.multiprocessing import Queue
 
 
-def setup_primary_logging(log_file_path: str, error_log_file_path: str, debug: bool) -> Queue:
+def setup_primary_logging(
+    log_file_path: str, error_log_file_path: str, debug: bool
+) -> Queue:
     """
     Global logging is setup using this method. In a distributed setup, a multiprocessing queue is setup
     which can be used by the workers to write their log messages. This initializers respective handlers

@@ -4,8 +4,11 @@ from typing import Any
 
 import torch
 from torch import nn
-from torch.optim.lr_scheduler import (ChainedScheduler,
-                                      CosineAnnealingWarmRestarts, LinearLR)
+from torch.optim.lr_scheduler import (
+    ChainedScheduler,
+    CosineAnnealingWarmRestarts,
+    LinearLR,
+)
 from torch.utils.data import random_split
 
 from conf.config import THGStrainStressConfig
