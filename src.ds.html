@@ -300,8 +300,12 @@ Optimal hyperparameters are logged.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>cfg</strong> – hydra configuration object. Only uses cfg.optuna.trials.</p></li>
-<li><p><strong>rank</strong> – device rank.</p></li>
+<li><p><strong>local_rank</strong> – the GPU rank on the node.</p></li>
+<li><p><strong>world_size</strong> – the number of GPUs on the node.</p></li>
+<li><p><strong>cfg</strong> – configuration object containing cfg.paths.[data, target]
+and optuna hyperparameter space.</p></li>
+<li><p><strong>log_queue</strong> – a queue for logging to push their messages to.
+Can be created by <cite>setup_primary_logging()</cite>.</p></li>
 </ul>
 </dd>
 </dl>

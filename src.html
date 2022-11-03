@@ -428,13 +428,18 @@
 <span class="sig-prename descclassname"><span class="pre">src.main.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig" title="src.conf.config.THGStrainStressConfig"><span class="pre">THGStrainStressConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.main.main" title="Permalink to this definition">#</a></dt>
 <dd><p>This is the main entry point for the THG strain stress project.
 Can
-1. calculate appropriate hyperparameters for a model;
-2. visualize result of hyperparameter optimization.
-3. calculate model parameters for the model,</p>
+1. calculate appropriate hyperparameters for a model.</p>
 <blockquote>
-<div><p>estimating parameters describing the strain-stress
-curve of skin tissue from single SHG images;</p>
+<div><p>To be instantiated with <cite>sbatch shg-optuna.sbatch</cite> as it makes
+use of Pytorch DistributedDataParallel and allows for multiple
+nodes using their own GPUs to divide the data.</p>
 </div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>visualize result of hyperparameter optimization.</p></li>
+<li><p>calculate model parameters for the model,
+estimating parameters describing the strain-stress
+curve of skin tissue from single SHG images;</p></li>
+</ol>
 <p>Configurations must be made in conf/config.yaml.</p>
 </dd></dl>
 
