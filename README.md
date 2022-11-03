@@ -81,6 +81,15 @@ Using a large set of strain-stress and SHG of human skin tissue, a deep neural n
 
 [![Python][Python]][Python-url]
 [![PyTorch][PyTorch]][Pytorch-url]
+[![Optuna][Optuna]][Optuna-url]
+[![scikit-learn][scikit-learn]][scikit-learn-url]
+[![Numpy][Numpy]][Numpy-url]
+[![scipy][scipy]][scipy-url]
+[![Hydra][Hydra]][Hydra-url]
+[![tqdm][tqdm]][tqdm-url]
+[![matplotlib][matplotlib]][matplotlib-url]
+[![plotly][plotly]][plotly-url]
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -235,6 +244,22 @@ Project Link: [https://github.com/siemdejong/shg-strain-stress](https://github.c
 [PyTorch-url]: https://pytorch.org
 [Python]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [Python-url]: https://python.org
+[Numpy]: https://img.shields.io/badge/Numpy-013243?style=for-the-badge&logo=numpy&logoColor=white
+[Numpy-url]: https://numpy.org/index.html
+[Optuna]: https://img.shields.io/badge/-Optuna-483D8B?style=for-the-badge&logo=optuna&logoColor=white
+[Optuna-url]: https://optuna.org/
+[scikit-learn]: https://img.shields.io/badge/scikit%20learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white
+[scikit-learn-url]: https://scikit-learn.org/stable/index.html
+[Hydra]: https://img.shields.io/badge/hydra-87CEEB?style=for-the-badge&logo=hydra&logoColor=white
+[Hydra-url]: https://hydra.cc/docs/intro/
+[tqdm]: https://img.shields.io/badge/tqdm-FFC107?style=for-the-badge&logo=tqdm&logoColor=white
+[tqdm-url]: https://tqdm.github.io/
+[matplotlib]: https://img.shields.io/badge/matplotlib-white?style=for-the-badge&logo=matplotlib&logoColor=white
+[matplotlib-url]: https://matplotlib.org/
+[plotly]: https://img.shields.io/badge/plotly-3F4F75?style=for-the-badge&logo=plotly&logoColor=white
+[plotly-url]: https://plotly.com/python/
+[scipy]: https://img.shields.io/badge/scipy-8CAAE6?style=for-the-badge&logo=scipy&logoColor=white
+[scipy-url]: https://scipy.org/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
 [React-url]: https://reactjs.org/
 [Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
