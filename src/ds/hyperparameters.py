@@ -181,6 +181,8 @@ class Objective:
             ),
         }
 
+        logging.info(f"Hyperparameters of current trial:{hparams}")
+
         # Build the model with hparams defined by Optuna.
         # Use SyncBatchNorm to sync statistics between parallel models.
         # Cast the model to a DistributedDataParallel model where every GPU
