@@ -19,9 +19,9 @@ def create_experiment_log_dir(root: str, parents: bool = True) -> str:
     )
     try:
         child.mkdir(parents=parents)
-        logging.info("Logging directory created.")
+        logging.info("Tensorboard logging directory created.")
     except FileExistsError:
-        logging.info("Using existing log dir for this process.")
+        logging.info("Using existing tensorboard log dir for this subprocess.")
     return child.as_posix()
 
 
