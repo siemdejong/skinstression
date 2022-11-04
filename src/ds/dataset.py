@@ -68,9 +68,10 @@ class THGStrainStressDataset(Dataset[Any]):
         reweight: str,
         lds: bool = False,
         lds_kernel: str = "gaussian",
-        lds_ks: int = 5,
-        lds_sigma: int = 2,
-        param_ids: Optional[str] = None,
+        param_roi: Optional[dict[str, int]] = None,
+        param_ks: Optional[dict[str, int]] = None,
+        param_sigma: Optional[dict[str, int]] = None,
+        param_desc: Optional[str] = None,
     ):
         """Adaptation of label density smoothing (LDS) as described in arXiv:2102.09554v2.
         The adaptation allows for multi-dimensional label smoothening,
@@ -89,18 +90,68 @@ class THGStrainStressDataset(Dataset[Any]):
             reweight != "none" if lds else True
         ), "Set reweight to 'sqrt_inv' (default) or 'inverse' when using LDS"
 
-        # targets = targets.T
+        all_weights = []
+        all_emp_dists = []
+        all_eff_dists = []
+        all_edges = []
+        for param_data, param in zip(targets.T, param_desc):
+            if param_roi:
+                edges = param_roi.get(param)
+            else:
+                edges = np.histogram_bin_edges(param_data, "auto")
+            bin_index_per_target = np.digitize(param_data, edges)
 
-        # Dictionary for the LDS below
-        # targets = np.ndarray([a1, k1, xc1], [a2, k2, xc2], ...])
-        # num_per_target = target
+            # minlength so extrapolation is possible.
+            emp_target_dist = np.bincount(bin_index_per_target, minlength=len(edges))
+
+            print(param, len(edges), len(emp_target_dist))
+
+            if reweight == "sqrt_inv":
+                emp_target_dist = np.sqrt(emp_target_dist)
+            elif reweight == "inv":
+                # Clip weights for inverse re-weight
+                emp_target_dist = np.clip(emp_target_dist, -np.inf, np.inf)
+                raise NotImplementedError
+
+            # Calculate effective label distribution
+            if param_ks:
+                lds_ks = param_ks.get(param)
+            else:
+                lds_ks = 5
+            if param_sigma:
+                lds_sigma = param_sigma.get(param)
+            else:
+                lds_sigma = 2
+            lds_kernel_window = get_lds_kernel_window(lds_kernel, lds_ks, lds_sigma)
+            eff_target_dist = convolve1d(
+                emp_target_dist, weights=lds_kernel_window, mode="constant"
+            )
+
+            eff_num_per_target = np.float32(eff_target_dist[bin_index_per_target])
+            weights = 1 / eff_num_per_target
+
+            scaling = len(weights) / np.sum(weights)
+            scaled_weights = scaling * weights
+
+            all_weights.append(scaled_weights)
+            all_emp_dists.append(emp_target_dist)
+            all_eff_dists.append(eff_target_dist)
+            all_edges.append(edges)
+
+        return (
+            np.asarray(all_weights),
+            np.asarray(all_emp_dists, dtype=object),
+            np.asarray(all_eff_dists, dtype=object),
+            np.asarray(all_edges, dtype=object),
+        )
 
         # Calculate count statistic.
         bin_edges_list = []
         bin_count_list = []
         for param_data in targets.T:
-            bins = sturge(len(param_data))
-            bin_edges = np.histogram_bin_edges(param_data, bins=bins)
+            # bins = sturge(len(param_data))
+            # bins = 500
+            bin_edges = np.histogram_bin_edges(param_data, bins=500)
             bin_edges_list.append(bin_edges)
 
             idcs = np.digitize(param_data, bin_edges)
@@ -129,7 +180,8 @@ class THGStrainStressDataset(Dataset[Any]):
             num_per_target.append(target_as_bin_count)
 
         logging.info(f"Using re-weighting: [{reweight.upper()}]")
-
+        num_per_target_original = num_per_target
+        smoothed_num_per_bin_list = []
         if lds:
             lds_kernel_window = get_lds_kernel_window(lds_kernel, lds_ks, lds_sigma)
             logging.info(
@@ -144,6 +196,8 @@ class THGStrainStressDataset(Dataset[Any]):
                     mode="constant",
                 )
 
+                smoothed_num_per_bin_list.append(smoothed_num_per_bin)
+
                 # Bin edges haven't changed. No need to redigitize target.
                 idcs = idcs_list[i]
                 target_as_smoothed_bin_count = smoothed_num_per_bin[idcs]
@@ -154,7 +208,7 @@ class THGStrainStressDataset(Dataset[Any]):
         scaling = weights.shape[1] / np.sum(weights, axis=0)
         scaled_weights = scaling * weights
 
-        return scaled_weights
+        return scaled_weights, num_per_target_original, num_per_target
 
     def get_transform(self):
         if self.split == "train":
@@ -206,7 +260,7 @@ class THGStrainStressDataset(Dataset[Any]):
             targets_list.append(labels[["a", "k", "xc"]].to_numpy())
         targets_list = np.asarray(targets_list)
 
-        weights = THGStrainStressDataset._prepare_weights(
+        weights, _, _ = THGStrainStressDataset._prepare_weights(
             targets=targets_list,
             reweight=reweight,
             lds=lds,
