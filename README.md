@@ -153,11 +153,20 @@ TODO: show examples of optuna optimization, model training, and inference.
 
 ### Optuna hyperparameter optimization
 
+Set `mode: TUNE` in `config.yaml` to enable hyperparameter tuning.
+Define parameter search space in `config.yaml`.
+
 The `shg-optuna.sbatch` jobscript contains `sbatch` directives used by SLURM to initialize Optuna processes.
 Every Optuna process is responsible for their own Trials.
 Every Trial makes use of `TorchDistributedTrial` to make use of Pytorch DistributedDataParallel.
 Configure the jobscript to use appropriate resources.
 Run `sbatch shg-optuna.sbatch` to initialize the hyperparameter optimization.
+
+### Visualize hyperparameter optimization
+
+To view hyperparamter optimization results (loss curves, parameter importances, etc.), set `mode: TUNE_VISUALIZE` in `config.yaml`.
+Run `python src/main.py`.
+Available optimization visualizations will show in the browser.
 
 _For more examples, please refer to the [documentation](https://siemdejong.github.io/shg-strain-stress)._
 

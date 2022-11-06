@@ -54,7 +54,7 @@ class Dist:
 
 class Mode(Enum):
     TUNE: int = 0
-    VISUALIZE: int = 1
+    TUNE_VISUALIZE: int = 1
     TRAIN: int = 2
 
 

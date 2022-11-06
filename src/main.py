@@ -54,7 +54,7 @@ def main(cfg: THGStrainStressConfig) -> None:
         "See Hydra output for worker log messages."
     )
 
-    if cfg.mode == Mode.VISUALIZE.name:
+    if cfg.mode == Mode.TUNE_VISUALIZE.name:
         visualize(cfg)
     elif cfg.mode == Mode.TUNE.name:
         mp.spawn(
