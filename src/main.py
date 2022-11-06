@@ -55,7 +55,7 @@ def main(cfg: THGStrainStressConfig) -> None:
     )
 
     if cfg.mode == Mode.VISUALIZE.name:
-        visualize(cfg.paths.optuna_db)
+        visualize(cfg)
     elif cfg.mode == Mode.TUNE.name:
         mp.spawn(
             fn=tune_hyperparameters,
