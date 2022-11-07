@@ -125,10 +125,6 @@ def ddp_setup(rank, world_size):
         world_size: Total number of processes.
     """
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
-    logging.info(
-        f"{os.environ['MASTER_ADDR']}:{os.environ['MASTER_PORT']}: "
-        f"group {rank + 1}/{world_size} initialized."
-    )
 
 
 def ddp_cleanup():

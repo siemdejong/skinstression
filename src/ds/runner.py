@@ -130,8 +130,9 @@ class Runner:
                 experiment.add_batch_metric("loss", loss.detach(), self.run_count)
 
         # Only let 1 process save checkpoints.
+        # The current runner must be a validation runner
         # Check only every epoch.
-        if self.local_rank == 0 and self.optimizer:
+        if self.local_rank == 0 and self.stage == Stage.VAL:
             if self.should_save(loss):
                 self.save_checkpoint()
 

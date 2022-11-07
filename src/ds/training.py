@@ -29,6 +29,7 @@ from torch.optim.lr_scheduler import (
 from torch.utils.data import Subset, DataLoader
 from torch.multiprocessing import Queue
 from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.utils.data.distributed import DistributedSampler
 from sklearn.model_selection import train_test_split
 import numpy as np
 
@@ -91,6 +92,7 @@ class Trainer:
                 self.train_val_subset, local_rank, world_size
             )
         else:
+            # NOTE: BELOW SHOULD ACTUALLY BE CROSS-RUNNER WITH NSPLITS=1
             model = THGStrainStressCNN(self.cfg)
             model_sync_bathchnorm = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
             model = DDP(model_sync_bathchnorm.to(local_rank), device_ids=[local_rank])
@@ -112,18 +114,28 @@ class Trainer:
             scheduler = ChainedScheduler([warmup_scheduler, restart_scheduler])
             scaler = torch.cuda.amp.GradScaler(enabled=self.cfg.use_amp)
 
+            # Distributed the workload across the GPUs.
+            train_sampler = DistributedSampler(self.train_subset, seed=self.cfg.seed)
+            val_sampler = DistributedSampler(self.val_subset, seed=self.cfg.seed)
+
             # Define dataloaders
             train_loader = DataLoader(
                 self.train_subset,
                 batch_size=int(self.cfg.params.batch_size),
                 num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
+                persistent_workers=True,
                 pin_memory=True,
+                shuffle=False,  # The distributed sampler shuffles for us.
+                sampler=train_sampler,
             )
             val_loader = DataLoader(
                 self.val_subset,
                 batch_size=int(self.cfg.params.batch_size),
                 num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
+                persistent_workers=True,
                 pin_memory=True,
+                shuffle=False,  # The distributed sampler shuffles for us.
+                sampler=val_sampler,
             )
 
             # Create the runners
@@ -211,16 +223,18 @@ def train(
     cross_validation: bool = False,
 ):
 
+    global_rank = int(os.environ["SLURM_RANK"]) * cfg.dist.gpus_per_node + local_rank
+
     # Setup logging.
     setup_worker_logging(local_rank, log_queue, cfg.debug)
 
     # Set and seed device
     torch.cuda.set_device(local_rank)
-    logging.info(f"Hello from device {local_rank} of {world_size}")
+    logging.info(f"Hello from device {global_rank} of {world_size}")
     seed_all(cfg.seed)
 
     # Initialize process group
-    ddp_setup(local_rank, world_size)
+    ddp_setup(global_rank, world_size)
     # Load dataset.
     dataset, groups = THGStrainStressDataset.load_data(
         split="train",

@@ -78,16 +78,22 @@ def main(cfg: THGStrainStressConfig) -> None:
             args=(cfg.dist.gpus_per_node, cfg, log_queue),
         )
     elif cfg.mode == Mode.TRAIN.name:
+        logging.info(
+            f"Processes will communicate with {os.environ['MASTER_ADDR']}:{os.environ['MASTER_PORT']}. "
+            "See Hydra output for worker log messages."
+        )
+        world_size = cfg.dist.gpus_per_node * cfg.dist.nodes
         mp.spawn(
             fn=train,
             nprocs=cfg.dist.gpus_per_node,
-            args=(cfg.dist.gpus_per_node, cfg, log_queue),
+            args=(world_size, cfg, log_queue),
         )
     elif cfg.mode == Mode.CROSS_VALIDATION.name:
+        world_size = cfg.dist.gpus_per_node * cfg.dist.nodes
         mp.spawn(
             fn=train,
             nprocs=cfg.dist.gpus_per_node,
-            args=(cfg.dist.gpus_per_node, cfg, log_queue, True),
+            args=(world_size, cfg, log_queue, True),
         )
 
     logging.info("All processes exited without critical errors.")

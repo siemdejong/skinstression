@@ -83,8 +83,8 @@ class CrossRunner:
             val_subset = Subset(dataset, val_idx)
 
             # Distributed the workload across the GPUs.
-            train_sampler = DistributedSampler(train_subset)
-            val_sampler = DistributedSampler(val_subset)
+            train_sampler = DistributedSampler(train_subset, seed=self.cfg.seed)
+            val_sampler = DistributedSampler(val_subset, seed=self.cfg.seed)
 
             # Define dataloaders
             train_loader = DataLoader(
