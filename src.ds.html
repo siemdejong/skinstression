@@ -504,7 +504,7 @@ SOFTWARE.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.ds.runner.Runner.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">desc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.ds.tracking.ExperimentTracker" title="src.ds.tracking.ExperimentTracker"><span class="pre">ExperimentTracker</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.runner.Runner.run" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">desc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.ds.tracking.ExperimentTracker" title="src.ds.tracking.ExperimentTracker"><span class="pre">ExperimentTracker</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.runner.Runner.run" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -688,6 +688,11 @@ SOFTWARE.</p>
 <span class="sig-name descname"><span class="pre">add_epoch_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.tracking.ExperimentTracker.add_epoch_metric" title="Permalink to this definition">#</a></dt>
 <dd><p>Implements logging a epoch-level metric.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.ds.tracking.ExperimentTracker.add_epoch_metrics">
+<span class="sig-name descname"><span class="pre">add_epoch_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag_scalar_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.tracking.ExperimentTracker.add_epoch_metrics" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.ds.tracking.ExperimentTracker.set_stage">
@@ -997,6 +1002,7 @@ Plots are opened in an external browser at ports opened by Plotly.</p>
 <li><a class="reference internal" href="#src.ds.tracking.ExperimentTracker"><code class="docutils literal notranslate"><span class="pre">ExperimentTracker</span></code></a><ul>
 <li><a class="reference internal" href="#src.ds.tracking.ExperimentTracker.add_batch_metric"><code class="docutils literal notranslate"><span class="pre">ExperimentTracker.add_batch_metric()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.tracking.ExperimentTracker.add_epoch_metric"><code class="docutils literal notranslate"><span class="pre">ExperimentTracker.add_epoch_metric()</span></code></a></li>
+<li><a class="reference internal" href="#src.ds.tracking.ExperimentTracker.add_epoch_metrics"><code class="docutils literal notranslate"><span class="pre">ExperimentTracker.add_epoch_metrics()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.tracking.ExperimentTracker.set_stage"><code class="docutils literal notranslate"><span class="pre">ExperimentTracker.set_stage()</span></code></a></li>
 </ul>
 </li>
