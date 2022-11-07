@@ -2,14 +2,14 @@
 #SBATCH --job-name=shg
 #SBATCH --output=/scistor/guest/sjg203/projects/shg-strain-stress/slurm/%j.out
 #SBATCH --error=/scistor/guest/sjg203/projects/shg-strain-stress/slurm/%j.err
-#SBATCH --nodes=3
+#SBATCH --nodes=4
 #SBATCH --gpus-per-node 2
 #SBATCH --mem-per-gpu 5G
 #SBATCH --cpus-per-gpu 13
 #SBATCH --mail-user=siem.de.jong@student.vu.nl
 #SBATCH --mail-type=ALL
 
-# Make sure hydra.dist contains the same allocation specification.
+# Please make sure config.dist contains the same allocation specifications.
 
 source /scistor/guest/sjg203/.bashrc
 

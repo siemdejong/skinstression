@@ -71,6 +71,10 @@ class Trainer:
                 random_state=cfg.seed,
             )
 
+            logging.debug(f"train idx: {train_idx}")
+            logging.debug(f"val idx: {val_idx}")
+            logging.debug(f"test idx: {test_idx}")
+
             self.train_val_subset = Subset(dataset, indices=train_val_idx)
             self.train_subset = Subset(dataset, indices=train_idx)
             self.val_subset = Subset(dataset, indices=val_idx)
@@ -139,16 +143,6 @@ class Trainer:
             )
 
             # Create the runners
-            val_runner = Runner(
-                loader=val_loader,
-                model=model,
-                loss_fn=loss_fn,
-                stage=Stage.VAL,
-                local_rank=local_rank,
-                progress_bar=False,
-                scaler=scaler,
-                dry_run=self.cfg.dry_run,
-            )
             train_runner = Runner(
                 loader=train_loader,
                 model=model,
@@ -156,6 +150,16 @@ class Trainer:
                 stage=Stage.TRAIN,
                 optimizer=optimizer,
                 scheduler=scheduler,
+                local_rank=local_rank,
+                progress_bar=False,
+                scaler=scaler,
+                dry_run=self.cfg.dry_run,
+            )
+            val_runner = Runner(
+                loader=val_loader,
+                model=model,
+                loss_fn=loss_fn,
+                stage=Stage.VAL,
                 local_rank=local_rank,
                 progress_bar=False,
                 scaler=scaler,
@@ -172,6 +176,8 @@ class Trainer:
 
         # Run epochs.
         for epoch_id in range(self.cfg.params.epoch_count):
+            train_runner.loader.sampler.set_epoch(epoch_id)
+            val_runner.loader.sampler.set_epoch(epoch_id)
             run_epoch(
                 val_runner=val_runner,
                 train_runner=train_runner,
@@ -180,8 +186,12 @@ class Trainer:
                 local_rank=local_rank,
             )
 
-            loss = val_runner.avg_loss
-            logging.info(f"epoch: {epoch_id} | loss: {loss}")
+            if local_rank == 0:
+                train_loss = train_runner.avg_loss
+                val_loss = val_runner.avg_loss
+
+                logging.info(f"epoch: {epoch_id} | train loss: {train_loss}")
+                logging.info(f"epoch: {epoch_id} | validation loss: {val_loss}")
 
             train_runner.reset()
             val_runner.reset()
@@ -196,7 +206,7 @@ class Trainer:
         scaler = torch.cuda.amp.GradScaler(enabled=self.cfg.use_amp)
 
         test_loader = DataLoader(
-            self.val_subset,
+            self.test_subset,
             batch_size=int(self.cfg.params.batch_size),
             num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
             pin_memory=True,

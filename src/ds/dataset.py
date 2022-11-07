@@ -145,11 +145,11 @@ class THGStrainStressDataset(Dataset[Any]):
                 lds_sigma = 2
             logging.info(
                 f"LDS: {param} "
-                f"| kernel: {lds_kernel.upper()} "
-                f"| param roi: {edges[0]:.2f}-{edges[-1]:.2f} ",
-                f"| param res.: {edges[1]-edges[0]:.5f} "
-                f"| kernel size: {lds_ks} "
-                f"| sigma: {lds_sigma}",
+                + f"| kernel: {lds_kernel.upper()} "
+                + f"| param roi: {edges[0]:.2f}-{edges[-1]:.2f} "
+                + f"| param res.: {edges[1]-edges[0]:.5f} "
+                + f"| kernel size: {lds_ks} "
+                + f"| sigma: {lds_sigma}"
             )
             lds_kernel_window = get_lds_kernel_window(lds_kernel, lds_ks, lds_sigma)
             eff_target_dist = convolve1d(

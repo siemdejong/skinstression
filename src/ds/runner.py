@@ -84,10 +84,12 @@ class Runner:
     def avg_loss(self):
         return self.loss_metric.average
 
-    def run(self, desc: str, experiment: ExperimentTracker):
+    def run(self, desc: str, experiment: ExperimentTracker, epoch_id):
 
         # Turn on eval or train mode.
         self.model.train(self.stage is Stage.TRAIN)
+
+        self.epoch_id = epoch_id
 
         for batch_num, (x, y, w) in enumerate(
             tqdm(self.loader, desc=desc, ncols=80, disable=self.disable_progress_bar)
@@ -121,7 +123,8 @@ class Runner:
                 loss
             )  # TODO: MAKE SURE THIS ALL REDUCE LOSS IS WHAT WE WANT (AND NOT E.G. AVG)
 
-            logging.debug(f"    iteration: {batch_num} | loss: {loss}")
+            if self.local_rank == 0:
+                logging.debug(f"    iteration: {batch_num} | loss: {loss}")
 
             # Compute Batch Validation Metrics
             self.loss_metric.update(loss.detach(), len(x))
@@ -163,7 +166,7 @@ class Runner:
 
     def save_checkpoint(self):
         state: dict[str, Union[int, dict[str, Any]]] = {
-            "epoch": self.run_count,
+            "epoch": self.epoch_id,
             "model_state_dict": self.model.state_dict(),
         }
 
@@ -180,7 +183,7 @@ class Runner:
             state,
             f"{os.getcwd()}/checkpoint.pt",  # os.getcwd() is set by Hydra to 'outputs'.
         )
-        logging.info(f"Checkpoint saved at epoch {self.run_count}.")
+        logging.info(f"Checkpoint saved at epoch {self.epoch_id}.")
 
     def load_checkpoint(self, path: str):
         # NOTE: consume_prefix_in_state_dict_if_present() should be used
@@ -193,7 +196,7 @@ class Runner:
             self.scaler.load_state_dict(checkpoint["scaler_state_dict"])
         if self.scheduler:
             self.scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
-        self.run_count = checkpoint["epoch"]
+        self.epoch_id = checkpoint["epoch"]
 
         # Might be needed in the future (https://github.com/pytorch/pytorch/issues/2830):
         # for state in optimizer.state.values():
@@ -225,7 +228,7 @@ def run_epoch(
 ) -> None:
     # Training Loop
     experiment.set_stage(Stage.TRAIN)
-    train_runner.run("Train Batches", experiment)
+    train_runner.run("Train Batches", experiment, epoch_id)
 
     if local_rank == 0:
         # Log Training Epoch Metrics
@@ -239,7 +242,7 @@ def run_epoch(
     # Validation Loop
     experiment.set_stage(Stage.VAL)
     with torch.no_grad():
-        val_runner.run("Validation Batches", experiment)
+        val_runner.run("Validation Batches", experiment, epoch_id)
 
     if local_rank == 0:
         # Log Validation Epoch Metrics
