@@ -60,19 +60,18 @@ def main(cfg: THGStrainStressConfig) -> None:
     torch.multiprocessing.set_start_method("spawn", force=True)
     log_queue = setup_primary_logging("out.log", "error.log", cfg.debug)
 
-    # IP and port need to be available for dist.init_process_group().
-    ip = get_ip()
-    port = get_free_port(ip)
-    os.environ["MASTER_ADDR"] = str(ip)
-    os.environ["MASTER_PORT"] = str(port)
-    logging.info(
-        f"Processes will spawn from {ip}:{port}. "
-        "See Hydra output for worker log messages."
-    )
-
     if cfg.mode == Mode.TUNE_VISUALIZE.name:
         visualize(cfg)
     elif cfg.mode == Mode.TUNE.name:
+        # IP and port need to be available for dist.init_process_group().
+        ip = get_ip()
+        port = get_free_port(ip)
+        os.environ["MASTER_ADDR"] = str(ip)
+        os.environ["MASTER_PORT"] = str(port)
+        logging.info(
+            f"Processes will spawn from {ip}:{port}. "
+            "See Hydra output for worker log messages."
+        )
         mp.spawn(
             fn=tune_hyperparameters,
             nprocs=cfg.dist.gpus_per_node,
@@ -83,6 +82,12 @@ def main(cfg: THGStrainStressConfig) -> None:
             fn=train,
             nprocs=cfg.dist.gpus_per_node,
             args=(cfg.dist.gpus_per_node, cfg, log_queue),
+        )
+    elif cfg.mode == Mode.CROSS_VALIDATION.name:
+        mp.spawn(
+            fn=train,
+            nprocs=cfg.dist.gpus_per_node,
+            args=(cfg.dist.gpus_per_node, cfg, log_queue, True),
         )
 
     logging.info("All processes exited without critical errors.")

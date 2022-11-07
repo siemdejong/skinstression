@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 import os
-from typing import Any
+from typing import Any, Optional
 
 import torch
 from torch import nn
@@ -26,9 +26,11 @@ from torch.optim.lr_scheduler import (
     CosineAnnealingWarmRestarts,
     LinearLR,
 )
-from torch.utils.data import random_split, Subset
+from torch.utils.data import Subset, DataLoader
 from torch.multiprocessing import Queue
 from torch.nn.parallel import DistributedDataParallel as DDP
+from sklearn.model_selection import train_test_split
+import numpy as np
 
 from conf.config import THGStrainStressConfig
 from ds.dataset import THGStrainStressDataset
@@ -38,89 +40,119 @@ from ds.tensorboard import TensorboardExperiment
 from ds.loss import weighted_l1_loss
 from ds.utils import seed_all, ddp_cleanup, ddp_setup
 from ds.logging_setup import setup_worker_logging
+from ds.cross_validation import CrossRunner
 
 
 class Trainer:
-    def __init__(self, dataset, cfg: THGStrainStressConfig):
+    def __init__(self, dataset, groups, cfg: THGStrainStressConfig):
         self.cfg = cfg
+        self.dataset = dataset
         if self.cfg.try_overfit:
             self.train_subset = Subset(dataset, indices=[0, 1])
             self.val_subset = Subset(dataset, indices=[0, 1])
         else:
             # Split the dataset in train, validation and test (sub)sets.
-            train_test_split = int(len(dataset) * 0.8)
-            train_set, test_set = random_split(
-                dataset, [train_test_split, len(dataset) - train_test_split]
+            train_val_size = int(len(dataset) * 0.8)
+            train_val_idx, test_idx = train_test_split(
+                np.arange(len(dataset)),
+                train_size=train_val_size,
+                stratify=groups,
+                shuffle=True,
+                random_state=cfg.seed,
             )
 
-            train_val_split = int(len(train_set) * 0.8)
-            self.train_subset, self.val_subset = random_split(
-                train_set, [train_val_split, len(train_set) - train_val_split]
+            train_size = int(len(train_val_idx) * 0.8)
+            train_idx, val_idx = train_test_split(
+                np.arange(len(train_val_idx)),
+                train_size=train_size,
+                stratify=groups[train_val_idx],
+                shuffle=True,
+                random_state=cfg.seed,
             )
 
-    def __call__(self, local_rank: int, world_size: int):
+            self.train_val_subset = Subset(dataset, indices=train_val_idx)
+            self.train_subset = Subset(dataset, indices=train_idx)
+            self.val_subset = Subset(dataset, indices=val_idx)
+            self.test_subset = Subset(dataset, indices=test_idx)
+
+    def __call__(
+        self,
+        local_rank: int,
+        world_size: int,
+        cross_runner: Optional[CrossRunner] = None,
+        from_checkpoint: bool = False,
+    ):
         """
         Args:
             cfg: hydra configuration object.
         """
-        model = THGStrainStressCNN(self.cfg)
-        model_sync_bathchnorm = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
-        model = DDP(model_sync_bathchnorm.to(local_rank), device_ids=[local_rank])
+        if cross_runner:
+            train_runner, val_runner = cross_runner(
+                self.train_val_subset, local_rank, world_size
+            )
+        else:
+            model = THGStrainStressCNN(self.cfg)
+            model_sync_bathchnorm = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
+            model = DDP(model_sync_bathchnorm.to(local_rank), device_ids=[local_rank])
 
-        loss_fn = weighted_l1_loss  # MAE.
-        optimizer = getattr(torch.optim, self.cfg.params.optimizer.name)(
-            model.parameters(),
-            lr=self.cfg.params.optimizer.lr,
-            weight_decay=self.cfg.params.optimizer.weight_decay,
-        )
-        warmup_scheduler = LinearLR(
-            optimizer=optimizer, start_factor=0.1, end_factor=1, total_iters=10
-        )
-        restart_scheduler = CosineAnnealingWarmRestarts(
-            optimizer=optimizer,
-            T_0=400,
-            T_mult=self.cfg.params.optimizer.T_mult,
-        )
-        scheduler = ChainedScheduler([warmup_scheduler, restart_scheduler])
-        scaler = torch.cuda.amp.GradScaler(enabled=self.cfg.use_amp)
+            loss_fn = weighted_l1_loss  # MAE.
+            optimizer = getattr(torch.optim, self.cfg.params.optimizer.name)(
+                model.parameters(),
+                lr=self.cfg.params.optimizer.lr,
+                weight_decay=self.cfg.params.optimizer.weight_decay,
+            )
+            warmup_scheduler = LinearLR(
+                optimizer=optimizer, start_factor=0.1, end_factor=1, total_iters=10
+            )
+            restart_scheduler = CosineAnnealingWarmRestarts(
+                optimizer=optimizer,
+                T_0=self.cfg.params.scheduler.T_0,
+                T_mult=self.cfg.params.scheduler.T_mult,
+            )
+            scheduler = ChainedScheduler([warmup_scheduler, restart_scheduler])
+            scaler = torch.cuda.amp.GradScaler(enabled=self.cfg.use_amp)
 
-        # Define dataloaders
-        train_loader = torch.utils.data.DataLoader(
-            self.train_subset,
-            batch_size=int(self.cfg.params.batch_size),
-            num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
-            pin_memory=True,
-        )
-        val_loader = torch.utils.data.DataLoader(
-            self.val_subset,
-            batch_size=int(self.cfg.params.batch_size),
-            num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
-            pin_memory=True,
-        )
+            # Define dataloaders
+            train_loader = DataLoader(
+                self.train_subset,
+                batch_size=int(self.cfg.params.batch_size),
+                num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
+                pin_memory=True,
+            )
+            val_loader = DataLoader(
+                self.val_subset,
+                batch_size=int(self.cfg.params.batch_size),
+                num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
+                pin_memory=True,
+            )
 
-        # Create the runners
-        val_runner = Runner(
-            loader=val_loader,
-            model=model,
-            loss_fn=loss_fn,
-            stage=Stage.VAL,
-            local_rank=local_rank,
-            progress_bar=False,
-            scaler=scaler,
-            dry_run=self.cfg.dry_run,
-        )
-        train_runner = Runner(
-            loader=train_loader,
-            model=model,
-            loss_fn=loss_fn,
-            stage=Stage.TRAIN,
-            optimizer=optimizer,
-            scheduler=scheduler,
-            local_rank=local_rank,
-            progress_bar=False,
-            scaler=scaler,
-            dry_run=self.cfg.dry_run,
-        )
+            # Create the runners
+            val_runner = Runner(
+                loader=val_loader,
+                model=model,
+                loss_fn=loss_fn,
+                stage=Stage.VAL,
+                local_rank=local_rank,
+                progress_bar=False,
+                scaler=scaler,
+                dry_run=self.cfg.dry_run,
+            )
+            train_runner = Runner(
+                loader=train_loader,
+                model=model,
+                loss_fn=loss_fn,
+                stage=Stage.TRAIN,
+                optimizer=optimizer,
+                scheduler=scheduler,
+                local_rank=local_rank,
+                progress_bar=False,
+                scaler=scaler,
+                dry_run=self.cfg.dry_run,
+            )
+
+        if from_checkpoint:
+            train_runner.load_checkpoint(self.cfg.paths.checkpoint)
+            val_runner.load_checkpoint(self.cfg.paths.checkpoint)
 
         # Setup the experiment tracker
         log_dir = os.getcwd() + "/tensorboard"
@@ -133,15 +165,50 @@ class Trainer:
                 train_runner=train_runner,
                 experiment=tracker,
                 epoch_id=epoch_id,
-                local_rank=0,
+                local_rank=local_rank,
             )
 
             loss = val_runner.avg_loss
             logging.info(f"epoch: {epoch_id} | loss: {loss}")
 
+            train_runner.reset()
+            val_runner.reset()
+
+            tracker.flush()
+
+    def test(self, local_rank: int, world_size: int):
+        model = THGStrainStressCNN(self.cfg)
+        model_sync_bathchnorm = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
+        model = DDP(model_sync_bathchnorm.to(local_rank), device_ids=[local_rank])
+
+        scaler = torch.cuda.amp.GradScaler(enabled=self.cfg.use_amp)
+
+        test_loader = DataLoader(
+            self.val_subset,
+            batch_size=int(self.cfg.params.batch_size),
+            num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
+            pin_memory=True,
+        )
+        test_runner = Runner(
+            loader=test_loader,
+            model=model,
+            loss_fn=weighted_l1_loss,
+            stage=Stage.TEST,
+            local_rank=local_rank,
+            progress_bar=False,
+            scaler=scaler,
+            dry_run=self.cfg.dry_run,
+        )
+
+        test_runner.load_checkpoint(self.cfg.paths.checkpoint)
+
 
 def train(
-    local_rank: int, world_size: int, cfg: THGStrainStressConfig, log_queue: Queue
+    local_rank: int,
+    world_size: int,
+    cfg: THGStrainStressConfig,
+    log_queue: Queue,
+    cross_validation: bool = False,
 ):
 
     # Setup logging.
@@ -162,8 +229,17 @@ def train(
         reweight="sqrt_inv",
         lds=True,
     )
-    trainer = Trainer(dataset, cfg)
-    trainer(local_rank, world_size)
+    trainer = Trainer(dataset, groups, cfg)
+    if cross_validation:
+        cross_runner = CrossRunner.StratifiedKFold(n_splits=5, groups=groups, cfg=cfg)
+    else:
+        cross_runner = None
+    trainer(
+        local_rank,
+        world_size,
+        cross_runner=cross_runner,
+        from_checkpoint=cfg.load_checkpoint,
+    )
 
     # Exit subprocesses.
     ddp_cleanup()

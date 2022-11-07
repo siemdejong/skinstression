@@ -163,7 +163,7 @@ class Runner:
     def save_checkpoint(self):
         state: dict[str, Union[int, dict[str, Any]]] = {
             "epoch": self.run_count,
-            "model_state_dict": self.model.module.state_dict(),
+            "model_state_dict": self.model.state_dict(),
         }
 
         if self.optimizer:
@@ -179,15 +179,19 @@ class Runner:
             state,
             f"{os.getcwd()}/checkpoint.pt",  # os.getcwd() is set by Hydra to 'outputs'.
         )
-        logging.info("Checkpoint saved.")
+        logging.info(f"Checkpoint saved at epoch {self.run_count}.")
 
     def load_checkpoint(self, path: str):
         # NOTE: consume_prefix_in_state_dict_if_present() should be used
-        # if loading from a DDP saved checkpoint.
+        # if loading a DDP saved checkpoint to non-DDP.
         checkpoint = torch.load(path)
         self.model.load_state_dict(checkpoint["model_state_dict"])
         if self.optimizer:
             self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        if self.scaler.is_enabled():
+            self.scaler.load_state_dict(checkpoint["scaler_state_dict"])
+        if self.scheduler:
+            self.scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
         self.run_count = checkpoint["epoch"]
 
         # Might be needed in the future (https://github.com/pytorch/pytorch/issues/2830):

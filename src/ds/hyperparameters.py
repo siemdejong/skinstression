@@ -197,7 +197,7 @@ class Objective:
             ),
         }
 
-        logging.info(f"Hyperparameters of current trial:{hparams}")
+        logging.info(f"Hyperparameters of current trial: {hparams}")
 
         # Build the model with hparams defined by Optuna.
         # Use SyncBatchNorm to sync statistics between parallel models.
@@ -312,6 +312,11 @@ class Objective:
                 # TODO: compile Pytorch with Caffe2.
                 # tracker.add_hparams(hparams)
                 raise optuna.exceptions.TrialPruned()
+
+            train_runner.reset()
+            val_runner.reset()
+
+            tracker.flush()
 
         # tracker.add_hparams(hparams, loss)
         return val_loss

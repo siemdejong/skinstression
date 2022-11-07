@@ -34,8 +34,6 @@ class Optimizer:
     name: str
     lr: float
     weight_decay: float
-    T_0: int
-    T_mult: int
     beta_1: float
     beta_2: float
 
@@ -43,6 +41,7 @@ class Optimizer:
 @dataclass
 class Scheduler:
     T_0: int
+    T_mult: int
 
 
 @dataclass
@@ -50,6 +49,7 @@ class Paths:
     data: str
     targets: str
     optuna_db: str
+    checkpoint: str
 
 
 @dataclass
@@ -73,6 +73,7 @@ class Mode(Enum):
     TUNE: int = 0
     TUNE_VISUALIZE: int = 1
     TRAIN: int = 2
+    CROSS_VALIDATION: int = 3
 
 
 @dataclass
@@ -121,3 +122,4 @@ class THGStrainStressConfig:
     seed: int
     try_overfit: bool
     dry_run: bool
+    load_checkpoint: bool
