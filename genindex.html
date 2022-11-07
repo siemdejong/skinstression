@@ -263,6 +263,8 @@
   <h2>C</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="src.conf.html#src.conf.config.Paths.checkpoint">checkpoint (src.conf.config.Paths attribute)</a>
+</li>
         <li><a href="src.conf.html#src.conf.config.Dist.cpus_per_gpu">cpus_per_gpu (src.conf.config.Dist attribute)</a>
 </li>
         <li><a href="src.ds.html#src.ds.utils.create_experiment_log_dir">create_experiment_log_dir() (in module src.ds.utils)</a>
@@ -276,6 +278,8 @@
         <li><a href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.create_logistic_curve">create_logistic_curve() (src.ds.tensorboard.TensorboardExperiment method)</a>
 </li>
         <li><a href="src.ds.html#src.ds.tensorboard.TensorboardExperiment.create_sigmoid">create_sigmoid() (src.ds.tensorboard.TensorboardExperiment method)</a>
+</li>
+        <li><a href="src.conf.html#src.conf.config.Mode.CROSS_VALIDATION">CROSS_VALIDATION (src.conf.config.Mode attribute)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -395,10 +399,6 @@
   <h2>K</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="src.ds.html#src.ds.cross_validator.k_fold">k_fold() (in module src.ds.cross_validator)</a>
-</li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="src.conf.html#src.conf.config.Params.k_folds">k_folds (src.conf.config.Params attribute)</a>
 </li>
     </ul></td>
@@ -409,6 +409,8 @@
   <h2>L</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="src.conf.html#src.conf.config.THGStrainStressConfig.load_checkpoint">load_checkpoint (src.conf.config.THGStrainStressConfig attribute)</a>
+</li>
         <li><a href="src.ds.html#src.ds.runner.Runner.load_checkpoint">load_checkpoint() (src.ds.runner.Runner method)</a>
 </li>
         <li><a href="src.ds.html#src.ds.dataset.THGStrainStressDataset.load_data">load_data() (src.ds.dataset.THGStrainStressDataset static method)</a>
@@ -456,8 +458,6 @@
           <li><a href="src.conf.html#module-src.conf.config">src.conf.config</a>
 </li>
           <li><a href="src.ds.html#module-src.ds">src.ds</a>
-</li>
-          <li><a href="src.ds.html#module-src.ds.cross_validator">src.ds.cross_validator</a>
 </li>
           <li><a href="src.ds.html#module-src.ds.dataset">src.ds.dataset</a>
 </li>
@@ -643,13 +643,6 @@
 </li>
         </ul></li>
         <li>
-    src.ds.cross_validator
-
-        <ul>
-          <li><a href="src.ds.html#module-src.ds.cross_validator">module</a>
-</li>
-        </ul></li>
-        <li>
     src.ds.dataset
 
         <ul>
@@ -747,15 +740,13 @@
         <li><a href="src.conf.html#src.conf.config.Hparams.T_0">T_0 (src.conf.config.Hparams attribute)</a>
 
         <ul>
-          <li><a href="src.conf.html#src.conf.config.Optimizer.T_0">(src.conf.config.Optimizer attribute)</a>
-</li>
           <li><a href="src.conf.html#src.conf.config.Scheduler.T_0">(src.conf.config.Scheduler attribute)</a>
 </li>
         </ul></li>
         <li><a href="src.conf.html#src.conf.config.Hparams.T_mult">T_mult (src.conf.config.Hparams attribute)</a>
 
         <ul>
-          <li><a href="src.conf.html#src.conf.config.Optimizer.T_mult">(src.conf.config.Optimizer attribute)</a>
+          <li><a href="src.conf.html#src.conf.config.Scheduler.T_mult">(src.conf.config.Scheduler attribute)</a>
 </li>
         </ul></li>
         <li><a href="src.conf.html#src.conf.config.Paths.targets">targets (src.conf.config.Paths attribute)</a>
@@ -766,10 +757,10 @@
 </li>
         <li><a href="src.ds.html#src.ds.models.THGStrainStressCNN">THGStrainStressCNN (class in src.ds.models)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="src.conf.html#src.conf.config.THGStrainStressConfig">THGStrainStressConfig (class in src.conf.config)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="src.ds.html#src.ds.dataset.THGStrainStressDataset">THGStrainStressDataset (class in src.ds.dataset)</a>
 </li>
         <li><a href="src.conf.html#src.conf.config.Mode.TRAIN">TRAIN (src.conf.config.Mode attribute)</a>

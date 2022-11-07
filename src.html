@@ -224,6 +224,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.conf.html#src.conf.config.Mode"><code class="docutils literal notranslate"><span class="pre">Mode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Mode.CROSS_VALIDATION"><code class="docutils literal notranslate"><span class="pre">Mode.CROSS_VALIDATION</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Mode.TRAIN"><code class="docutils literal notranslate"><span class="pre">Mode.TRAIN</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Mode.TUNE"><code class="docutils literal notranslate"><span class="pre">Mode.TUNE</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Mode.TUNE_VISUALIZE"><code class="docutils literal notranslate"><span class="pre">Mode.TUNE_VISUALIZE</span></code></a></li>
@@ -239,8 +240,6 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.conf.html#src.conf.config.Optimizer"><code class="docutils literal notranslate"><span class="pre">Optimizer</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Optimizer.T_0"><code class="docutils literal notranslate"><span class="pre">Optimizer.T_0</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Optimizer.T_mult"><code class="docutils literal notranslate"><span class="pre">Optimizer.T_mult</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Optimizer.beta_1"><code class="docutils literal notranslate"><span class="pre">Optimizer.beta_1</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Optimizer.beta_2"><code class="docutils literal notranslate"><span class="pre">Optimizer.beta_2</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Optimizer.lr"><code class="docutils literal notranslate"><span class="pre">Optimizer.lr</span></code></a></li>
@@ -268,6 +267,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.conf.html#src.conf.config.Paths"><code class="docutils literal notranslate"><span class="pre">Paths</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Paths.checkpoint"><code class="docutils literal notranslate"><span class="pre">Paths.checkpoint</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Paths.data"><code class="docutils literal notranslate"><span class="pre">Paths.data</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Paths.optuna_db"><code class="docutils literal notranslate"><span class="pre">Paths.optuna_db</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Paths.targets"><code class="docutils literal notranslate"><span class="pre">Paths.targets</span></code></a></li>
@@ -280,12 +280,14 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.conf.html#src.conf.config.Scheduler"><code class="docutils literal notranslate"><span class="pre">Scheduler</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Scheduler.T_0"><code class="docutils literal notranslate"><span class="pre">Scheduler.T_0</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.Scheduler.T_mult"><code class="docutils literal notranslate"><span class="pre">Scheduler.T_mult</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig.debug"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.debug</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig.dist"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.dist</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig.dry_run"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.dry_run</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.load_checkpoint</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig.mode"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.mode</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig.optuna"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.optuna</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig.params"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.params</span></code></a></li>
@@ -302,10 +304,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="src.ds.html">src.ds package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="src.ds.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.cross_validator">src.ds.cross_validator module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.cross_validator.k_fold"><code class="docutils literal notranslate"><span class="pre">k_fold()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="src.ds.html#src-ds-cross-validator-module">src.ds.cross_validator module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.dataset">src.ds.dataset module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.dataset.THGStrainStressDataset"><code class="docutils literal notranslate"><span class="pre">THGStrainStressDataset</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.dataset.THGStrainStressDataset.get_transform"><code class="docutils literal notranslate"><span class="pre">THGStrainStressDataset.get_transform()</span></code></a></li>
@@ -434,7 +433,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.</p>
 <p>You should have received a copy of the GNU General Public License
-along with this program.  If not, see &lt;<a class="reference external" href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/</a>&gt;.</p>
+along with this program. If not, see &lt;<a class="reference external" href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/</a>&gt;.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="src.main.main">
 <span class="sig-prename descclassname"><span class="pre">src.main.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig" title="src.conf.config.THGStrainStressConfig"><span class="pre">THGStrainStressConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.main.main" title="Permalink to this definition">#</a></dt>
