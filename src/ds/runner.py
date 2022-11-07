@@ -136,7 +136,7 @@ class Runner:
         # The current runner must be a validation runner
         # Check only every epoch.
         if self.local_rank == 0 and self.stage == Stage.VAL:
-            if self.should_save(loss):
+            if self.should_save():
                 self.save_checkpoint()
 
         if self.scheduler and self.optimizer:
@@ -157,9 +157,9 @@ class Runner:
     def reset(self):
         self.loss_metric = Metric()
 
-    def should_save(self, loss):
-        if loss < self.lowest_loss:
-            self.lowest_loss = loss
+    def should_save(self):
+        if self.loss_metric.average < self.lowest_loss:
+            self.lowest_loss = self.loss_metric.average
             return True
         else:
             return False
