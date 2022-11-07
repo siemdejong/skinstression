@@ -214,7 +214,7 @@ Distributed under the GNU General Public License v3.0. See `LICENSE` for more in
 <!-- CONTACT -->
 ## Contact
 
-Siem de Jong - [linkedin.com/siemdejong](https://linkedin.com/siemdejong) - siem.dejong@hotmail.nl
+Siem de Jong - [linkedin.com/in/siemdejong](https://www.linkedin.com/in/siemdejong/) - siem.dejong@hotmail.nl
 
 Project Link: [https://github.com/siemdejong/shg-strain-stress](https://github.com/siemdejong/shg-strain-stress)
 

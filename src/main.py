@@ -1,3 +1,20 @@
+"""Provides main entry to the project.
+Copyright (C) 2022  Siem de Jong
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
 import logging
 import os
 
@@ -17,7 +34,6 @@ cs = ConfigStore.instance()
 cs.store(name="thg_strain_stress_config", node=THGStrainStressConfig)
 
 
-# @hydra.main(config_path="conf", config_name="config")
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: THGStrainStressConfig) -> None:
     """
@@ -63,7 +79,11 @@ def main(cfg: THGStrainStressConfig) -> None:
             args=(cfg.dist.gpus_per_node, cfg, log_queue),
         )
     elif cfg.mode == Mode.TRAIN.name:
-        pass
+        mp.spawn(
+            fn=train,
+            nprocs=cfg.dist.gpus_per_node,
+            args=(cfg.dist.gpus_per_node, cfg, log_queue),
+        )
 
     logging.info("All processes exited without critical errors.")
 
