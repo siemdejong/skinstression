@@ -179,6 +179,10 @@ class THGStrainStressDataset(Dataset[Any]):
             transform = transforms.Compose(
                 [
                     # TODO: Insert some data augmentation transforms.
+                    transforms.Normalize(
+                        mean=(3.80627821e1, 0, 1.24499975e-2),
+                        std=(42.51551508, 0, 0.19324445),
+                    ),
                     transforms.Grayscale(),
                     transforms.ToTensor(),
                     # transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
@@ -187,6 +191,10 @@ class THGStrainStressDataset(Dataset[Any]):
         else:
             transform = transforms.Compose(
                 [
+                    transforms.Normalize(
+                        mean=(3.80627821e1, 0, 1.24499975e-2),
+                        std=(42.51551508, 0, 0.19324445),
+                    ),
                     transforms.Grayscale(),
                     transforms.ToTensor(),
                     # transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
