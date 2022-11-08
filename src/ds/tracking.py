@@ -57,12 +57,16 @@ class ExperimentTracker(Protocol):
         ...
 
     def add_epoch_metric(self, name: str, value: float, step: int):
-        """Implements logging a epoch-level metric."""
+        """Implements logging an epoch-level metric."""
         ...
 
     def add_epoch_metrics(
         self, name: str, tag_scalar_dict: dict[str, float], step: int
     ):
+        ...
+    
+    def add_epoch_param(self, name: str, value: float, step: int):
+        """Implements logging an epoch-level parameter."""
         ...
 
     # def add_epoch_confusion_matrix(

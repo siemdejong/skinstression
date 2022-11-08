@@ -101,6 +101,10 @@ class TensorboardExperiment:
         self._writer.add_scalars(
             main_tag=main_tag, tag_scalar_dict=tag_scalar_dict, global_step=step
         )
+    
+    def add_epoch_param(self, name: str, value: float, step: int) -> None:
+        tag = f"epoch/{name}"
+        self._writer.add_scalar(tag, value, step)
 
     def add_train_val_epoch_metrics(
         self, name: str, train_value: float, val_value: float, step: int

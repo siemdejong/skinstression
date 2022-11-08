@@ -176,6 +176,8 @@ class Trainer:
 
         # Run epochs.
         for epoch_id in range(self.cfg.params.epoch_count):
+            tracker.add_epoch_param("lr", scheduler.get_last_lr()[0], epoch_id)
+
             train_runner.loader.sampler.set_epoch(epoch_id)
             val_runner.loader.sampler.set_epoch(epoch_id)
             run_epoch(
