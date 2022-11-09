@@ -81,6 +81,7 @@ Using a large set of strain-stress and SHG of human skin tissue, a deep neural n
 
 [![Python][Python]][Python-url]
 [![PyTorch][PyTorch]][Pytorch-url]
+[![TensorFlow][TensorFlow]][TensorFlow-url]
 [![Optuna][Optuna]][Optuna-url]
 [![scikit-learn][scikit-learn]][scikit-learn-url]
 [![Numpy][Numpy]][Numpy-url]
@@ -251,7 +252,9 @@ Project Link: [https://github.com/siemdejong/shg-strain-stress](https://github.c
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [PyTorch]: https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white
-[PyTorch-url]: https://pytorch.org
+[PyTorch-url]: https://www.tensorflow.org/
+[TensorFlow]: https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white
+[TensorFlow-url]: https://pytorch.org
 [Python]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [Python-url]: https://python.org
 [Numpy]: https://img.shields.io/badge/Numpy-013243?style=for-the-badge&logo=numpy&logoColor=white
