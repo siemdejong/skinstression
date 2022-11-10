@@ -152,6 +152,10 @@ Not necessarily needed, but the project provides jobscripts for easy job submiss
 
 TODO: show examples of optuna optimization, model training, and inference.
 
+### Image analysis
+A forked version of [pyimagequalityranking](https://github.com/siemdejong/pyimagequalityranking/tree/bmp-support) supports loading of bitmap images.
+To run analysis on all subdirectories containing different image stacks, run `./analyze_images.sh`.
+
 ### Optuna hyperparameter optimization
 
 Set `mode: TUNE` in `config.yaml` to enable hyperparameter tuning.
