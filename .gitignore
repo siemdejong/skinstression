@@ -5,6 +5,8 @@ config.yaml
 runs
 data
 slurm
+image_analysis_stout.txt
+image_analysis_stderr.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
