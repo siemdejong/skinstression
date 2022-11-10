@@ -1,0 +1,4 @@
+[submodule "pyimq"]
+	path = pyimq
+	url = https://github.com/siemdejong/pyimagequalityranking.git
+	branch = bmp-support
