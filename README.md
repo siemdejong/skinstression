@@ -91,6 +91,7 @@ Using a large set of strain-stress and SHG of human skin tissue, a deep neural n
 [![tqdm][tqdm]][tqdm-url]
 [![matplotlib][matplotlib]][matplotlib-url]
 [![plotly][plotly]][plotly-url]
+[![pyimq][pyimq]][pyimq-url]
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -257,6 +258,8 @@ Project Link: [https://github.com/siemdejong/shg-strain-stress](https://github.c
 [Next-url]: https://nextjs.org/
 [PyTorch]: https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white
 [PyTorch-url]: https://www.tensorflow.org/
+[pyimq]: https://img.shields.io/badge/pyimq-1689a0?style=for-the-badge&logo=pyimq&logoColor=white
+[pyimq-url]: https://github.com/sakoho81/pyimagequalityranking
 [TensorFlow]: https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white
 [TensorFlow-url]: https://pytorch.org
 [Python]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
