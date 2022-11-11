@@ -279,69 +279,8 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 </dd></dl>
 
 </section>
-<section id="module-src.ds.hyperparameters">
-<span id="src-ds-hyperparameters-module"></span><h2>src.ds.hyperparameters module<a class="headerlink" href="#module-src.ds.hyperparameters" title="Permalink to this heading">#</a></h2>
-<p>Implements a hyperparameter opimization algorithm using Optuna.
-Copyright (C) 2022  Siem de Jong</p>
-<p>This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.</p>
-<p>This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.</p>
-<p>You should have received a copy of the GNU General Public License
-along with this program. If not, see &lt;<a class="reference external" href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/</a>&gt;.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="src.ds.hyperparameters.Objective">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.ds.hyperparameters.</span></span><span class="sig-name descname"><span class="pre">Objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig" title="src.conf.config.THGStrainStressConfig"><span class="pre">THGStrainStressConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.hyperparameters.Objective" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Provides the callable Optuna objective.
-Data is loaded only once and attached to the objective.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.ds.hyperparameters.build_model">
-<span class="sig-prename descclassname"><span class="pre">src.ds.hyperparameters.</span></span><span class="sig-name descname"><span class="pre">build_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hparams</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig" title="src.conf.config.THGStrainStressConfig"><span class="pre">THGStrainStressConfig</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.hyperparameters.build_model" title="Permalink to this definition">#</a></dt>
-<dd><p>Build model within an Optuna trial.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>hparams</strong> – Dict of parameters (including those to be optimized by Optuna).</p></li>
-<li><p><strong>cfg</strong> – Configuration object.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <cite>nn.Sequential</cite> of all parameterized layers.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>model</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.ds.hyperparameters.tune_hyperparameters">
-<span class="sig-prename descclassname"><span class="pre">src.ds.hyperparameters.</span></span><span class="sig-name descname"><span class="pre">tune_hyperparameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_rank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">world_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="src.conf.html#src.conf.config.THGStrainStressConfig" title="src.conf.config.THGStrainStressConfig"><span class="pre">THGStrainStressConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_queue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Queue</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.hyperparameters.tune_hyperparameters" title="Permalink to this definition">#</a></dt>
-<dd><p>Optimize parameters using an objective function and Optuna.
-All configurations are overwritten during optimization.
-Number of Optuna trials is given by cfg.optuna.trials.
-Optimal hyperparameters are logged.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>local_rank</strong> – the GPU rank on the node.</p></li>
-<li><p><strong>world_size</strong> – the number of GPUs on the node.</p></li>
-<li><p><strong>cfg</strong> – configuration object containing cfg.paths.[data, target]
-and optuna hyperparameter space.</p></li>
-<li><p><strong>log_queue</strong> – a queue for logging to push their messages to.
-Can be created by <cite>setup_primary_logging()</cite>.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
+<section id="src-ds-hyperparameters-module">
+<h2>src.ds.hyperparameters module<a class="headerlink" href="#src-ds-hyperparameters-module" title="Permalink to this heading">#</a></h2>
 </section>
 <section id="module-src.ds.metrics">
 <span id="src-ds-metrics-module"></span><h2>src.ds.metrics module<a class="headerlink" href="#module-src.ds.metrics" title="Permalink to this heading">#</a></h2>
@@ -509,12 +448,12 @@ SOFTWARE.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.ds.runner.Runner.save_checkpoint">
-<span class="sig-name descname"><span class="pre">save_checkpoint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.runner.Runner.save_checkpoint" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">save_checkpoint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.ds.runner.Runner.save_checkpoint" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.ds.runner.Runner.should_save">
-<span class="sig-name descname"><span class="pre">should_save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.runner.Runner.should_save" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">should_save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.ds.runner.Runner.should_save" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -950,12 +889,7 @@ Plots are opened in an external browser at ports opened by Plotly.</p>
 <li><a class="reference internal" href="#src.ds.functions.sigmoid"><code class="docutils literal notranslate"><span class="pre">sigmoid()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-src.ds.hyperparameters">src.ds.hyperparameters module</a><ul>
-<li><a class="reference internal" href="#src.ds.hyperparameters.Objective"><code class="docutils literal notranslate"><span class="pre">Objective</span></code></a></li>
-<li><a class="reference internal" href="#src.ds.hyperparameters.build_model"><code class="docutils literal notranslate"><span class="pre">build_model()</span></code></a></li>
-<li><a class="reference internal" href="#src.ds.hyperparameters.tune_hyperparameters"><code class="docutils literal notranslate"><span class="pre">tune_hyperparameters()</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#src-ds-hyperparameters-module">src.ds.hyperparameters module</a></li>
 <li><a class="reference internal" href="#module-src.ds.metrics">src.ds.metrics module</a><ul>
 <li><a class="reference internal" href="#src.ds.metrics.Metric"><code class="docutils literal notranslate"><span class="pre">Metric</span></code></a><ul>
 <li><a class="reference internal" href="#src.ds.metrics.Metric.average"><code class="docutils literal notranslate"><span class="pre">Metric.average</span></code></a></li>
