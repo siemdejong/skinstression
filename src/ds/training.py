@@ -38,7 +38,7 @@ from ds.dataset import THGStrainStressDataset
 from ds.models import THGStrainStressCNN
 from ds.runner import Runner, Stage, run_epoch
 from ds.tensorboard import TensorboardExperiment
-from ds.loss import weighted_l1_loss
+from ds.loss import weighted_fr_dist
 from ds.utils import seed_all, ddp_cleanup, ddp_setup
 from ds.logging_setup import setup_worker_logging
 from ds.cross_validation import CrossRunner
@@ -101,7 +101,7 @@ class Trainer:
             model_sync_bathchnorm = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
             model = DDP(model_sync_bathchnorm.to(local_rank), device_ids=[local_rank])
 
-            loss_fn = weighted_l1_loss  # MAE.
+            loss_fn = weighted_fr_dist
             optimizer = getattr(torch.optim, self.cfg.params.optimizer.name)(
                 model.parameters(),
                 lr=self.cfg.params.optimizer.lr,
