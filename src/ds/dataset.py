@@ -180,13 +180,17 @@ class THGStrainStressDataset(Dataset[Any]):
                 [
                     # TODO: Insert some data augmentation transforms.
                     # NOTE: Without transforms.Normalize, min-maxnormalization is used.
+                    # NOTE: If using values below, be careful to not leak information
+                    # from the val/test sets to the training set.
                     # transforms.Normalize(
                     #     mean=(3.80627821e1, 0, 1.24499975e-2),
                     #     std=(42.51551508, 0, 0.19324445),
                     # ),
+                    transforms.ColorJitter(brightness=0.3),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.RandomVerticalFlip(),
                     transforms.Grayscale(),
                     transforms.ToTensor(),
-                    # transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
                 ]
             )
         else:
@@ -198,7 +202,6 @@ class THGStrainStressDataset(Dataset[Any]):
                     # ),
                     transforms.Grayscale(),
                     transforms.ToTensor(),
-                    # transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
                 ]
             )
         return transform

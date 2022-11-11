@@ -45,17 +45,16 @@ from ds.cross_validation import CrossRunner
 
 
 class Trainer:
-    def __init__(self, dataset, groups, cfg: THGStrainStressConfig):
+    def __init__(self, dataset_train, dataset_val, groups, cfg: THGStrainStressConfig):
         self.cfg = cfg
-        self.dataset = dataset
         if self.cfg.try_overfit:
-            self.train_subset = Subset(dataset, indices=[0, 1])
-            self.val_subset = Subset(dataset, indices=[0, 1])
+            self.train_subset = Subset(dataset_train, indices=[0, 1])
+            self.val_subset = Subset(dataset_val, indices=[0, 1])
         else:
             # Split the dataset in train, validation and test (sub)sets.
-            train_val_size = int(len(dataset) * 0.8)
+            train_val_size = int(len(dataset_train) * 0.8)
             train_val_idx, test_idx = train_test_split(
-                np.arange(len(dataset)),
+                np.arange(len(dataset_train)),
                 train_size=train_val_size,
                 stratify=groups,
                 shuffle=True,
@@ -75,10 +74,12 @@ class Trainer:
             logging.debug(f"val idx: {val_idx}")
             logging.debug(f"test idx: {test_idx}")
 
-            self.train_val_subset = Subset(dataset, indices=train_val_idx)
-            self.train_subset = Subset(dataset, indices=train_idx)
-            self.val_subset = Subset(dataset, indices=val_idx)
-            self.test_subset = Subset(dataset, indices=test_idx)
+            # TODO: CROSSRUNNERS NOW ONLY USE NON-AUGMENTED DATA!
+            self.train_val_subset = Subset(dataset_val, indices=train_val_idx)
+            self.train_subset = Subset(dataset_train, indices=train_idx)
+            self.val_subset = Subset(dataset_val, indices=val_idx)
+            # dataset_val has the same augmentations as the testset
+            self.test_subset = Subset(dataset_val, indices=test_idx)
 
     def __call__(
         self,
@@ -96,7 +97,6 @@ class Trainer:
                 self.train_val_subset, local_rank, world_size
             )
         else:
-            # NOTE: BELOW SHOULD ACTUALLY BE CROSS-RUNNER WITH NSPLITS=1
             model = THGStrainStressCNN(self.cfg)
             model_sync_bathchnorm = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
             model = DDP(model_sync_bathchnorm.to(local_rank), device_ids=[local_rank])
@@ -247,15 +247,27 @@ def train(
 
     # Initialize process group
     ddp_setup(global_rank, world_size)
-    # Load dataset.
-    dataset, groups = THGStrainStressDataset.load_data(
+    # Load datasets.
+    # Careful: dataset_train and _val contain the same data,
+    # but the augmentations are diffent.
+    # Data still needs to be randomly split by Trainer.
+    dataset_train, groups = THGStrainStressDataset.load_data(
         split="train",
         data_path=cfg.paths.data,
         targets_path=cfg.paths.targets,
         reweight="sqrt_inv",
         lds=True,
     )
-    trainer = Trainer(dataset, groups, cfg)
+
+    dataset_val, _ = THGStrainStressDataset.load_data(
+        split="validation",
+        data_path=cfg.paths.data,
+        targets_path=cfg.paths.targets,
+        reweight="sqrt_inv",
+        lds=True,
+    )
+
+    trainer = Trainer(dataset_train, dataset_val, groups, cfg)
     if cross_validation:
         cross_runner = CrossRunner.StratifiedKFold(n_splits=5, groups=groups, cfg=cfg)
     else:
