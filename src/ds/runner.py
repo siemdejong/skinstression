@@ -74,6 +74,8 @@ class Runner:
         self.lowest_loss = np.inf
         self.optimizer = optimizer
         self.scheduler = scheduler
+        self.current_lr = scheduler.get_last_lr()[0]
+        self.restart_count = 0
         self.local_rank = local_rank
         self.stage = stage
         self.disable_progress_bar = not progress_bar
@@ -132,15 +134,16 @@ class Runner:
             if self.local_rank == 0:
                 experiment.add_batch_metric("loss", loss.detach(), self.run_count)
 
+        if self.scheduler and self.optimizer:
+            self.current_lr = self.next_lr
+            self.scheduler.step()
+            self.next_lr = self.scheduler.get_last_lr()[0]
+
         # Only let 1 process save checkpoints.
         # The current runner must be a validation runner
         # Check only every epoch.
         if self.local_rank == 0 and self.stage == Stage.VAL:
-            if self.should_save():
-                self.save_checkpoint()
-
-        if self.scheduler and self.optimizer:
-            self.scheduler.step()
+            self.save_checkpoint()
 
     def _run_single(self, x: Any, y: Any, w: float):
         """
@@ -157,33 +160,50 @@ class Runner:
     def reset(self):
         self.loss_metric = Metric()
 
-    def should_save(self):
-        if self.loss_metric.average < self.lowest_loss:
+    def should_save(self) -> Union[str, None]:
+        new_low = self.loss_metric.average < self.lowest_loss
+        restart = self.next_lr > self.current_lr
+        if new_low and restart:
+            return "low_and_restart"
+        elif new_low:
             self.lowest_loss = self.loss_metric.average
-            return True
+            return "low"
+        elif restart:
+            # Saving an ensemble of models right before restarts gives ability
+            # to average over multiple good models:
+            # https://arxiv.org/pdf/1704.00109.pdf.
+            self.restart_count += 1
+            return f"restart-{self.restart_count}"
         else:
-            return False
+            return None
 
-    def save_checkpoint(self):
-        state: dict[str, Union[int, dict[str, Any]]] = {
-            "epoch": self.epoch_id,
-            "model_state_dict": self.model.state_dict(),
-        }
+    def save_checkpoint(self) -> None:
 
-        if self.optimizer:
-            state["optimizer_state_dict"] = self.optimizer.state_dict()
+        # First check if the checkpoint needs saving.
+        # Return checkpoint filename.
+        checkpoint_fn = self.should_save()
 
-        if self.scaler.is_enabled():
-            state["scaler_state_dict"] = self.scaler.state_dict()
+        # should_save returns None if saving is not needed.
+        if checkpoint_fn:
+            state: dict[str, Union[int, dict[str, Any]]] = {
+                "epoch": self.epoch_id,
+                "model_state_dict": self.model.state_dict(),
+            }
 
-        if self.scheduler:
-            state["scheduler_state_dict"] = self.scheduler.state_dict()
+            if self.optimizer:
+                state["optimizer_state_dict"] = self.optimizer.state_dict()
 
-        torch.save(
-            state,
-            f"{os.getcwd()}/checkpoint.pt",  # os.getcwd() is set by Hydra to 'outputs'.
-        )
-        logging.info(f"Checkpoint saved at epoch {self.epoch_id}.")
+            if self.scaler.is_enabled():
+                state["scaler_state_dict"] = self.scaler.state_dict()
+
+            if self.scheduler:
+                state["scheduler_state_dict"] = self.scheduler.state_dict()
+
+            torch.save(
+                state,
+                f"{os.getcwd()}/{checkpoint_fn}.pt",  # os.getcwd() is set by Hydra to 'outputs'.
+            )
+            logging.info(f"Checkpoint saved at epoch {self.epoch_id}.")
 
     def load_checkpoint(self, path: str):
         # NOTE: consume_prefix_in_state_dict_if_present() should be used
