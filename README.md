@@ -13,12 +13,12 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <!-- <a href="https://github.com/siemdejong/shg-strain-stress">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a> -->
+  <a href="https://github.com/siemdejong/shg-strain-stress">
+    <img src="images/skinstression-logo.png" alt="Logo" width="80" height="80">
+  </a>
 
 
-<h2 align="center">Restression</h2>
+<h2 align="center">Skinstression</h2>
 <h3 align="center">Perform strain-stress curve regression on SHG images</h3>
 
   <p align="center">
