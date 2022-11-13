@@ -189,7 +189,7 @@ class THGStrainStressDataset(Dataset[Any]):
                     transforms.ColorJitter(brightness=0.3),
                     transforms.RandomHorizontalFlip(),
                     transforms.RandomVerticalFlip(),
-                    transforms.Grayscale(),
+                    # transforms.Grayscale(),
                     transforms.ToTensor(),
                 ]
             )

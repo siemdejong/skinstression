@@ -1,6 +1,7 @@
 *.db
 sigmoid_labels.csv
 outputs
+multirun
 config.yaml
 runs
 data

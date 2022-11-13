@@ -42,7 +42,7 @@ import torch
 import torch.nn.functional as F
 from frechetdist import frdist
 import numpy as np
-from functions import logistic
+from ds.functions import logistic
 
 
 def weighted_l1_loss(prediction, targets, weights=None):
@@ -53,11 +53,18 @@ def weighted_l1_loss(prediction, targets, weights=None):
     return loss
 
 
-def weighted_fr_dist(prediction, targets, start=0, end=1.6, num=200, weights=None):
+def weighted_fr_dist(
+    prediction,
+    targets,
+    weights=None,
+    start: float = 0,
+    end: float = 1.6,
+    num: int = 200,
+):
     # Fréchet distance requires two curves.
-    x = torch.linspace(start, end, num, device="cuda")
-    input_curve = logistic(x, *prediction)
-    target_curve = logistic(x, *targets)
+    x = np.linspace(start, end, num)
+    input_curve = logistic(x, *prediction.detach().cpu().numpy())
+    target_curve = logistic(x, *targets.detach().cpu().numpy())
 
     loss = frdist(input_curve, target_curve)
 

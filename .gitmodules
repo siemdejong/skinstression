@@ -5,3 +5,4 @@
 [submodule "hydra-torchrun-launcher"]
 	path = hydra-torchrun-launcher
 	url = https://github.com/siemdejong/hydra-torchrun-launcher
+	branch = torchrun-launcher-only

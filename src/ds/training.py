@@ -30,6 +30,7 @@ from torch.utils.data import Subset, DataLoader
 from torch.multiprocessing import Queue
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data.distributed import DistributedSampler
+from torch.distributed.elastic.multiprocessing.errors import record
 from sklearn.model_selection import train_test_split
 import numpy as np
 
@@ -38,7 +39,7 @@ from ds.dataset import THGStrainStressDataset
 from ds.models import THGStrainStressCNN
 from ds.runner import Runner, Stage, run_epoch
 from ds.tensorboard import TensorboardExperiment
-from ds.loss import weighted_fr_dist
+from ds.loss import weighted_fr_dist, weighted_l1_loss
 from ds.utils import seed_all, ddp_cleanup, ddp_setup
 from ds.logging_setup import setup_worker_logging
 from ds.cross_validation import CrossRunner
@@ -83,6 +84,7 @@ class Trainer:
 
     def __call__(
         self,
+        global_rank: int,
         local_rank: int,
         world_size: int,
         cross_runner: Optional[CrossRunner] = None,
@@ -101,7 +103,7 @@ class Trainer:
             model_sync_bathchnorm = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
             model = DDP(model_sync_bathchnorm.to(local_rank), device_ids=[local_rank])
 
-            loss_fn = weighted_fr_dist
+            loss_fn = weighted_l1_loss
             optimizer = getattr(torch.optim, self.cfg.params.optimizer.name)(
                 model.parameters(),
                 lr=self.cfg.params.optimizer.lr,
@@ -126,7 +128,7 @@ class Trainer:
             train_loader = DataLoader(
                 self.train_subset,
                 batch_size=int(self.cfg.params.batch_size),
-                num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
+                num_workers=int(os.environ.get("SLURM_CPUS_PER_GPU")),
                 persistent_workers=True,
                 pin_memory=True,
                 shuffle=False,  # The distributed sampler shuffles for us.
@@ -135,7 +137,7 @@ class Trainer:
             val_loader = DataLoader(
                 self.val_subset,
                 batch_size=int(self.cfg.params.batch_size),
-                num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
+                num_workers=int(os.environ.get("SLURM_CPUS_PER_GPU")),
                 persistent_workers=True,
                 pin_memory=True,
                 shuffle=False,  # The distributed sampler shuffles for us.
@@ -150,6 +152,7 @@ class Trainer:
                 stage=Stage.TRAIN,
                 optimizer=optimizer,
                 scheduler=scheduler,
+                global_rank=global_rank,
                 local_rank=local_rank,
                 progress_bar=False,
                 scaler=scaler,
@@ -160,6 +163,7 @@ class Trainer:
                 model=model,
                 loss_fn=loss_fn,
                 stage=Stage.VAL,
+                global_rank=global_rank,
                 local_rank=local_rank,
                 progress_bar=False,
                 scaler=scaler,
@@ -171,24 +175,25 @@ class Trainer:
             val_runner.load_checkpoint(self.cfg.paths.checkpoint)
 
         # Setup the experiment tracker
-        log_dir = os.getcwd() + "/tensorboard"
-        tracker = TensorboardExperiment(log_path=log_dir)
+        if global_rank == 0:
+            log_dir = os.getcwd() + "/tensorboard"
+            tracker = TensorboardExperiment(log_path=log_dir)
+        else:
+            tracker = None
 
         # Run epochs.
         for epoch_id in range(self.cfg.params.epoch_count):
-            tracker.add_epoch_param("lr", scheduler.get_last_lr()[0], epoch_id)
 
             train_runner.loader.sampler.set_epoch(epoch_id)
             val_runner.loader.sampler.set_epoch(epoch_id)
             run_epoch(
                 val_runner=val_runner,
                 train_runner=train_runner,
-                experiment=tracker,
                 epoch_id=epoch_id,
-                local_rank=local_rank,
+                experiment=tracker,
             )
 
-            if local_rank == 0:
+            if global_rank == 0:
                 train_loss = train_runner.avg_loss
                 val_loss = val_runner.avg_loss
 
@@ -210,7 +215,7 @@ class Trainer:
         test_loader = DataLoader(
             self.test_subset,
             batch_size=int(self.cfg.params.batch_size),
-            num_workers=int(os.environ.get("SLURM_CPUS_ON_NODE")) // world_size,
+            num_workers=int(os.environ.get("SLURM_CPUS_PER_GPU")),
             pin_memory=True,
         )
         test_runner = Runner(
@@ -227,7 +232,9 @@ class Trainer:
         test_runner.load_checkpoint(self.cfg.paths.checkpoint)
 
 
+@record
 def train(
+    global_rank: int,
     local_rank: int,
     world_size: int,
     cfg: THGStrainStressConfig,
@@ -235,18 +242,18 @@ def train(
     cross_validation: bool = False,
 ):
 
-    global_rank = int(os.environ["SLURM_RANK"]) * cfg.dist.gpus_per_node + local_rank
+    # Initialize process group
+    ddp_setup(global_rank, world_size)
 
     # Setup logging.
-    setup_worker_logging(local_rank, log_queue, cfg.debug)
+    setup_worker_logging(global_rank, log_queue, cfg.debug)
 
     # Set and seed device
     torch.cuda.set_device(local_rank)
-    logging.info(f"Hello from device {global_rank} of {world_size}")
     seed_all(cfg.seed)
 
-    # Initialize process group
-    ddp_setup(global_rank, world_size)
+    logging.info(f"Hello from global rank: {global_rank}/{world_size}")
+
     # Load datasets.
     # Careful: dataset_train and _val contain the same data,
     # but the augmentations are diffent.
@@ -273,8 +280,9 @@ def train(
     else:
         cross_runner = None
     trainer(
-        local_rank,
-        world_size,
+        global_rank=global_rank,
+        local_rank=local_rank,
+        world_size=world_size,
         cross_runner=cross_runner,
         from_checkpoint=cfg.load_checkpoint,
     )

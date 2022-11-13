@@ -34,7 +34,7 @@ cs = ConfigStore.instance()
 cs.store(name="thg_strain_stress_config", node=THGStrainStressConfig)
 
 
-@hydra.main(version_base=None, config_path="conf", config_name="config")
+@hydra.main(version_base="1.1", config_path="conf", config_name="config")
 def main(cfg: THGStrainStressConfig) -> None:
     """
     This is the main entry point for the THG strain stress project.
@@ -53,6 +53,7 @@ def main(cfg: THGStrainStressConfig) -> None:
     # Sources:
     #   https://tuni-itc.github.io/wiki/Technical-Notes/Distributed_dataparallel_pytorch/
     #   https://yangkky.github.io/2019/07/08/distributed-pytorch-tutorial.html
+    #   https://lambdalabs.com/blog/multi-node-pytorch-distributed-training-guide
 
     # Initialize the primary logging handlers. Worker processes may use
     # the `log_queue` to push their messages to the same log file.
@@ -78,21 +79,30 @@ def main(cfg: THGStrainStressConfig) -> None:
             args=(cfg.dist.gpus_per_node, cfg, log_queue),
         )
     elif cfg.mode == Mode.TRAIN.name:
-        logging.info(
-            f"Processes will communicate with {os.environ['MASTER_ADDR']}:{os.environ['MASTER_PORT']}. "
-            "See Hydra output for worker log messages."
-        )
-        world_size = cfg.dist.gpus_per_node * cfg.dist.nodes
-        mp.spawn(
-            fn=train,
-            nprocs=cfg.dist.gpus_per_node,
-            args=(world_size, cfg, log_queue),
-        )
+        global_rank = int(os.environ["RANK"])
+        local_rank = int(os.environ["LOCAL_RANK"])
+        world_size = int(os.environ["WORLD_SIZE"])
+        train(global_rank, local_rank, world_size, cfg, log_queue)
+
+        # logging.info(
+        #     f"Processes will communicate with {os.environ['MASTER_ADDR']}:{os.environ['MASTER_PORT']}. "
+        #     "See Hydra output for worker log messages."
+        # )
+        # world_size = cfg.dist.gpus_per_node * cfg.dist.nodes
+        # mp.spawn(
+        #     fn=train,
+        #     nprocs=cfg.dist.gpus_per_node,
+        #     args=(world_size, cfg, log_queue),
+        # )
     elif cfg.mode == Mode.CROSS_VALIDATION.name:
-        world_size = cfg.dist.gpus_per_node * cfg.dist.nodes
+        # world_size = cfg.dist.gpus_per_node * cfg.dist.nodes
+        world_size = int(os.environ["SLURM_GPUS_PER_NODE"]) * int(
+            os.environ["SLURM_JOB_NUM_NODES"]
+        )
         mp.spawn(
             fn=train,
-            nprocs=cfg.dist.gpus_per_node,
+            # nprocs=cfg.dist.gpus_per_node,
+            nprocs=int(os.environ["SLURM_GPUS_PER_NODE"]),
             args=(world_size, cfg, log_queue, True),
         )
 

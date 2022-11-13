@@ -60,6 +60,7 @@ class Runner:
         loss_fn: torch.nn.Module,
         stage: Stage,
         scaler: torch.cuda.amp.GradScaler,
+        global_rank: int,
         local_rank: int,
         optimizer: Optional[torch.optim.Optimizer] = None,
         scheduler: Optional[Union[_LRScheduler, ReduceLROnPlateau]] = None,
@@ -74,8 +75,9 @@ class Runner:
         self.lowest_loss = np.inf
         self.optimizer = optimizer
         self.scheduler = scheduler
-        self.current_lr = scheduler.get_last_lr()[0]
+        self.next_lr = 0  # TODO: this is not actually 0...
         self.restart_count = 0
+        self.global_rank = global_rank
         self.local_rank = local_rank
         self.stage = stage
         self.disable_progress_bar = not progress_bar
@@ -125,24 +127,22 @@ class Runner:
                 loss
             )  # TODO: MAKE SURE THIS ALL REDUCE LOSS IS WHAT WE WANT (AND NOT E.G. AVG)
 
-            if self.local_rank == 0:
-                logging.debug(f"    iteration: {batch_num} | loss: {loss}")
-
             # Compute Batch Validation Metrics
             self.loss_metric.update(loss.detach(), len(x))
 
-            if self.local_rank == 0:
+            if self.global_rank == 0:
+                logging.debug(f"    iteration: {batch_num} | loss: {loss}")
                 experiment.add_batch_metric("loss", loss.detach(), self.run_count)
 
         if self.scheduler and self.optimizer:
-            self.current_lr = self.next_lr
+            self.current = self.next_lr
             self.scheduler.step()
             self.next_lr = self.scheduler.get_last_lr()[0]
 
         # Only let 1 process save checkpoints.
         # The current runner must be a validation runner
         # Check only every epoch.
-        if self.local_rank == 0 and self.stage == Stage.VAL:
+        if self.global_rank == 0 and self.stage == Stage.VAL:
             self.save_checkpoint()
 
     def _run_single(self, x: Any, y: Any, w: float):
@@ -242,16 +242,18 @@ def run_test(
 def run_epoch(
     val_runner: Runner,
     train_runner: Runner,
-    experiment: ExperimentTracker,
     epoch_id: int,
-    local_rank: int,
+    experiment: Optional[ExperimentTracker] = None,
 ) -> None:
+
     # Training Loop
-    experiment.set_stage(Stage.TRAIN)
+    if experiment:  # only global rank 0 does experiment tracking.
+        experiment.set_stage(Stage.TRAIN)
     train_runner.run("Train Batches", experiment, epoch_id)
 
-    if local_rank == 0:
+    if experiment:
         # Log Training Epoch Metrics
+        experiment.add_epoch_param("lr", train_runner.current_lr, epoch_id)
         experiment.add_epoch_logistic_curve(
             train_runner.prediction.detach().cpu(),
             train_runner.target.detach().cpu(),
@@ -260,11 +262,12 @@ def run_epoch(
 
     # TODO: Possibly only do validation once every x epochs.
     # Validation Loop
-    experiment.set_stage(Stage.VAL)
+    if experiment:
+        experiment.set_stage(Stage.VAL)
     with torch.no_grad():
         val_runner.run("Validation Batches", experiment, epoch_id)
 
-    if local_rank == 0:
+    if experiment:
         # Log Validation Epoch Metrics
         experiment.add_epoch_logistic_curve(
             val_runner.prediction.detach().cpu(),
