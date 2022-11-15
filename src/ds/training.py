@@ -103,7 +103,7 @@ class Trainer:
             model_sync_bathchnorm = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
             model = DDP(model_sync_bathchnorm.to(local_rank), device_ids=[local_rank])
 
-            loss_fn = weighted_l1_loss
+            loss_fn = getattr(loss_functions, self.cfg.params.loss_fn)
             optimizer = getattr(torch.optim, self.cfg.params.optimizer.name)(
                 model.parameters(),
                 lr=self.cfg.params.optimizer.lr,
@@ -221,7 +221,7 @@ class Trainer:
         test_runner = Runner(
             loader=test_loader,
             model=model,
-            loss_fn=weighted_l1_loss,
+            loss_fn=getattr(loss_functions, self.cfg.params.loss_fn),
             stage=Stage.TEST,
             local_rank=local_rank,
             progress_bar=False,

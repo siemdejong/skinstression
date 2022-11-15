@@ -60,6 +60,7 @@ class Params:
     model: Model
     optimizer: Optimizer
     scheduler: Scheduler
+    loss_fn: str
 
 
 @dataclass
