@@ -16,7 +16,7 @@ source /scistor/guest/sjg203/.bashrc
 # Uncomment if debugging parallel processes.
 # export NCCL_DEBUG=INFO
 # export NCCL_DEBUG_SUBSYS=ALL
-# export NCCL_ASYNC_ERROR_HANDLING=1
+# export TORCH_DISTRIBUTED_DEBUG=INFO
 
 export HYDRA_FULL_ERROR=1
 

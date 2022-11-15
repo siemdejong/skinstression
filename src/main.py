@@ -30,6 +30,8 @@ from ds.training import train
 from ds.utils import get_free_port, get_ip
 from ds.visualization import visualize
 
+log = logging.getLogger(__name__)
+
 cs = ConfigStore.instance()
 cs.store(name="thg_strain_stress_config", node=THGStrainStressConfig)
 
@@ -106,7 +108,7 @@ def main(cfg: THGStrainStressConfig) -> None:
             args=(world_size, cfg, log_queue, True),
         )
 
-    logging.info("All processes exited without critical errors.")
+    log.info("All processes exited without critical errors.")
 
 
 if __name__ == "__main__":

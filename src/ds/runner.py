@@ -50,6 +50,9 @@ from tqdm import tqdm
 
 from ds.metrics import Metric
 from ds.tracking import ExperimentTracker, Stage
+from ds.utils import reduce_tensor
+
+log = logging.getLogger(__name__)
 
 
 class Runner:
@@ -129,18 +132,17 @@ class Runner:
             self.loss_metric.update(loss.detach(), len(x))
 
             if self.global_rank == 0:
-                logging.debug(f"    iteration: {batch_num} | loss: {loss}")
+                log.debug(f"    iteration: {batch_num} | loss: {loss}")
                 experiment.add_batch_metric("loss", loss.detach(), self.run_count)
 
         if self.scheduler and self.optimizer:
-            self.current = self.next_lr
+            self.current_lr = self.next_lr
             self.scheduler.step()
             self.next_lr = self.scheduler.get_last_lr()[0]
 
         # Only let 1 process save checkpoints.
-        # The current runner must be a validation runner
-        # Check only every epoch.
-        if self.global_rank == 0 and self.stage == Stage.VAL:
+        # Checkpoint only once every epoch at the maximum.
+        if self.global_rank == 0:
             self.save_checkpoint()
 
     def _run_single(self, x: Any, y: Any, w: float):
@@ -158,22 +160,25 @@ class Runner:
     def reset(self):
         self.loss_metric = Metric()
 
-    def should_save(self) -> Union[str, None]:
-        new_low = self.loss_metric.average < self.lowest_loss
-        restart = self.next_lr > self.current_lr
-        if new_low and restart:
-            return "low_and_restart"
-        elif new_low:
-            self.lowest_loss = self.loss_metric.average
-            return "low"
-        elif restart:
-            # Saving an ensemble of models right before restarts gives ability
-            # to average over multiple good models:
-            # https://arxiv.org/pdf/1704.00109.pdf.
-            self.restart_count += 1
-            return f"restart-{self.restart_count}"
-        else:
-            return None
+    def should_save(self) -> str:
+        """Determine if a checkpoint should be saved because of a warm restart or a lowest loss."""
+
+        filename = None
+
+        # Only train runners hold scheduler information.
+        if self.stage is Stage.TRAIN:
+            restart = self.next_lr > self.current_lr
+            if restart:
+                filename = f"restart-{self.restart_count}"
+
+        # Only save lowest loss checkpoint based on validation loss.
+        elif self.stage is Stage.VAL:
+            new_low = self.loss_metric.average < self.lowest_loss
+            if new_low:
+                self.lowest_loss = self.loss_metric.average
+                filename = "low"
+
+        return filename
 
     def save_checkpoint(self) -> None:
 
@@ -201,7 +206,7 @@ class Runner:
                 state,
                 f"{os.getcwd()}/{checkpoint_fn}.pt",  # os.getcwd() is set by Hydra to 'outputs'.
             )
-            logging.info(f"Checkpoint saved at epoch {self.epoch_id}.")
+            log.info(f"Checkpoint '{checkpoint_fn}' saved at epoch {self.epoch_id}.")
 
     def load_checkpoint(self, path: str):
         # NOTE: consume_prefix_in_state_dict_if_present() should be used
@@ -301,7 +306,7 @@ def run_fold(
 
         experiment.add_fold_metric("loss", val_runner.avg_loss, fold_id)
 
-        logging.info(
+        log.info(
             summary(
                 train_runner,
                 val_runner,

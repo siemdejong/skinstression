@@ -30,6 +30,8 @@ from torch.utils.data import ConcatDataset, Dataset
 
 from ds.utils import get_lds_kernel_window, sturge
 
+log = logging.getLogger(__name__)
+
 
 class THGStrainStressDataset(Dataset[Any]):
     def __init__(
@@ -126,7 +128,7 @@ class THGStrainStressDataset(Dataset[Any]):
             # minlength so extrapolation is possible.
             emp_target_dist = np.bincount(bin_index_per_target, minlength=len(edges))
 
-            logging.info(f"Using re-weighting: [{reweight.upper()}]")
+            log.info(f"Using re-weighting: [{reweight.upper()}]")
             if reweight == "sqrt_inv":
                 emp_target_dist = np.sqrt(emp_target_dist)
             elif reweight == "inv":
@@ -143,7 +145,7 @@ class THGStrainStressDataset(Dataset[Any]):
                 lds_sigma = param_sigma.get(param)
             else:
                 lds_sigma = 2
-            logging.info(
+            log.info(
                 f"LDS: {param} "
                 + f"| kernel: {lds_kernel.upper()} "
                 + f"| param roi: {edges[0]:.2f}-{edges[-1]:.2f} "
@@ -273,7 +275,7 @@ class THGStrainStressDataset(Dataset[Any]):
             targets = labels[["a", "k", "xc"]].to_numpy(dtype=float)
 
             if not (Path(data_path) / str(folder)).is_dir():
-                logging.error(
+                log.error(
                     f"{Path(data_path) / str(folder)} will be excluded "
                     f"because it is not found."
                 )
@@ -290,7 +292,7 @@ class THGStrainStressDataset(Dataset[Any]):
             # Dirty way of checking if data is compatible with model.
             valid_shape = (1, 1000, 1000)
             if not dataset[0][0].shape == valid_shape:
-                logging.error(
+                log.error(
                     f"{Path(data_path) / str(folder)} will be excluded "
                     f"because the data of size {dataset[0][0].shape} "
                     "is incompatible with the model."

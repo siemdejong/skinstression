@@ -199,6 +199,15 @@ Available optimization visualizations will show in the browser.
 
 _For more examples, please refer to the [documentation](https://siemdejong.github.io/shg-strain-stress)._
 
+### Tensorboard
+To visualize experiments, Tensorboard summaries are written at runtime.
+To open, run
+```bash
+tensorboard --logdir <output-log-directory>
+```
+To scroll through more epoch graphs, add `--samples_per_plugin=images=100` to the above command.
+For more Tensorboard configurations, run `tensorboard --help`.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
@@ -232,7 +241,7 @@ Contribute using the following steps.
 <!-- ETYMOLOGY -->
 ## Etymology
 Skinstression is a combination of skin, stress and regression.
-Second-harmonic generation images next and corresponding stress curves form the basis of the regression task.
+Second-harmonic generation images and their corresponding stress curves form the basis of the regression task.
 
 
 <!-- LICENSE -->

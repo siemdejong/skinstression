@@ -39,10 +39,12 @@ from ds.dataset import THGStrainStressDataset
 from ds.models import THGStrainStressCNN
 from ds.runner import Runner, Stage, run_epoch
 from ds.tensorboard import TensorboardExperiment
-from ds.loss import weighted_fr_dist, weighted_l1_loss
+from ds import loss as loss_functions
 from ds.utils import seed_all, ddp_cleanup, ddp_setup
 from ds.logging_setup import setup_worker_logging
 from ds.cross_validation import CrossRunner
+
+log = logging.getLogger(__name__)
 
 
 class Trainer:
@@ -71,9 +73,9 @@ class Trainer:
                 random_state=cfg.seed,
             )
 
-            logging.debug(f"train idx: {train_idx}")
-            logging.debug(f"val idx: {val_idx}")
-            logging.debug(f"test idx: {test_idx}")
+            log.debug(f"train idx: {train_idx}")
+            log.debug(f"val idx: {val_idx}")
+            log.debug(f"test idx: {test_idx}")
 
             # TODO: CROSSRUNNERS NOW ONLY USE NON-AUGMENTED DATA!
             self.train_val_subset = Subset(dataset_val, indices=train_val_idx)
@@ -197,12 +199,13 @@ class Trainer:
                 train_loss = train_runner.avg_loss
                 val_loss = val_runner.avg_loss
 
-                logging.info(f"epoch: {epoch_id} | train loss: {train_loss}")
-                logging.info(f"epoch: {epoch_id} | validation loss: {val_loss}")
+                log.info(f"epoch: {epoch_id} | train loss: {train_loss}")
+                log.info(f"epoch: {epoch_id} | validation loss: {val_loss}")
 
             train_runner.reset()
             val_runner.reset()
 
+        if tracker:
             tracker.flush()
 
     def test(self, local_rank: int, world_size: int):
@@ -252,7 +255,7 @@ def train(
     torch.cuda.set_device(local_rank)
     seed_all(cfg.seed)
 
-    logging.info(f"Hello from global rank: {global_rank}/{world_size}")
+    log.info(f"Hello from global rank: {global_rank}/{world_size}")
 
     # Load datasets.
     # Careful: dataset_train and _val contain the same data,
