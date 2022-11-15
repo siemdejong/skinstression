@@ -453,8 +453,9 @@ SOFTWARE.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.ds.runner.Runner.should_save">
-<span class="sig-name descname"><span class="pre">should_save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.ds.runner.Runner.should_save" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">should_save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.ds.runner.Runner.should_save" title="Permalink to this definition">#</a></dt>
+<dd><p>Determine if a checkpoint should be saved because of a warm restart or a lowest loss.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -771,6 +772,18 @@ SOFTWARE.</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="src.ds.utils.reduce_tensor">
+<span class="sig-prename descclassname"><span class="pre">src.ds.utils.</span></span><span class="sig-name descname"><span class="pre">reduce_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.utils.reduce_tensor" title="Permalink to this definition">#</a></dt>
+<dd><p>When calling all_reduce(), tensors get reduced to their sum.
+However, it is more interesting to see what the average tensor is for the loss e.g.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tensor</strong> – tensor to be reduced.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="src.ds.utils.seed_all">
 <span class="sig-prename descclassname"><span class="pre">src.ds.utils.</span></span><span class="sig-name descname"><span class="pre">seed_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.utils.seed_all" title="Permalink to this definition">#</a></dt>
 <dd><p>Seed the current device.
@@ -972,6 +985,7 @@ Plots are opened in an external browser at ports opened by Plotly.</p>
 <li><a class="reference internal" href="#src.ds.utils.get_lds_kernel_window"><code class="docutils literal notranslate"><span class="pre">get_lds_kernel_window()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.utils.increment_experiment_number"><code class="docutils literal notranslate"><span class="pre">increment_experiment_number()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.utils.is_first_experiment"><code class="docutils literal notranslate"><span class="pre">is_first_experiment()</span></code></a></li>
+<li><a class="reference internal" href="#src.ds.utils.reduce_tensor"><code class="docutils literal notranslate"><span class="pre">reduce_tensor()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.utils.seed_all"><code class="docutils literal notranslate"><span class="pre">seed_all()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.utils.sturge"><code class="docutils literal notranslate"><span class="pre">sturge()</span></code></a></li>
 </ul>
