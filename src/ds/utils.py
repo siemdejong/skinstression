@@ -132,6 +132,20 @@ def ddp_cleanup():
     dist.destroy_process_group()
 
 
+def reduce_tensor(tensor):
+    """When calling all_reduce(), tensors get reduced to their sum.
+    However, it is more interesting to see what the average tensor is for the loss e.g.
+
+    Args:
+        tensor: tensor to be reduced.
+    """
+    cloned_tensor = tensor.clone()
+    dist.all_reduce(cloned_tensor, op=dist.ReduceOp.SUM)
+    reduced_tensor = cloned_tensor / dist.get_world_size()
+
+    return reduced_tensor
+
+
 def get_ip():
     hostname = socket.gethostname()
     ip_addr = socket.gethostbyname(hostname)

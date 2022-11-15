@@ -123,9 +123,7 @@ class Runner:
 
             # The distributed validation losses must be reduced to the same loss.
             # Doesn't seem to be implemented for the scaler.scale().backward() call, sadly.
-            dist.all_reduce(
-                loss
-            )  # TODO: MAKE SURE THIS ALL REDUCE LOSS IS WHAT WE WANT (AND NOT E.G. AVG)
+            reduce_tensor(loss)
 
             # Compute Batch Validation Metrics
             self.loss_metric.update(loss.detach(), len(x))
