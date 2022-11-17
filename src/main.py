@@ -29,6 +29,7 @@ from ds.logging_setup import setup_primary_logging
 from ds.training import train
 from ds.utils import get_free_port, get_ip
 from ds.visualization import visualize
+from tests.benchmark_num_workers import benchmark_num_workers
 
 log = logging.getLogger(__name__)
 
@@ -81,10 +82,16 @@ def main(cfg: THGStrainStressConfig) -> None:
             args=(cfg.dist.gpus_per_node, cfg, log_queue),
         )
     elif cfg.mode == Mode.TRAIN.name:
-        global_rank = int(os.environ["RANK"])
-        local_rank = int(os.environ["LOCAL_RANK"])
-        world_size = int(os.environ["WORLD_SIZE"])
-        train(global_rank, local_rank, world_size, cfg, log_queue)
+        with torch.autograd.profiler.profile(
+            enabled=cfg.profiler.enable,
+            use_cuda=cfg.profiler.cuda,
+            profile_memory=cfg.profiler.memory,
+        ) as prof:
+            global_rank = int(os.environ["RANK"])
+            local_rank = int(os.environ["LOCAL_RANK"])
+            world_size = int(os.environ["WORLD_SIZE"])
+            train(global_rank, local_rank, world_size, cfg, log_queue)
+        log.info(prof.key_averages().table(sort_by="self_cpu_time_total"))
 
         # logging.info(
         #     f"Processes will communicate with {os.environ['MASTER_ADDR']}:{os.environ['MASTER_PORT']}. "
@@ -107,6 +114,8 @@ def main(cfg: THGStrainStressConfig) -> None:
             nprocs=int(os.environ["SLURM_GPUS_PER_NODE"]),
             args=(world_size, cfg, log_queue, True),
         )
+    elif cfg.mode == Mode.BENCHMARK_NUM_WORKERS.name:
+        benchmark_num_workers()
 
     log.info("All processes exited without critical errors.")
 

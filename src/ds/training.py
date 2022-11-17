@@ -129,8 +129,8 @@ class Trainer:
             # Define dataloaders
             train_loader = DataLoader(
                 self.train_subset,
-                batch_size=int(self.cfg.params.batch_size),
-                num_workers=int(os.environ.get("SLURM_CPUS_PER_GPU")),
+                batch_size=self.cfg.params.batch_size,
+                num_workers=self.cfg.dist.num_workers,
                 persistent_workers=True,
                 pin_memory=True,
                 shuffle=False,  # The distributed sampler shuffles for us.
@@ -138,8 +138,8 @@ class Trainer:
             )
             val_loader = DataLoader(
                 self.val_subset,
-                batch_size=int(self.cfg.params.batch_size),
-                num_workers=int(os.environ.get("SLURM_CPUS_PER_GPU")),
+                batch_size=self.cfg.params.batch_size,
+                num_workers=self.cfg.dist.num_workers,
                 persistent_workers=True,
                 pin_memory=True,
                 shuffle=False,  # The distributed sampler shuffles for us.
@@ -205,6 +205,9 @@ class Trainer:
             train_runner.reset()
             val_runner.reset()
 
+            if self.cfg.dry_run:
+                break
+
         if tracker:
             tracker.flush()
 
@@ -218,7 +221,7 @@ class Trainer:
         test_loader = DataLoader(
             self.test_subset,
             batch_size=int(self.cfg.params.batch_size),
-            num_workers=int(os.environ.get("SLURM_CPUS_PER_GPU")),
+            num_workers=self.cfg.dist.num_workers,
             pin_memory=True,
         )
         test_runner = Runner(

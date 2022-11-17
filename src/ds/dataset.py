@@ -19,6 +19,7 @@ import logging
 import os
 from pathlib import Path
 from typing import Any, Optional
+from glob import glob
 
 import numpy as np
 import pandas as pd
@@ -52,7 +53,9 @@ class THGStrainStressDataset(Dataset[Any]):
         self.extension = extension
         self.transform = self.get_transform()
         self.target_transform = target_transform
-        self._length = sum(1 for _ in os.listdir(self._data))
+
+        # Exclude files from PyIQ.
+        self._length = len(glob(f"{self._data}/*.{extension}"))
 
         self.weights = weights
 

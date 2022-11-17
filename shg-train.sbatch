@@ -5,7 +5,7 @@
 #SBATCH --nodes 4
 #SBATCH --gpus-per-node 2
 #SBATCH --mem-per-gpu 5G
-#SBATCH --cpus-per-gpu 13
+#SBATCH --cpus-per-gpu 10
 #SBATCH --mail-user=siem.de.jong@student.vu.nl
 #SBATCH --mail-type=ALL
 

@@ -68,6 +68,7 @@ class Dist:
     nodes: int
     gpus_per_node: int
     cpus_per_gpu: int
+    num_workers: int
 
 
 class Mode(Enum):
@@ -75,6 +76,7 @@ class Mode(Enum):
     TUNE_VISUALIZE: int = 1
     TRAIN: int = 2
     CROSS_VALIDATION: int = 3
+    BENCHMARK_NUM_WORKERS: int = 4
 
 
 @dataclass
@@ -112,6 +114,13 @@ class Optuna:
 
 
 @dataclass
+class Profiler:
+    enable: bool
+    cuda: bool
+    memory: bool
+
+
+@dataclass
 class THGStrainStressConfig:
     paths: Paths
     params: Params
@@ -124,3 +133,4 @@ class THGStrainStressConfig:
     try_overfit: bool
     dry_run: bool
     load_checkpoint: bool
+    profiler: Profiler

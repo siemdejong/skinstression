@@ -101,8 +101,6 @@ class Runner:
         for batch_num, (x, y, w) in enumerate(
             tqdm(self.loader, desc=desc, ncols=80, disable=self.disable_progress_bar)
         ):
-            # if self.dry_run and self.run_count:
-            #     break
             with torch.autocast(
                 device_type="cuda",
                 dtype=torch.float16,
@@ -134,6 +132,9 @@ class Runner:
             if self.global_rank == 0:
                 log.debug(f"    iteration: {batch_num} | loss: {loss}")
                 experiment.add_batch_metric("loss", loss.detach(), self.run_count)
+
+            if self.dry_run:
+                break
 
         if self.scheduler and self.optimizer:
             self.current_lr = self.next_lr
