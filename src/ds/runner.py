@@ -76,6 +76,7 @@ class Runner:
         self.model = model
         self.compute_loss = loss_fn
         self.lowest_loss = np.inf
+        self.lowest_loss_restart = np.inf
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.next_lr = 0  # TODO: this is not actually 0...
@@ -164,31 +165,36 @@ class Runner:
     def should_save(self) -> str:
         """Determine if a checkpoint should be saved because of a warm restart or a lowest loss."""
 
-        filename = None
+        filenames = []
 
         # Only train runners hold scheduler information.
         if self.stage is Stage.TRAIN:
             restart = self.next_lr > self.current_lr
             if restart:
-                filename = f"restart-{self.restart_count}"
+                self.lowest_loss_restart = np.inf
 
         # Only save lowest loss checkpoint based on validation loss.
         elif self.stage is Stage.VAL:
             new_low = self.loss_metric.average < self.lowest_loss
             if new_low:
                 self.lowest_loss = self.loss_metric.average
-                filename = "low"
+                filenames.append("low")
 
-        return filename
+            new_low_restart = self.loss_metric.average < self.lowest_loss_restart
+            if new_low_restart:
+                self.lowest_loss_restart = self.loss_metric.average
+                filenames.append(f"low_restart-{self.restart_count}")
+
+        return filenames
 
     def save_checkpoint(self) -> None:
 
         # First check if the checkpoint needs saving.
         # Return checkpoint filename.
-        checkpoint_fn = self.should_save()
+        filenames = self.should_save()
 
-        # should_save returns None if saving is not needed.
-        if checkpoint_fn:
+        # should_save returns empty list if saving is not needed.
+        for checkpoint_fn in filenames:
             state: dict[str, Union[int, dict[str, Any]]] = {
                 "epoch": self.epoch_id,
                 "model_state_dict": self.model.state_dict(),
