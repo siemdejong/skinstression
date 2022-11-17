@@ -48,5 +48,4 @@ def benchmark_num_workers():
             for _, _ in enumerate(train_loader):
                 pass
         end = time()
-
         log.info(f"Finished in {end - start:.5f} seconds with {num_workers} workers.")

@@ -191,6 +191,7 @@ class THGStrainStressDataset(Dataset[Any]):
                     #     mean=(3.80627821e1, 0, 1.24499975e-2),
                     #     std=(42.51551508, 0, 0.19324445),
                     # ),
+                    transforms.Resize((258, 258)),
                     transforms.ColorJitter(brightness=0.3),
                     transforms.RandomHorizontalFlip(),
                     transforms.RandomVerticalFlip(),
@@ -205,6 +206,7 @@ class THGStrainStressDataset(Dataset[Any]):
                     #     mean=(3.80627821e1, 0, 1.24499975e-2),
                     #     std=(42.51551508, 0, 0.19324445),
                     # ),
+                    transforms.Resize((258, 258)),
                     transforms.Grayscale(),
                     transforms.ToTensor(),
                 ]
@@ -293,15 +295,15 @@ class THGStrainStressDataset(Dataset[Any]):
             )
 
             # Dirty way of checking if data is compatible with model.
-            valid_shape = (1, 1000, 1000)
-            if not dataset[0][0].shape == valid_shape:
-                log.error(
-                    f"{Path(data_path) / str(folder)} will be excluded "
-                    f"because the data of size {dataset[0][0].shape} "
-                    "is incompatible with the model."
-                    f"Images of shape {valid_shape} are accepted."
-                )
-                continue
+            # valid_shape = (1, 1000, 1000)
+            # if not dataset[0][0].shape == valid_shape:
+            #     log.error(
+            #         f"{Path(data_path) / str(folder)} will be excluded "
+            #         f"because the data of size {dataset[0][0].shape} "
+            #         "is incompatible with the model."
+            #         f"Images of shape {valid_shape} are accepted."
+            #     )
+            #     continue
 
             datasets.append(dataset)
             person_ids.extend([person_id] * len(dataset))

@@ -162,7 +162,7 @@ Not necessarily needed, but the project provides jobscripts for easy job submiss
     conda env create -f environment.yml
     ```
 4.  Check if CUDA is available for the installed Pytorch distribution.
-    In a Python shell, executre
+    In a Python shell, execute
     ```python
     import torch
     torch.cuda.is_available()
@@ -186,7 +186,7 @@ Set `mode: TUNE` in `config.yaml` to enable hyperparameter tuning.
 Define parameter search space in `config.yaml`.
 
 The `shg-optuna.sbatch` jobscript contains `sbatch` directives used by SLURM to initialize Optuna processes.
-Every Optuna process is responsible for their own Trials.
+All GPUs running Optuna work together finishing one Trial as fast as possible.
 Every Trial makes use of `TorchDistributedTrial` to make use of Pytorch DistributedDataParallel.
 Configure the jobscript to use appropriate resources.
 Run `sbatch shg-optuna.sbatch` to initialize the hyperparameter optimization.

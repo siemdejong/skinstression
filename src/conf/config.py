@@ -21,11 +21,7 @@ from enum import Enum, auto
 
 @dataclass
 class Model:
-    dropout_1: float
-    dropout_2: float
-    dropout_3: float
-    dropout_4: float
-    n_nodes: 64
+    n_nodes: int
     num_output_features: int
 
 
@@ -92,7 +88,6 @@ class Hparams:
     lr: list[float, float]
     T_0: list[int, int]
     T_mult: list[int, int]
-    num_preblocks: list[int]
     n_nodes: int
     batch_size: list[int]
 

@@ -33,10 +33,10 @@ class THGStrainStressCNN(nn.Module):
         layers = []
 
         # Pre-blocks
-        for _ in range(14):
-            layers.append(nn.Conv2d(1, 1, 53, bias=False))
-            layers.append(nn.BatchNorm2d(1))
-            layers.append(nn.ReLU())
+        # for _ in range(14):
+        #     layers.append(nn.Conv2d(1, 1, 53, bias=False))
+        #     layers.append(nn.BatchNorm2d(1))
+        #     layers.append(nn.ReLU())
 
         # Block 1
         layers.append(nn.Conv2d(1, 64, 3, bias=False))

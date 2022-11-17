@@ -124,7 +124,8 @@ def ddp_setup(rank, world_size):
         rank: Unique identifier of each process.
         world_size: Total number of processes.
     """
-    dist.init_process_group("nccl", rank=rank, world_size=world_size)
+    backend = "nccl" if torch.cuda.is_available() else "gloo"
+    dist.init_process_group(backend=backend, rank=rank, world_size=world_size)
 
 
 def ddp_cleanup():

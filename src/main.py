@@ -67,20 +67,10 @@ def main(cfg: THGStrainStressConfig) -> None:
     if cfg.mode == Mode.TUNE_VISUALIZE.name:
         visualize(cfg)
     elif cfg.mode == Mode.TUNE.name:
-        # IP and port need to be available for dist.init_process_group().
-        ip = get_ip()
-        port = get_free_port(ip)
-        os.environ["MASTER_ADDR"] = str(ip)
-        os.environ["MASTER_PORT"] = str(port)
-        logging.info(
-            f"Processes will spawn from {ip}:{port}. "
-            "See Hydra output for worker log messages."
-        )
-        mp.spawn(
-            fn=tune_hyperparameters,
-            nprocs=cfg.dist.gpus_per_node,
-            args=(cfg.dist.gpus_per_node, cfg, log_queue),
-        )
+        global_rank = int(os.environ["RANK"])
+        local_rank = int(os.environ["LOCAL_RANK"])
+        world_size = int(os.environ["WORLD_SIZE"])
+        tune_hyperparameters(global_rank, local_rank, world_size, cfg, log_queue)
     elif cfg.mode == Mode.TRAIN.name:
         with torch.autograd.profiler.profile(
             enabled=cfg.profiler.enable,
@@ -91,18 +81,10 @@ def main(cfg: THGStrainStressConfig) -> None:
             local_rank = int(os.environ["LOCAL_RANK"])
             world_size = int(os.environ["WORLD_SIZE"])
             train(global_rank, local_rank, world_size, cfg, log_queue)
-        log.info(prof.key_averages().table(sort_by="self_cpu_time_total"))
-
-        # logging.info(
-        #     f"Processes will communicate with {os.environ['MASTER_ADDR']}:{os.environ['MASTER_PORT']}. "
-        #     "See Hydra output for worker log messages."
-        # )
-        # world_size = cfg.dist.gpus_per_node * cfg.dist.nodes
-        # mp.spawn(
-        #     fn=train,
-        #     nprocs=cfg.dist.gpus_per_node,
-        #     args=(world_size, cfg, log_queue),
-        # )
+        try:
+            log.info(prof.key_averages().table(sort_by="self_cpu_time_total"))
+        except AttributeError:
+            pass
     elif cfg.mode == Mode.CROSS_VALIDATION.name:
         # world_size = cfg.dist.gpus_per_node * cfg.dist.nodes
         world_size = int(os.environ["SLURM_GPUS_PER_NODE"]) * int(
