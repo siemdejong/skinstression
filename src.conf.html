@@ -218,7 +218,7 @@ GNU General Public License for more details.</p>
 along with this program. If not, see &lt;<a class="reference external" href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/</a>&gt;.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="src.conf.config.Dist">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.conf.config.</span></span><span class="sig-name descname"><span class="pre">Dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpus_per_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cpus_per_gpu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.conf.config.Dist" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.conf.config.</span></span><span class="sig-name descname"><span class="pre">Dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpus_per_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cpus_per_gpu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.conf.config.Dist" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.conf.config.Dist.cpus_per_gpu">
@@ -233,6 +233,11 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.conf.config.Dist.nodes">
 <span class="sig-name descname"><span class="pre">nodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#src.conf.config.Dist.nodes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Dist.num_workers">
+<span class="sig-name descname"><span class="pre">num_workers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#src.conf.config.Dist.num_workers" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -288,6 +293,11 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.conf.config.</span></span><span class="sig-name descname"><span class="pre">Mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.conf.config.Mode" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
 <p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Mode.BENCHMARK_NUM_WORKERS">
+<span class="sig-name descname"><span class="pre">BENCHMARK_NUM_WORKERS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#src.conf.config.Mode.BENCHMARK_NUM_WORKERS" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.conf.config.Mode.CROSS_VALIDATION">
 <span class="sig-name descname"><span class="pre">CROSS_VALIDATION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#src.conf.config.Mode.CROSS_VALIDATION" title="Permalink to this definition">#</a></dt>
@@ -486,6 +496,27 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="src.conf.config.Profiler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.conf.config.</span></span><span class="sig-name descname"><span class="pre">Profiler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cuda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.conf.config.Profiler" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Profiler.cuda">
+<span class="sig-name descname"><span class="pre">cuda</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#src.conf.config.Profiler.cuda" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Profiler.enable">
+<span class="sig-name descname"><span class="pre">enable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#src.conf.config.Profiler.enable" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Profiler.memory">
+<span class="sig-name descname"><span class="pre">memory</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#src.conf.config.Profiler.memory" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="src.conf.config.Pruner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.conf.config.</span></span><span class="sig-name descname"><span class="pre">Pruner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_resource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.conf.config.Pruner" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -519,7 +550,7 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 
 <dl class="py class">
 <dt class="sig sig-object py" id="src.conf.config.THGStrainStressConfig">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.conf.config.</span></span><span class="sig-name descname"><span class="pre">THGStrainStressConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.conf.config.Paths" title="src.conf.config.Paths"><span class="pre">src.conf.config.Paths</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.conf.config.Params" title="src.conf.config.Params"><span class="pre">src.conf.config.Params</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.conf.config.Dist" title="src.conf.config.Dist"><span class="pre">src.conf.config.Dist</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.conf.config.Mode" title="src.conf.config.Mode"><span class="pre">src.conf.config.Mode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optuna</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.conf.config.Optuna" title="src.conf.config.Optuna"><span class="pre">src.conf.config.Optuna</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_amp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">try_overfit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_checkpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.conf.config.THGStrainStressConfig" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.conf.config.</span></span><span class="sig-name descname"><span class="pre">THGStrainStressConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.conf.config.Paths" title="src.conf.config.Paths"><span class="pre">src.conf.config.Paths</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.conf.config.Params" title="src.conf.config.Params"><span class="pre">src.conf.config.Params</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.conf.config.Dist" title="src.conf.config.Dist"><span class="pre">src.conf.config.Dist</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.conf.config.Mode" title="src.conf.config.Mode"><span class="pre">src.conf.config.Mode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optuna</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.conf.config.Optuna" title="src.conf.config.Optuna"><span class="pre">src.conf.config.Optuna</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_amp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">try_overfit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_checkpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profiler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.conf.config.Profiler" title="src.conf.config.Profiler"><span class="pre">src.conf.config.Profiler</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.conf.config.THGStrainStressConfig" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.conf.config.THGStrainStressConfig.debug">
@@ -559,6 +590,11 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.conf.config.THGStrainStressConfig.paths">
 <span class="sig-name descname"><span class="pre">paths</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#src.conf.config.Paths" title="src.conf.config.Paths"><span class="pre">Paths</span></a></em><a class="headerlink" href="#src.conf.config.THGStrainStressConfig.paths" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.THGStrainStressConfig.profiler">
+<span class="sig-name descname"><span class="pre">profiler</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#src.conf.config.Profiler" title="src.conf.config.Profiler"><span class="pre">Profiler</span></a></em><a class="headerlink" href="#src.conf.config.THGStrainStressConfig.profiler" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -648,6 +684,7 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 <li><a class="reference internal" href="#src.conf.config.Dist.cpus_per_gpu"><code class="docutils literal notranslate"><span class="pre">Dist.cpus_per_gpu</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Dist.gpus_per_node"><code class="docutils literal notranslate"><span class="pre">Dist.gpus_per_node</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Dist.nodes"><code class="docutils literal notranslate"><span class="pre">Dist.nodes</span></code></a></li>
+<li><a class="reference internal" href="#src.conf.config.Dist.num_workers"><code class="docutils literal notranslate"><span class="pre">Dist.num_workers</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#src.conf.config.Hparams"><code class="docutils literal notranslate"><span class="pre">Hparams</span></code></a><ul>
@@ -662,6 +699,7 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 </ul>
 </li>
 <li><a class="reference internal" href="#src.conf.config.Mode"><code class="docutils literal notranslate"><span class="pre">Mode</span></code></a><ul>
+<li><a class="reference internal" href="#src.conf.config.Mode.BENCHMARK_NUM_WORKERS"><code class="docutils literal notranslate"><span class="pre">Mode.BENCHMARK_NUM_WORKERS</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Mode.CROSS_VALIDATION"><code class="docutils literal notranslate"><span class="pre">Mode.CROSS_VALIDATION</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Mode.TRAIN"><code class="docutils literal notranslate"><span class="pre">Mode.TRAIN</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Mode.TUNE"><code class="docutils literal notranslate"><span class="pre">Mode.TUNE</span></code></a></li>
@@ -712,6 +750,12 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 <li><a class="reference internal" href="#src.conf.config.Paths.targets"><code class="docutils literal notranslate"><span class="pre">Paths.targets</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#src.conf.config.Profiler"><code class="docutils literal notranslate"><span class="pre">Profiler</span></code></a><ul>
+<li><a class="reference internal" href="#src.conf.config.Profiler.cuda"><code class="docutils literal notranslate"><span class="pre">Profiler.cuda</span></code></a></li>
+<li><a class="reference internal" href="#src.conf.config.Profiler.enable"><code class="docutils literal notranslate"><span class="pre">Profiler.enable</span></code></a></li>
+<li><a class="reference internal" href="#src.conf.config.Profiler.memory"><code class="docutils literal notranslate"><span class="pre">Profiler.memory</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#src.conf.config.Pruner"><code class="docutils literal notranslate"><span class="pre">Pruner</span></code></a><ul>
 <li><a class="reference internal" href="#src.conf.config.Pruner.min_resource"><code class="docutils literal notranslate"><span class="pre">Pruner.min_resource</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Pruner.reduction_factor"><code class="docutils literal notranslate"><span class="pre">Pruner.reduction_factor</span></code></a></li>
@@ -731,6 +775,7 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 <li><a class="reference internal" href="#src.conf.config.THGStrainStressConfig.optuna"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.optuna</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.THGStrainStressConfig.params"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.params</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.THGStrainStressConfig.paths"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.paths</span></code></a></li>
+<li><a class="reference internal" href="#src.conf.config.THGStrainStressConfig.profiler"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.profiler</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.THGStrainStressConfig.seed"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.seed</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.THGStrainStressConfig.try_overfit"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.try_overfit</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.THGStrainStressConfig.use_amp"><code class="docutils literal notranslate"><span class="pre">THGStrainStressConfig.use_amp</span></code></a></li>
