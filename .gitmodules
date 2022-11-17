@@ -6,6 +6,3 @@
 	path = hydra-torchrun-launcher
 	url = https://github.com/siemdejong/hydra-torchrun-launcher
 	branch = torchrun-launcher-only
-[submodule "optuna"]
-	path = optuna
-	url = https://github.com/reyoung/optuna
