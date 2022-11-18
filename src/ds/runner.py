@@ -171,6 +171,7 @@ class Runner:
         if self.stage is Stage.TRAIN:
             restart = self.next_lr > self.current_lr
             if restart:
+                self.restart_count += 1
                 self.lowest_loss_restart = np.inf
 
         # Only save lowest loss checkpoint based on validation loss.
