@@ -63,6 +63,9 @@ class THGStrainStressDataset(Dataset[Any]):
         length_whole_dataset = len(glob(f"{self._data}/*.{self.extension}"))
 
         if self.top_k:
+            # To make sure top_k is not too large.
+            if self.top_k > length_whole_dataset:
+                log.error(f"Argument top_k too large. Using full dataset {self._data}.")
             number = min(self.top_k, length_whole_dataset)
         else:
             number = length_whole_dataset
