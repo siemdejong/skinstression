@@ -44,6 +44,7 @@ class THGStrainStressDataset(Dataset[Any]):
         weights: Optional[np.ndarray],
         extension: str = "bmp",
         target_transform=None,
+        top_k: Optional[int] = None,
     ):
         # header = 0, assume there is a header in the labels.csv file.
         self.split = split
@@ -53,11 +54,20 @@ class THGStrainStressDataset(Dataset[Any]):
         self.extension = extension
         self.transform = self.get_transform()
         self.target_transform = target_transform
-
-        # Exclude files from PyIQ.
-        self._length = len(glob(f"{self._data}/*.{extension}"))
-
+        self.top_k = top_k
+        self._length = self.calc_length()
         self.weights = weights
+
+    def calc_length(self):
+        # Exclude files from PyIQ.
+        length_whole_dataset = len(glob(f"{self._data}/*.{self.extension}"))
+
+        if self.top_k:
+            number = min(self.top_k, length_whole_dataset)
+        else:
+            number = length_whole_dataset
+
+        return number
 
     def __len__(self):
         return self._length
