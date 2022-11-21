@@ -63,9 +63,6 @@ class Params:
 
 @dataclass
 class Dist:
-    nodes: int
-    gpus_per_node: int
-    cpus_per_gpu: int
     num_workers: int
 
 
