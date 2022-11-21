@@ -193,9 +193,16 @@ Run `sbatch shg-optuna.sbatch` to initialize the hyperparameter optimization.
 
 ### Visualize hyperparameter optimization
 
-To view hyperparamter optimization results (loss curves, parameter importances, etc.), set `mode: TUNE_VISUALIZE` in `config.yaml`.
-Run `python src/main.py`.
+To view hyperparamter optimization results (loss curves, parameter importances, etc.), run 
+```bash
+optuna-dashboard sqlite:///<url-to-database>
+```
+Open a browser and enter the listening address shown in the terminal.
+For help, run `optuna-dashboard --help` or see [optuna/optuna-dashboard](https://github.com/optuna/optuna-dashboard).
+
+Another way is to set `mode: TUNE_VISUALIZE` in `config.yaml` and run `python src/main.py`.
 Available optimization visualizations will show in the browser.
+This way, contour plots are shown, which could give more insight than the slice plots given by optuna-dasboard.
 
 _For more examples, please refer to the [documentation](https://siemdejong.github.io/shg-strain-stress)._
 

@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from dataclasses import dataclass
 from enum import Enum, auto
+from typing import Optional
 
 
 @dataclass
@@ -77,18 +78,28 @@ class Mode(Enum):
 
 @dataclass
 class Pruner:
+    name: str
     min_resource: int
+    max_resource: int
     reduction_factor: int
+    seed: int
+
+
+@dataclass
+class Sampler:
+    name: str
+    seed: int
+    restart_strategy: str  # TODO: Make this accept None!
+    inc_popsize: int
 
 
 @dataclass
 class Hparams:
-    optimizer_name: str
     weight_decay: list[float, float]
     lr: list[float, float]
     T_0: list[int, int]
     T_mult: list[int, int]
-    n_nodes: int
+    n_nodes: list[int]
     batch_size: list[int]
 
 
@@ -103,8 +114,8 @@ class Optuna:
     trials: int
     direction: str  # Use Direction class?
     hparams: Hparams
-    seed: int
     pruner: Pruner
+    sampler: Sampler
     parallel: bool
 
 

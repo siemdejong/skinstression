@@ -207,7 +207,7 @@ class THGStrainStressDataset(Dataset[Any]):
                     #     std=(42.51551508, 0, 0.19324445),
                     # ),
                     transforms.Resize((258, 258)),
-                    transforms.Grayscale(),
+                    # transforms.Grayscale(),
                     transforms.ToTensor(),
                 ]
             )

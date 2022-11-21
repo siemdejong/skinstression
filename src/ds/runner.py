@@ -69,6 +69,7 @@ class Runner:
         scheduler: Optional[Union[_LRScheduler, ReduceLROnPlateau]] = None,
         progress_bar: bool = False,
         dry_run: bool = False,
+        trial: Optional[int] = None,
     ) -> None:
         self.run_count = 0
         self.loader = loader
@@ -87,6 +88,7 @@ class Runner:
         self.disable_progress_bar = not progress_bar
         self.scaler = scaler
         self.dry_run = dry_run
+        self.trial = trial
 
     @property
     def avg_loss(self):
@@ -196,6 +198,9 @@ class Runner:
 
         # should_save returns empty list if saving is not needed.
         for checkpoint_fn in filenames:
+            if self.trial:
+                checkpoint_fn = f"trial_{self.trial}-{checkpoint_fn}"
+
             state: dict[str, Union[int, dict[str, Any]]] = {
                 "epoch": self.epoch_id,
                 "model_state_dict": self.model.state_dict(),

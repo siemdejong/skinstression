@@ -23,7 +23,6 @@ import numpy as np
 import optuna
 import torch
 from optuna.storages import RetryFailedTrialCallback
-from optuna.study import MaxTrialsCallback
 from optuna.trial import TrialState
 from sklearn.model_selection import train_test_split
 from torch import nn
@@ -206,20 +205,15 @@ class Objective:
 
         # Define hyperparameter space.
         hparams = {
-            "optimizer_name": trial.suggest_categorical(
-                "optimizer_name", self.cfg.optuna.hparams.optimizer_name
-            ),
             "weight_decay": trial.suggest_float(
                 "weight_decay", *self.cfg.optuna.hparams.weight_decay, log=True
             ),
             "lr": trial.suggest_float("lr", *self.cfg.optuna.hparams.lr, log=True),
             "T_0": trial.suggest_int("T_0", *self.cfg.optuna.hparams.T_0),
             "T_mult": trial.suggest_int("T_mult", *self.cfg.optuna.hparams.T_mult),
-            "n_nodes": trial.suggest_categorical(
-                "n_nodes", self.cfg.optuna.hparams.n_nodes
-            ),
-            "batch_size": trial.suggest_categorical(
-                "batch_size", self.cfg.optuna.hparams.batch_size
+            "n_nodes": trial.suggest_int("n_nodes", *self.cfg.optuna.hparams.n_nodes),
+            "batch_size": trial.suggest_int(
+                "batch_size", *self.cfg.optuna.hparams.batch_size
             ),
         }
 
@@ -236,7 +230,7 @@ class Objective:
 
         # Choose optimizer with learning rates picked by Optuna.
         loss_fn = getattr(loss_functions, self.cfg.params.loss_fn)
-        optimizer = getattr(torch.optim, hparams["optimizer_name"])(
+        optimizer = getattr(torch.optim, self.cfg.params.optimizer.name)(
             model.parameters(), lr=hparams["lr"], weight_decay=hparams["weight_decay"]
         )
 
@@ -296,6 +290,7 @@ class Objective:
             progress_bar=False,
             scaler=scaler,
             dry_run=self.cfg.dry_run,
+            trial=optuna.trial.Trial.number,
         )
         val_runner = Runner(
             loader=val_loader,
@@ -307,6 +302,7 @@ class Objective:
             progress_bar=False,
             scaler=scaler,
             dry_run=self.cfg.dry_run,
+            trial=optuna.trial.Trial.number,
         )
 
         # Setup the experiment tracker
@@ -409,15 +405,47 @@ def tune_hyperparameters(
         # Prune with ASHA algorithm.
         # Set min_resource to be something that brings the loss close to 0.
         # Reduction factor can be larger if more trials are allowed.
+        sampler_cls = getattr(optuna.samplers, cfg.optuna.sampler.name)
+
+        sampler = None
+        if sampler_cls.__name__ == "CmaEsSampler":
+            consider_pruned_trials = (
+                True
+                if cfg.optuna.sampler.name in ["HyperbandPruner", "SuccessiveHalving"]
+                else False
+            )
+            sampler = sampler_cls(
+                seed=cfg.optuna.sampler.seed,
+                restart_strategy=cfg.optuna.sampler.restart_strategy,
+                inc_popsize=cfg.optuna.sampler.inc_popsize,
+                consider_pruned_trials=consider_pruned_trials,
+            )
+        elif sampler_cls.__name__ == "TPESampler":
+            sampler = sampler_cls(seed=cfg.optuna.sampler.seed)
+
+        pruner_cls = getattr(optuna.pruners, cfg.optuna.pruner.name)
+
+        # To make pruning reproducible for Hyperband
+        pruner = None
+        if pruner_cls.__name__ == "HyperbandPruner":
+            os.environ["PYTHONHASHSEED"] = cfg.optuna.pruner.seed
+            pruner = pruner_cls(
+                min_resource=cfg.optuna.pruner.min_resource,
+                max_resource=cfg.optuna.pruner.max_resource,
+                reduction_factor=cfg.optuna.pruner.reduction_factor,
+            )
+        elif pruner_cls.__name__ == "SuccessiveHalving":
+            pruner = pruner_cls(
+                min_resource=cfg.optuna.pruner.min_resource,
+                reduction_factor=cfg.optuna.pruner.reduction_factor,
+            )
+
         study = optuna.create_study(
             study_name=cfg.optuna.study_name,
             storage=storage,
             direction=cfg.optuna.direction,
-            sampler=optuna.samplers.TPESampler(seed=cfg.optuna.seed),
-            pruner=optuna.pruners.SuccessiveHalvingPruner(
-                min_resource=cfg.optuna.pruner.min_resource,
-                reduction_factor=cfg.optuna.pruner.reduction_factor,
-            ),
+            sampler=sampler,
+            pruner=pruner,
             load_if_exists=True,
         )
 
