@@ -391,10 +391,12 @@
   <h2>I</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="src.ds.html#src.ds.utils.increment_experiment_number">increment_experiment_number() (in module src.ds.utils)</a>
+        <li><a href="src.conf.html#src.conf.config.Sampler.inc_popsize">inc_popsize (src.conf.config.Sampler attribute)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="src.ds.html#src.ds.utils.increment_experiment_number">increment_experiment_number() (in module src.ds.utils)</a>
+</li>
         <li><a href="src.ds.html#src.ds.utils.is_first_experiment">is_first_experiment() (in module src.ds.utils)</a>
 </li>
     </ul></td>
@@ -441,6 +443,8 @@
   <h2>M</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="src.conf.html#src.conf.config.Pruner.max_resource">max_resource (src.conf.config.Pruner attribute)</a>
+</li>
         <li><a href="src.conf.html#src.conf.config.Profiler.memory">memory (src.conf.config.Profiler attribute)</a>
 </li>
         <li><a href="src.ds.html#src.ds.metrics.Metric">Metric (class in src.ds.metrics)</a>
@@ -501,7 +505,13 @@
 </li>
         </ul></li>
         <li><a href="src.conf.html#src.conf.config.Optimizer.name">name (src.conf.config.Optimizer attribute)</a>
+
+        <ul>
+          <li><a href="src.conf.html#src.conf.config.Pruner.name">(src.conf.config.Pruner attribute)</a>
 </li>
+          <li><a href="src.conf.html#src.conf.config.Sampler.name">(src.conf.config.Sampler attribute)</a>
+</li>
+        </ul></li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="src.conf.html#src.conf.config.Dist.nodes">nodes (src.conf.config.Dist attribute)</a>
@@ -523,8 +533,6 @@
         <li><a href="src.conf.html#src.conf.config.Optimizer">Optimizer (class in src.conf.config)</a>
 </li>
         <li><a href="src.conf.html#src.conf.config.Params.optimizer">optimizer (src.conf.config.Params attribute)</a>
-</li>
-        <li><a href="src.conf.html#src.conf.config.Hparams.optimizer_name">optimizer_name (src.conf.config.Hparams attribute)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
@@ -576,6 +584,8 @@
 </li>
         <li><a href="src.ds.html#src.ds.runner.Runner.reset">reset() (src.ds.runner.Runner method)</a>
 </li>
+        <li><a href="src.conf.html#src.conf.config.Sampler.restart_strategy">restart_strategy (src.conf.config.Sampler attribute)</a>
+</li>
         <li><a href="src.ds.html#src.ds.runner.Runner.run">run() (src.ds.runner.Runner method)</a>
 </li>
     </ul></td>
@@ -598,15 +608,21 @@
   <h2>S</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="src.conf.html#src.conf.config.Sampler">Sampler (class in src.conf.config)</a>
+</li>
+        <li><a href="src.conf.html#src.conf.config.Optuna.sampler">sampler (src.conf.config.Optuna attribute)</a>
+</li>
         <li><a href="src.ds.html#src.ds.runner.Runner.save_checkpoint">save_checkpoint() (src.ds.runner.Runner method)</a>
 </li>
         <li><a href="src.conf.html#src.conf.config.Scheduler">Scheduler (class in src.conf.config)</a>
 </li>
         <li><a href="src.conf.html#src.conf.config.Params.scheduler">scheduler (src.conf.config.Params attribute)</a>
 </li>
-        <li><a href="src.conf.html#src.conf.config.Optuna.seed">seed (src.conf.config.Optuna attribute)</a>
+        <li><a href="src.conf.html#src.conf.config.Pruner.seed">seed (src.conf.config.Pruner attribute)</a>
 
         <ul>
+          <li><a href="src.conf.html#src.conf.config.Sampler.seed">(src.conf.config.Sampler attribute)</a>
+</li>
           <li><a href="src.conf.html#src.conf.config.THGStrainStressConfig.seed">(src.conf.config.THGStrainStressConfig attribute)</a>
 </li>
         </ul></li>
@@ -650,6 +666,8 @@
           <li><a href="src.ds.html#module-src.ds">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     src.ds.dataset
 
@@ -657,8 +675,6 @@
           <li><a href="src.ds.html#module-src.ds.dataset">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     src.ds.functions
 
