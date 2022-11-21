@@ -268,6 +268,7 @@ def train(
         split="train",
         data_path=cfg.paths.data,
         targets_path=cfg.paths.targets,
+        top_k=cfg.params.top_k,
         reweight="sqrt_inv",
         lds=True,
     )
@@ -276,6 +277,7 @@ def train(
         split="validation",
         data_path=cfg.paths.data,
         targets_path=cfg.paths.targets,
+        top_k=cfg.params.top_k,
         reweight="sqrt_inv",
         lds=True,
     )

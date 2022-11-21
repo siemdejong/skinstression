@@ -137,6 +137,7 @@ class Objective:
             split="train",
             data_path=cfg.paths.data,
             targets_path=cfg.paths.targets,
+            top_k=cfg.params.top_k,
             reweight="sqrt_inv",
             lds=True,
         )
@@ -144,6 +145,7 @@ class Objective:
             split="validation",
             data_path=cfg.paths.data,
             targets_path=cfg.paths.targets,
+            top_k=cfg.params.top_k,
             reweight="sqrt_inv",
             lds=True,
         )
@@ -251,7 +253,9 @@ class Objective:
             T_mult=hparams["T_mult"],
         )
 
-        scheduler = SequentialLR(optimizer=optimizer, schedulers=[warmup_scheduler, restart_scheduler])
+        scheduler = SequentialLR(
+            optimizer=optimizer, schedulers=[warmup_scheduler, restart_scheduler]
+        )
 
         # Distributed the workload across the GPUs.
         train_sampler = DistributedSampler(self.train_subset, seed=self.cfg.seed)

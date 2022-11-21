@@ -231,6 +231,7 @@ class THGStrainStressDataset(Dataset[Any]):
         split: str,
         data_path: str,
         targets_path: str,
+        top_k: int,
         reweight="none",
         lds=False,
         lds_kernel="gaussian",
@@ -305,6 +306,7 @@ class THGStrainStressDataset(Dataset[Any]):
                 folder=folder,
                 targets=targets,
                 weights=weights,
+                top_k=top_k,
             )
 
             # Dirty way of checking if data is compatible with model.

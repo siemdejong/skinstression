@@ -51,6 +51,7 @@ class Paths:
 
 @dataclass
 class Params:
+    top_k: int
     epoch_count: int
     batch_size: int
     k_folds: int
