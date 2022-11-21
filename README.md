@@ -204,8 +204,6 @@ Another way is to set `mode: TUNE_VISUALIZE` in `config.yaml` and run `python sr
 Available optimization visualizations will show in the browser.
 This way, contour plots are shown, which could give more insight than the slice plots given by optuna-dasboard.
 
-_For more examples, please refer to the [documentation](https://siemdejong.github.io/shg-strain-stress)._
-
 ### Tensorboard
 To visualize experiments, Tensorboard summaries are written at runtime.
 To open, run
@@ -214,6 +212,9 @@ tensorboard --logdir <output-log-directory>
 ```
 To scroll through more epoch graphs, add `--samples_per_plugin=images=100` to the above command.
 For more Tensorboard configurations, run `tensorboard --help`.
+
+
+<!-- _For more examples, please refer to the [documentation](https://siemdejong.github.io/shg-strain-stress)._ -->
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

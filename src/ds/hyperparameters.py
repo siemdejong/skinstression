@@ -30,7 +30,7 @@ from torch.distributed.elastic.multiprocessing.errors import record
 from torch.multiprocessing import Queue
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.optim.lr_scheduler import (
-    ChainedScheduler,
+    SequentialLR,
     CosineAnnealingWarmRestarts,
     LinearLR,
 )
@@ -251,7 +251,7 @@ class Objective:
             T_mult=hparams["T_mult"],
         )
 
-        scheduler = ChainedScheduler([warmup_scheduler, restart_scheduler])
+        scheduler = SequentialLR(optimizer=optimizer, schedulers=[warmup_scheduler, restart_scheduler])
 
         # Distributed the workload across the GPUs.
         train_sampler = DistributedSampler(self.train_subset, seed=self.cfg.seed)
