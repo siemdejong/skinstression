@@ -6,3 +6,6 @@
 	path = hydra-torchrun-launcher
 	url = https://github.com/siemdejong/hydra-torchrun-launcher
 	branch = torchrun-launcher-only
+[submodule "n2v"]
+	path = n2v
+	url = https://github.com/siemdejong/n2v
