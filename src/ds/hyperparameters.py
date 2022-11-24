@@ -139,6 +139,7 @@ class Objective:
             targets_path=cfg.paths.targets,
             top_k=cfg.params.top_k,
             reweight="sqrt_inv",
+            importances=cfg.params.importances,
             lds=True,
         )
         dataset_val, _ = data_cls.load_data(
@@ -429,9 +430,8 @@ def tune_hyperparameters(
 
         pruner_cls = getattr(optuna.pruners, cfg.optuna.pruner.name)
 
-        # To make pruning reproducible for Hyperband
-        pruner = None
         if pruner_cls.__name__ == "HyperbandPruner":
+            # To make pruning reproducible for Hyperband
             os.environ["PYTHONHASHSEED"] = cfg.optuna.pruner.seed
             pruner = pruner_cls(
                 min_resource=cfg.optuna.pruner.min_resource,
@@ -443,6 +443,8 @@ def tune_hyperparameters(
                 min_resource=cfg.optuna.pruner.min_resource,
                 reduction_factor=cfg.optuna.pruner.reduction_factor,
             )
+        else:
+            pruner = None
 
         study = optuna.create_study(
             study_name=cfg.optuna.study_name,

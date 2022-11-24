@@ -59,6 +59,7 @@ class Params:
     optimizer: Optimizer
     scheduler: Scheduler
     loss_fn: str
+    importances: list[float]
 
 
 @dataclass

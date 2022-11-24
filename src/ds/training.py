@@ -270,6 +270,7 @@ def train(
         targets_path=cfg.paths.targets,
         top_k=cfg.params.top_k,
         reweight="sqrt_inv",
+        importances=np.array(cfg.params.importances),
         lds=True,
     )
 
@@ -279,6 +280,7 @@ def train(
         targets_path=cfg.paths.targets,
         top_k=cfg.params.top_k,
         reweight="sqrt_inv",
+        importances=np.array(cfg.params.importances),
         lds=True,
     )
 

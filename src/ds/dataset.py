@@ -98,8 +98,31 @@ class THGStrainStressDataset(Dataset[Any]):
         return image, targets, weight
 
     @staticmethod
+    def _apply_importance_on_weights(
+        weights: np.ndarray[float], importances: Optional[np.ndarray[float]] = None
+    ) -> np.ndarray[float]:
+        """To change the importances of the output.
+        E.g. if output (a, k, xc) and importances is (1, 1, 0.8), give less attention to xc.
+
+        Args:
+            weights: array of weights corresponding with the network output
+            importances: array of the importances of every network output
+
+        Returns:
+            array of weights on which importances are applied.
+        """
+
+        if importances:
+            weights_with_importance = weights * importances
+        else:
+            weights_with_importance = weights
+
+        return weights_with_importance
+
+    @staticmethod
     def _prepare_weights(
         targets: np.ndarray,
+        importances: np.ndarray,
         reweight: str,
         lds: bool = False,
         lds_kernel: str = "gaussian",
@@ -180,7 +203,13 @@ class THGStrainStressDataset(Dataset[Any]):
             scaling = len(weights) / np.sum(weights)
             scaled_weights = scaling * weights
 
-            all_weights.append(scaled_weights)
+            weights_after_importance = (
+                THGStrainStressDataset._apply_importance_on_weights(
+                    scaled_weights, importances
+                )
+            )
+
+            all_weights.append(weights_after_importance)
             all_emp_dists.append(emp_target_dist)
             all_eff_dists.append(eff_target_dist)
             all_edges.append(edges)
@@ -233,6 +262,7 @@ class THGStrainStressDataset(Dataset[Any]):
         targets_path: str,
         top_k: int,
         reweight="none",
+        importances: Optional[np.ndarray[float]] = None,
         lds=False,
         lds_kernel="gaussian",
         lds_ks=5,
@@ -275,6 +305,7 @@ class THGStrainStressDataset(Dataset[Any]):
 
         weights, _, _, _ = THGStrainStressDataset._prepare_weights(
             targets=targets_list,
+            importances=np.array(importances),
             reweight=reweight,
             lds=lds,
             lds_kernel=lds_kernel,
