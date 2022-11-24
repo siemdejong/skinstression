@@ -27,6 +27,7 @@ import torch
 import torchvision.transforms as transforms
 from PIL import Image
 from scipy.ndimage import convolve1d
+from scipy import stats
 from torch.utils.data import ConcatDataset, Dataset
 
 from ds.utils import get_lds_kernel_window, sturge
@@ -226,13 +227,16 @@ class THGStrainStressDataset(Dataset[Any]):
             transform = transforms.Compose(
                 [
                     # TODO: Insert some data augmentation transforms.
+                    transforms.Lambda(
+                        lambda y: stats.yeojohnson(y, 0.466319593487972)
+                    ),
                     # NOTE: Without transforms.Normalize, min-maxnormalization is used.
                     # NOTE: If using values below, be careful to not leak information
                     # from the val/test sets to the training set.
-                    transforms.Normalize(
-                        mean=(97.62348310672854),
-                        std=(66.14201631693666),
-                    ),
+                    # transforms.Normalize(
+                    #     mean=(97.62348310672854),
+                    #     std=(66.14201631693666),
+                    # ),
                     # TODO: RANDOMCROPPING IN COMBINATION WITH 1000x1000 IMAGES MAY WORK VERY WELL
                     transforms.RandomCrop((700, 700)),
                     transforms.Resize((258, 258)),
@@ -245,10 +249,13 @@ class THGStrainStressDataset(Dataset[Any]):
         else:
             transform = transforms.Compose(
                 [
-                    transforms.Normalize(
-                        mean=(97.62348310672854),
-                        std=(66.14201631693666),
+                    transforms.Lambda(
+                        lambda y: stats.yeojohnson(y, 0.466319593487972)
                     ),
+                    # transforms.Normalize(
+                    #     mean=(97.62348310672854),
+                    #     std=(66.14201631693666),
+                    # ),
                     transforms.Resize((258, 258)),
                     transforms.ToTensor(),
                 ]
