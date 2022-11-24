@@ -229,27 +229,27 @@ class THGStrainStressDataset(Dataset[Any]):
                     # NOTE: Without transforms.Normalize, min-maxnormalization is used.
                     # NOTE: If using values below, be careful to not leak information
                     # from the val/test sets to the training set.
-                    # transforms.Normalize(
-                    #     mean=(3.80627821e1, 0, 1.24499975e-2),
-                    #     std=(42.51551508, 0, 0.19324445),
-                    # ),
+                    transforms.Normalize(
+                        mean=(97.62348310672854),
+                        std=(66.14201631693666),
+                    ),
+                    # TODO: RANDOMCROPPING IN COMBINATION WITH 1000x1000 IMAGES MAY WORK VERY WELL
+                    transforms.RandomCrop((700, 700)),
                     transforms.Resize((258, 258)),
                     transforms.ColorJitter(brightness=0.3),
                     transforms.RandomHorizontalFlip(),
                     transforms.RandomVerticalFlip(),
-                    # transforms.Grayscale(),
                     transforms.ToTensor(),
                 ]
             )
         else:
             transform = transforms.Compose(
                 [
-                    # transforms.Normalize(
-                    #     mean=(3.80627821e1, 0, 1.24499975e-2),
-                    #     std=(42.51551508, 0, 0.19324445),
-                    # ),
+                    transforms.Normalize(
+                        mean=(97.62348310672854),
+                        std=(66.14201631693666),
+                    ),
                     transforms.Resize((258, 258)),
-                    # transforms.Grayscale(),
                     transforms.ToTensor(),
                 ]
             )
