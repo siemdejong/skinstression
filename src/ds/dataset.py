@@ -30,7 +30,7 @@ from scipy.ndimage import convolve1d
 from scipy import stats
 from torch.utils.data import ConcatDataset, Dataset
 
-from ds.utils import get_lds_kernel_window, sturge
+from ds.utils import get_lds_kernel_window
 
 log = logging.getLogger(__name__)
 
@@ -228,32 +228,33 @@ class THGStrainStressDataset(Dataset[Any]):
                 [
                     # TODO: Insert some data augmentation transforms.
                     transforms.Lambda(lambda y: stats.yeojohnson(y, 0.466319593487972)),
-                    # NOTE: Without transforms.Normalize, min-maxnormalization is used.
-                    # NOTE: If using values below, be careful to not leak information
-                    # from the val/test sets to the training set.
-                    transforms.Normalize(
-                        mean=(14.716653741103862),
-                        std=(6.557034596034911),
-                    ),
-                    # TODO: RANDOMCROPPING IN COMBINATION WITH 1000x1000 IMAGES MAY WORK VERY WELL
-                    transforms.RandomCrop((700, 700)),
+                    # TODO: Make sure changing the crop aspect ratio doesn't change physics.
+                    transforms.RandomResizedCrop((700, 700)),
                     transforms.Resize((258, 258)),
                     transforms.ColorJitter(brightness=0.3),
                     transforms.RandomHorizontalFlip(),
                     transforms.RandomVerticalFlip(),
                     transforms.ToTensor(),
+                    # NOTE: If using values below, be careful to not leak information
+                    # from the val/test sets to the training set.
+                    # NOTE: mean and std are calculated in nb 29 and divided by 255.
+                    transforms.Normalize(
+                        mean=(0.05771236761217201),
+                        std=(0.02571386116092122),
+                    ),
                 ]
             )
         else:
             transform = transforms.Compose(
                 [
                     transforms.Lambda(lambda y: stats.yeojohnson(y, 0.466319593487972)),
-                    transforms.Normalize(
-                        mean=(14.716653741103862),
-                        std=(6.557034596034911),
-                    ),
+                    transforms.CenterCrop((700, 700)),
                     transforms.Resize((258, 258)),
                     transforms.ToTensor(),
+                    transforms.Normalize(
+                        mean=(0.05771236761217201),
+                        std=(0.02571386116092122),
+                    ),
                 ]
             )
         return transform
