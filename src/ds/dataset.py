@@ -228,6 +228,13 @@ class THGStrainStressDataset(Dataset[Any]):
                 [
                     # TODO: Insert some data augmentation transforms.
                     transforms.Lambda(lambda y: stats.yeojohnson(y, 0.466319593487972)),
+                    # NOTE: If using values below, be careful to not leak information
+                    # from the val/test sets to the training set.
+                    # NOTE: These mean and std are statistics after the Yeo-Johnson transform.
+                    transforms.Normalize(
+                        mean=(14.716653741103862),
+                        std=(6.557034596034911),
+                    ),
                     # TODO: Make sure changing the crop aspect ratio doesn't change physics.
                     transforms.RandomResizedCrop((700, 700)),
                     transforms.Resize((258, 258)),
@@ -235,26 +242,19 @@ class THGStrainStressDataset(Dataset[Any]):
                     transforms.RandomHorizontalFlip(),
                     transforms.RandomVerticalFlip(),
                     transforms.ToTensor(),
-                    # NOTE: If using values below, be careful to not leak information
-                    # from the val/test sets to the training set.
-                    # NOTE: mean and std are calculated in nb 29 and divided by 255.
-                    transforms.Normalize(
-                        mean=(0.05771236761217201),
-                        std=(0.02571386116092122),
-                    ),
                 ]
             )
         else:
             transform = transforms.Compose(
                 [
                     transforms.Lambda(lambda y: stats.yeojohnson(y, 0.466319593487972)),
+                    transforms.Normalize(
+                        mean=(14.716653741103862),
+                        std=(6.557034596034911),
+                    ),
                     transforms.CenterCrop((700, 700)),
                     transforms.Resize((258, 258)),
                     transforms.ToTensor(),
-                    transforms.Normalize(
-                        mean=(0.05771236761217201),
-                        std=(0.02571386116092122),
-                    ),
                 ]
             )
         return transform
