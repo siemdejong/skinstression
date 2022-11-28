@@ -35,7 +35,7 @@ from ds.utils import get_lds_kernel_window
 log = logging.getLogger(__name__)
 
 
-class THGStrainStressDataset(Dataset[Any]):
+class SkinstressionDataset(Dataset[Any]):
     def __init__(
         self,
         split: str,
@@ -142,7 +142,6 @@ class THGStrainStressDataset(Dataset[Any]):
             lds_kernel: The kernel to be used with density estimation see `get_lds_kernel_window()`. Default: gaussian.
             lds_ks: Kernel size. Default: 5.
             lds_sigma: Kernel distribution scale. See `get_lds_kernel_window()`. Default: 2.
-            param_ids: parameters to choose from the THGStrainStressDataset.df. If None, all columns are selected. Default: None.
         """
         assert reweight in {"none", "inverse", "sqrt_inv"}
         assert (
@@ -205,7 +204,7 @@ class THGStrainStressDataset(Dataset[Any]):
             scaled_weights = scaling * weights
 
             weights_after_importance = (
-                THGStrainStressDataset._apply_importance_on_weights(
+                SkinstressionDataset._apply_importance_on_weights(
                     scaled_weights, importances
                 )
             )
@@ -307,7 +306,7 @@ class THGStrainStressDataset(Dataset[Any]):
             "xc": 3,
         }
 
-        weights, _, _, _ = THGStrainStressDataset._prepare_weights(
+        weights, _, _, _ = SkinstressionDataset._prepare_weights(
             targets=targets_list,
             importances=np.array(importances),
             reweight=reweight,
@@ -335,7 +334,7 @@ class THGStrainStressDataset(Dataset[Any]):
                 )
                 continue
 
-            dataset = THGStrainStressDataset(
+            dataset = SkinstressionDataset(
                 split=split,
                 root_data_dir=data_path,
                 folder=folder,

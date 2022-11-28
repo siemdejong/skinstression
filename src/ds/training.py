@@ -34,9 +34,9 @@ from torch.distributed.elastic.multiprocessing.errors import record
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-from conf.config import THGStrainStressConfig
-from ds.dataset import THGStrainStressDataset
-from ds.models import THGStrainStressCNN
+from conf.config import SkinstressionConfig
+from ds.dataset import SkinstressionDataset
+from ds.models import SkinstressionCNN
 from ds.runner import Runner, Stage, run_epoch
 from ds.tensorboard import TensorboardExperiment
 from ds import loss as loss_functions
@@ -48,7 +48,7 @@ log = logging.getLogger(__name__)
 
 
 class Trainer:
-    def __init__(self, dataset_train, dataset_val, groups, cfg: THGStrainStressConfig):
+    def __init__(self, dataset_train, dataset_val, groups, cfg: SkinstressionConfig):
         self.cfg = cfg
         if self.cfg.try_overfit:
             self.train_subset = Subset(dataset_train, indices=[0, 1])
@@ -101,7 +101,7 @@ class Trainer:
                 self.train_val_subset, local_rank, world_size
             )
         else:
-            model = THGStrainStressCNN(self.cfg)
+            model = SkinstressionCNN(self.cfg)
             model_sync_bathchnorm = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
             model = DDP(model_sync_bathchnorm.to(local_rank), device_ids=[local_rank])
 
@@ -212,7 +212,7 @@ class Trainer:
             tracker.flush()
 
     def test(self, local_rank: int, world_size: int):
-        model = THGStrainStressCNN(self.cfg)
+        model = SkinstressionCNN(self.cfg)
         model_sync_bathchnorm = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
         model = DDP(model_sync_bathchnorm.to(local_rank), device_ids=[local_rank])
 
@@ -243,7 +243,7 @@ def train(
     global_rank: int,
     local_rank: int,
     world_size: int,
-    cfg: THGStrainStressConfig,
+    cfg: SkinstressionConfig,
     log_queue: Queue,
     cross_validation: bool = False,
 ):
@@ -264,7 +264,7 @@ def train(
     # Careful: dataset_train and _val contain the same data,
     # but the augmentations are diffent.
     # Data still needs to be randomly split by Trainer.
-    dataset_train, groups = THGStrainStressDataset.load_data(
+    dataset_train, groups = SkinstressionDataset.load_data(
         split="train",
         data_path=cfg.paths.data,
         targets_path=cfg.paths.targets,
@@ -274,7 +274,7 @@ def train(
         lds=True,
     )
 
-    dataset_val, _ = THGStrainStressDataset.load_data(
+    dataset_val, _ = SkinstressionDataset.load_data(
         split="validation",
         data_path=cfg.paths.data,
         targets_path=cfg.paths.targets,

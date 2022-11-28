@@ -37,8 +37,8 @@ from torch.optim.lr_scheduler import (
 from torch.utils.data import Subset
 from torch.utils.data.distributed import DistributedSampler
 
-from conf.config import THGStrainStressConfig
-from ds.dataset import THGStrainStressDataset
+from conf.config import SkinstressionConfig
+from ds.dataset import SkinstressionDataset
 from ds.logging_setup import setup_worker_logging
 from ds import loss as loss_functions
 from ds.runner import Runner, Stage, run_epoch
@@ -51,7 +51,7 @@ optuna.logging.disable_default_handler()  # Stop showing logs in sys.stderr.
 log = logging.getLogger(__name__)
 
 
-def build_model(hparams: dict[str, Any], cfg: THGStrainStressConfig):
+def build_model(hparams: dict[str, Any], cfg: SkinstressionConfig):
     """Build model within an Optuna trial.
 
     Args:
@@ -118,7 +118,7 @@ class Objective:
     Data is loaded only once and attached to the objective.
     """
 
-    def __init__(self, cfg: THGStrainStressConfig, data_cls: nn.Module):
+    def __init__(self, cfg: SkinstressionConfig, data_cls: nn.Module):
         """Initialize the objective to preload data
         and share train/validation splits across trials.
 
@@ -359,7 +359,7 @@ def tune_hyperparameters(
     global_rank: int,
     local_rank: int,
     world_size: int,
-    cfg: THGStrainStressConfig,
+    cfg: SkinstressionConfig,
     log_queue: Queue,
 ):
     """Optimize parameters using an objective function and Optuna.
@@ -389,7 +389,7 @@ def tune_hyperparameters(
     ddp_setup(global_rank, world_size)
 
     # Load data into objective, so it doesn't need to load every trial.
-    objective = Objective(cfg=cfg, data_cls=THGStrainStressDataset)
+    objective = Objective(cfg=cfg, data_cls=SkinstressionDataset)
 
     study = None
     if global_rank == 0:

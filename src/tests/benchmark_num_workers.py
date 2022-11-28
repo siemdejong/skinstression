@@ -7,14 +7,14 @@ import multiprocessing as mp
 from torch.utils.data import DataLoader
 import torch
 import os
-from ds.dataset import THGStrainStressDataset
+from ds.dataset import SkinstressionDataset
 import logging
 
 log = logging.getLogger(__name__)
 
 
 def benchmark_num_workers():
-    dataset_train, _ = THGStrainStressDataset.load_data(
+    dataset_train, _ = SkinstressionDataset.load_data(
         split="train",
         data_path="/scistor/guest/sjg203/projects/shg-strain-stress/data/preprocessed/z-stacks/",
         targets_path="/scistor/guest/sjg203/projects/shg-strain-stress/data/z-stacks/logistic_targets.csv",

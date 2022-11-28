@@ -14,16 +14,16 @@ from torch.optim.lr_scheduler import (
     LinearLR,
 )
 
-from conf.config import THGStrainStressConfig
-from ds.dataset import THGStrainStressDataset
+from conf.config import SkinstressionConfig
+from ds.dataset import SkinstressionDataset
 from ds.runner import Runner
 from ds.tracking import Stage
-from ds.models import THGStrainStressCNN
+from ds.models import SkinstressionCNN
 from ds.loss import weighted_l1_loss
 
 
 class CrossRunner:
-    def __init__(self, kf, groups, cfg: THGStrainStressConfig):
+    def __init__(self, kf, groups, cfg: SkinstressionConfig):
         self.kf = kf
         self.groups = groups
         self.cfg = cfg
@@ -48,7 +48,7 @@ class CrossRunner:
             # Use SyncBatchNorm to sync statistics between parallel models.
             # Cast the model to a DistributedDataParallel model where every GPU
             # has the full model.
-            model = THGStrainStressCNN(self.cfg)
+            model = SkinstressionCNN(self.cfg)
             model_sync_bathchnorm = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
             model = DDP(model_sync_bathchnorm.to(local_rank), device_ids=[local_rank])
 
@@ -133,6 +133,6 @@ class CrossRunner:
             yield train_runner, val_runner
 
     @classmethod
-    def StratifiedKFold(cls, n_splits, groups, cfg: THGStrainStressConfig):
+    def StratifiedKFold(cls, n_splits, groups, cfg: SkinstressionConfig):
         skf = StratifiedKFold(n_splits=n_splits, random_state=cfg.seed)
         return cls(skf, groups, cfg)

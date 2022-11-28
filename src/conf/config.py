@@ -126,7 +126,7 @@ class Profiler:
 
 
 @dataclass
-class THGStrainStressConfig:
+class SkinstressionConfig:
     paths: Paths
     params: Params
     dist: Dist

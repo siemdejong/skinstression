@@ -23,7 +23,7 @@ import torch
 import torch.multiprocessing as mp
 from hydra.core.config_store import ConfigStore
 
-from conf.config import Mode, THGStrainStressConfig
+from conf.config import Mode, SkinstressionConfig
 from ds.hyperparameters import tune_hyperparameters
 from ds.logging_setup import setup_primary_logging
 from ds.training import train
@@ -34,13 +34,13 @@ from tests.benchmark_num_workers import benchmark_num_workers
 log = logging.getLogger(__name__)
 
 cs = ConfigStore.instance()
-cs.store(name="thg_strain_stress_config", node=THGStrainStressConfig)
+cs.store(name="skinstression_config", node=SkinstressionConfig)
 
 
 @hydra.main(version_base="1.1", config_path="conf", config_name="config")
-def main(cfg: THGStrainStressConfig) -> None:
+def main(cfg: SkinstressionConfig) -> None:
     """
-    This is the main entry point for the THG strain stress project.
+    This is the main entry point for the Skinstression project.
     Can
     1. calculate appropriate hyperparameters for a model.
        To be instantiated with `sbatch shg-optuna.sbatch` as it makes

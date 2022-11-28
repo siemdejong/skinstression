@@ -67,7 +67,7 @@ class TensorboardExperiment:
                 [f"TRAIN/epoch/loss", f"VAL/epoch/loss"],
             ]
         }
-        layout = {"THG-STRAIN-STRESS": charts}
+        layout = {"SKINSTRESSION": charts}
         self._writer.add_custom_scalars(layout)
 
     def set_stage(self, stage: Stage) -> None:
@@ -101,7 +101,7 @@ class TensorboardExperiment:
         self._writer.add_scalars(
             main_tag=main_tag, tag_scalar_dict=tag_scalar_dict, global_step=step
         )
-    
+
     def add_epoch_param(self, name: str, value: float, step: int) -> None:
         tag = f"epoch/{name}"
         self._writer.add_scalar(tag, value, step)

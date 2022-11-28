@@ -25,10 +25,10 @@ from optuna.visualization import (
     plot_param_importances,
 )
 
-from conf.config import THGStrainStressConfig
+from conf.config import SkinstressionConfig
 
 
-def visualize(cfg: THGStrainStressConfig):
+def visualize(cfg: SkinstressionConfig):
     """Visualize Optuna optimization output.
     Plots are opened in an external browser at ports opened by Plotly.
 

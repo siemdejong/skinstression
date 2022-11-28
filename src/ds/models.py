@@ -18,17 +18,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import torch
 from torch import nn
 
-from conf.config import THGStrainStressConfig
+from conf.config import SkinstressionConfig
 
 
-class THGStrainStressCNN(nn.Module):
-    """Convolutional Neural Network (CNN) to calculate strain-stress features in THG skin images.
+class SkinstressionCNN(nn.Module):
+    """Convolutional Neural Network (CNN) to calculate strain-stress features in SHG skin images.
 
     Assumes a 2D RGB 258*258*3 input image.
     """
 
-    def __init__(self, cfg: THGStrainStressConfig) -> None:
-        super(THGStrainStressCNN, self).__init__()
+    def __init__(self, cfg: SkinstressionConfig) -> None:
+        super(SkinstressionCNN, self).__init__()
 
         layers = []
 
