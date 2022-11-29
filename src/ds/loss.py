@@ -43,48 +43,63 @@ import torch.nn.functional as F
 from frechetdist import frdist
 import numpy as np
 from ds.functions import logistic
+from typing import Optional
 
 
-def weighted_mse_loss(inputs, targets, weights=None):
+def weighted_mse_loss(
+    inputs, targets, weights=None, importances: Optional[np.ndarray[float]] = None
+):
     loss = (inputs - targets) ** 2
     if weights is not None:
         loss *= weights.expand_as(loss)
+    if importances is not None:
+        loss *= importances.expand_as(loss)
     loss = torch.mean(loss)
     return loss
 
 
 def weighted_l1_loss(inputs, targets, weights=None):
-    loss = F.l1_loss(inputs, targets, reduction='none')
+    loss = F.l1_loss(inputs, targets, reduction="none")
     if weights is not None:
         loss *= weights.expand_as(loss)
     loss = torch.mean(loss)
     return loss
 
 
-def weighted_focal_mse_loss(inputs, targets, weights=None, activate='sigmoid', beta=.2, gamma=1):
+def weighted_focal_mse_loss(
+    inputs, targets, weights=None, activate="sigmoid", beta=0.2, gamma=1
+):
     loss = (inputs - targets) ** 2
-    loss *= (torch.tanh(beta * torch.abs(inputs - targets))) ** gamma if activate == 'tanh' else \
-        (2 * torch.sigmoid(beta * torch.abs(inputs - targets)) - 1) ** gamma
+    loss *= (
+        (torch.tanh(beta * torch.abs(inputs - targets))) ** gamma
+        if activate == "tanh"
+        else (2 * torch.sigmoid(beta * torch.abs(inputs - targets)) - 1) ** gamma
+    )
     if weights is not None:
         loss *= weights.expand_as(loss)
     loss = torch.mean(loss)
     return loss
 
 
-def weighted_focal_l1_loss(inputs, targets, weights=None, activate='sigmoid', beta=.2, gamma=1):
-    loss = F.l1_loss(inputs, targets, reduction='none')
-    loss *= (torch.tanh(beta * torch.abs(inputs - targets))) ** gamma if activate == 'tanh' else \
-        (2 * torch.sigmoid(beta * torch.abs(inputs - targets)) - 1) ** gamma
+def weighted_focal_l1_loss(
+    inputs, targets, weights=None, activate="sigmoid", beta=0.2, gamma=1
+):
+    loss = F.l1_loss(inputs, targets, reduction="none")
+    loss *= (
+        (torch.tanh(beta * torch.abs(inputs - targets))) ** gamma
+        if activate == "tanh"
+        else (2 * torch.sigmoid(beta * torch.abs(inputs - targets)) - 1) ** gamma
+    )
     if weights is not None:
         loss *= weights.expand_as(loss)
     loss = torch.mean(loss)
     return loss
 
 
-def weighted_huber_loss(inputs, targets, weights=None, beta=1.):
+def weighted_huber_loss(inputs, targets, weights=None, beta=1.0):
     l1_loss = torch.abs(inputs - targets)
     cond = l1_loss < beta
-    loss = torch.where(cond, 0.5 * l1_loss ** 2 / beta, l1_loss - 0.5 * beta)
+    loss = torch.where(cond, 0.5 * l1_loss**2 / beta, l1_loss - 0.5 * beta)
     if weights is not None:
         loss *= weights.expand_as(loss)
     loss = torch.mean(loss)

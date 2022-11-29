@@ -37,12 +37,14 @@ class Optimizer:
 
 @dataclass
 class Scheduler:
+    T_warmup: int
     T_0: int
     T_mult: int
 
 
 @dataclass
 class Paths:
+    extension: str
     data: str
     targets: str
     optuna_db: str

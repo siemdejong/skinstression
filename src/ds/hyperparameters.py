@@ -34,7 +34,7 @@ from torch.optim.lr_scheduler import (
     CosineAnnealingWarmRestarts,
     LinearLR,
 )
-from torch.utils.data import Subset
+from torch.utils.data import Subset, DataLoader
 from torch.utils.data.distributed import DistributedSampler
 
 from conf.config import SkinstressionConfig
@@ -139,8 +139,9 @@ class Objective:
             targets_path=cfg.paths.targets,
             top_k=cfg.params.top_k,
             reweight="sqrt_inv",
-            importances=cfg.params.importances,
+            importances=np.array(cfg.params.importances),
             lds=True,
+            extension=cfg.paths.extension,
         )
         dataset_val, _ = data_cls.load_data(
             split="validation",
@@ -148,7 +149,9 @@ class Objective:
             targets_path=cfg.paths.targets,
             top_k=cfg.params.top_k,
             reweight="sqrt_inv",
+            importances=np.array(cfg.params.importances),
             lds=True,
+            extension=cfg.paths.extension,
         )
 
         # Split the dataset in train, validation and test (sub)sets.
@@ -221,7 +224,7 @@ class Objective:
         }
 
         if global_rank == 0:
-            log.info(f"Hyperparameters of current trial: {hparams}")
+            log.info(f"Hyperparameters of trial {trial.number}: {hparams}")
 
         # Build the model with hparams defined by Optuna.
         # Use SyncBatchNorm to sync statistics between parallel models.
@@ -242,7 +245,10 @@ class Objective:
 
         # Stabilize the initial model.
         warmup_scheduler = LinearLR(
-            optimizer=optimizer, start_factor=0.1, end_factor=1, total_iters=10
+            optimizer=optimizer,
+            start_factor=0.1,
+            end_factor=1,
+            total_iters=self.cfg.params.scheduler.T_warmup,
         )
 
         # Cosine annealing is used as a way to get to local minima.
@@ -255,7 +261,9 @@ class Objective:
         )
 
         scheduler = SequentialLR(
-            optimizer=optimizer, schedulers=[warmup_scheduler, restart_scheduler]
+            optimizer=optimizer,
+            schedulers=[warmup_scheduler, restart_scheduler],
+            milestones=[self.cfg.params.scheduler.T_warmup],
         )
 
         # Distributed the workload across the GPUs.
@@ -263,7 +271,7 @@ class Objective:
         val_sampler = DistributedSampler(self.val_subset, seed=self.cfg.seed)
 
         # Define dataloaders
-        train_loader = torch.utils.data.DataLoader(
+        train_loader = DataLoader(
             self.train_subset,
             batch_size=int(hparams["batch_size"]),
             num_workers=self.cfg.dist.num_workers,
@@ -272,7 +280,7 @@ class Objective:
             shuffle=False,  # The distributed sampler shuffles for us.
             sampler=train_sampler,
         )
-        val_loader = torch.utils.data.DataLoader(
+        val_loader = DataLoader(
             self.val_subset,
             batch_size=int(hparams["batch_size"]),
             num_workers=self.cfg.dist.num_workers,
@@ -295,7 +303,7 @@ class Objective:
             progress_bar=False,
             scaler=scaler,
             dry_run=self.cfg.dry_run,
-            trial=optuna.trial.Trial.number,
+            trial=trial.number,
         )
         val_runner = Runner(
             loader=val_loader,
@@ -307,7 +315,7 @@ class Objective:
             progress_bar=False,
             scaler=scaler,
             dry_run=self.cfg.dry_run,
-            trial=optuna.trial.Trial.number,
+            trial=trial.number,
         )
 
         # Setup the experiment tracker
@@ -432,7 +440,7 @@ def tune_hyperparameters(
 
         if pruner_cls.__name__ == "HyperbandPruner":
             # To make pruning reproducible for Hyperband
-            os.environ["PYTHONHASHSEED"] = cfg.optuna.pruner.seed
+            os.environ["PYTHONHASHSEED"] = str(cfg.optuna.pruner.seed)
             pruner = pruner_cls(
                 min_resource=cfg.optuna.pruner.min_resource,
                 max_resource=cfg.optuna.pruner.max_resource,

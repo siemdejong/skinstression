@@ -101,21 +101,24 @@ class Runner:
 
         self.epoch_id = epoch_id
 
-        for batch_num, (x, y, w) in enumerate(
+        for batch_num, (x, y, w, imp) in enumerate(
             tqdm(self.loader, desc=desc, ncols=80, disable=self.disable_progress_bar)
         ):
+
             with torch.autocast(
                 device_type="cuda",
                 dtype=torch.float16,
                 enabled=self.scaler.is_enabled(),
             ):
 
-                x, y, w = (
+                x, y, w, imp = (
                     x.to(self.local_rank),
                     y.to(self.local_rank),
                     w.to(self.local_rank),
+                    imp.to(self.local_rank),
                 )
-                loss = self._run_single(x, y, w)
+
+                loss = self._run_single(x, y, w, imp)
 
             if self.optimizer:
                 # Backpropagation
@@ -149,7 +152,7 @@ class Runner:
         if self.global_rank == 0:
             self.save_checkpoint()
 
-    def _run_single(self, x: Any, y: Any, w: float):
+    def _run_single(self, x: Any, y: Any, w: float, imp: np.ndarray[float]):
         """
         Args:
             w: weighting of the loss function.
@@ -157,7 +160,7 @@ class Runner:
         self.run_count += 1
         self.prediction = self.model(x)
         self.target = y
-        loss = self.compute_loss(self.prediction, self.target, w)
+        loss = self.compute_loss(self.prediction, self.target, w, imp)
 
         return loss
 

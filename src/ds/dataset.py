@@ -31,6 +31,7 @@ from scipy import stats
 from torch.utils.data import ConcatDataset, Dataset
 
 from ds.utils import get_lds_kernel_window
+from ds.transforms import YeoJohnsonTransform
 
 log = logging.getLogger(__name__)
 
@@ -46,8 +47,8 @@ class SkinstressionDataset(Dataset[Any]):
         extension: str = "bmp",
         target_transform=None,
         top_k: Optional[int] = None,
+        importances: Optional[np.ndarray[float]] = None,
     ):
-        # header = 0, assume there is a header in the labels.csv file.
         self.split = split
         self._data = Path(root_data_dir) / str(folder)
         self.group = folder
@@ -58,6 +59,7 @@ class SkinstressionDataset(Dataset[Any]):
         self.top_k = top_k
         self._length = self.calc_length()
         self.weights = weights
+        self.importances = importances
 
     def calc_length(self):
         # Exclude files from PyIQ.
@@ -66,7 +68,7 @@ class SkinstressionDataset(Dataset[Any]):
         if self.top_k:
             # To make sure top_k is not too large.
             if self.top_k > length_whole_dataset:
-                log.error(f"Argument top_k too large. Using full dataset {self._data}.")
+                log.error(f"Config top_k too large. Using full dataset {self._data}.")
             number = min(self.top_k, length_whole_dataset)
         else:
             number = length_whole_dataset
@@ -83,12 +85,8 @@ class SkinstressionDataset(Dataset[Any]):
         # data_path = self.data_dir / (str(int(self.labels["index"].iloc[idx])) + ".tif")
         image = Image.open(self._data / f"{str(idx)}.{self.extension}")
         targets = self.targets
-
-        weight = self.weights  # (
-        #     np.asarray([self.weights]).astype("float32")
-        #     if self.weights is not None
-        #     else np.asarray([np.float32(1.0)])
-        # )
+        weights = self.weights
+        importances = self.importances
 
         if self.transform:
             image = self.transform(image)
@@ -96,34 +94,11 @@ class SkinstressionDataset(Dataset[Any]):
         if self.target_transform:
             targets = self.target_transform(targets)
 
-        return image, targets, weight
-
-    @staticmethod
-    def _apply_importance_on_weights(
-        weights: np.ndarray[float], importances: Optional[np.ndarray[float]] = None
-    ) -> np.ndarray[float]:
-        """To change the importances of the output.
-        E.g. if output (a, k, xc) and importances is (1, 1, 0.8), give less attention to xc.
-
-        Args:
-            weights: array of weights corresponding with the network output
-            importances: array of the importances of every network output
-
-        Returns:
-            array of weights on which importances are applied.
-        """
-
-        if importances:
-            weights_with_importance = weights * importances
-        else:
-            weights_with_importance = weights
-
-        return weights_with_importance
+        return image, targets, weights, importances
 
     @staticmethod
     def _prepare_weights(
         targets: np.ndarray,
-        importances: np.ndarray,
         reweight: str,
         lds: bool = False,
         lds_kernel: str = "gaussian",
@@ -203,13 +178,7 @@ class SkinstressionDataset(Dataset[Any]):
             scaling = len(weights) / np.sum(weights)
             scaled_weights = scaling * weights
 
-            weights_after_importance = (
-                SkinstressionDataset._apply_importance_on_weights(
-                    scaled_weights, importances
-                )
-            )
-
-            all_weights.append(weights_after_importance)
+            all_weights.append(scaled_weights)
             all_emp_dists.append(emp_target_dist)
             all_eff_dists.append(eff_target_dist)
             all_edges.append(edges)
@@ -222,38 +191,40 @@ class SkinstressionDataset(Dataset[Any]):
         )
 
     def get_transform(self):
+
         if self.split == "train":
             transform = transforms.Compose(
                 [
-                    # TODO: Insert some data augmentation transforms.
-                    transforms.Lambda(lambda y: stats.yeojohnson(y, 0.466319593487972)),
+                    # NOTE: The Yeo-Johnson transform and normalization are time-consuming.
+                    # It is possible to do them in preprocessing e.g. in notebook 17.
+                    # YeoJohnsonTransform(0.466319593487972),
+                    transforms.ToTensor(),
                     # NOTE: If using values below, be careful to not leak information
                     # from the val/test sets to the training set.
                     # NOTE: These mean and std are statistics after the Yeo-Johnson transform.
-                    transforms.Normalize(
-                        mean=(14.716653741103862),
-                        std=(6.557034596034911),
-                    ),
+                    # transforms.Normalize(
+                    #     mean=(14.716653741103862 / 255),
+                    #     std=(6.557034596034911 / 255),
+                    # ),
                     # TODO: Make sure changing the crop aspect ratio doesn't change physics.
-                    transforms.RandomResizedCrop((700, 700)),
-                    transforms.Resize((258, 258)),
+                    transforms.RandomResizedCrop(
+                        size=(258, 258), scale=(0.9, 1), ratio=(1, 1), antialias=True
+                    ),
                     transforms.ColorJitter(brightness=0.3),
                     transforms.RandomHorizontalFlip(),
                     transforms.RandomVerticalFlip(),
-                    transforms.ToTensor(),
                 ]
             )
         else:
             transform = transforms.Compose(
                 [
-                    transforms.Lambda(lambda y: stats.yeojohnson(y, 0.466319593487972)),
-                    transforms.Normalize(
-                        mean=(14.716653741103862),
-                        std=(6.557034596034911),
-                    ),
-                    transforms.CenterCrop((700, 700)),
-                    transforms.Resize((258, 258)),
+                    # YeoJohnsonTransform(0.466319593487972),
                     transforms.ToTensor(),
+                    # transforms.Normalize(
+                    #     mean=(14.716653741103862 / 255),
+                    #     std=(6.557034596034911 / 255),
+                    # ),
+                    transforms.Resize((258, 258), antialias=True),
                 ]
             )
         return transform
@@ -268,8 +239,7 @@ class SkinstressionDataset(Dataset[Any]):
         importances: Optional[np.ndarray[float]] = None,
         lds=False,
         lds_kernel="gaussian",
-        lds_ks=5,
-        lds_sigma=2,
+        extension="bmp",
     ) -> tuple[Dataset, np.ndarray]:
         """Gather all data and construct a full dataset object.
         Return person_ids with it for stratification purposes.
@@ -308,7 +278,6 @@ class SkinstressionDataset(Dataset[Any]):
 
         weights, _, _, _ = SkinstressionDataset._prepare_weights(
             targets=targets_list,
-            importances=np.array(importances),
             reweight=reweight,
             lds=lds,
             lds_kernel=lds_kernel,
@@ -341,6 +310,8 @@ class SkinstressionDataset(Dataset[Any]):
                 targets=targets,
                 weights=weights,
                 top_k=top_k,
+                importances=importances,
+                extension=extension,
             )
 
             # Dirty way of checking if data is compatible with model.

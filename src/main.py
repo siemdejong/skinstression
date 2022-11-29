@@ -36,6 +36,9 @@ log = logging.getLogger(__name__)
 cs = ConfigStore.instance()
 cs.store(name="skinstression_config", node=SkinstressionConfig)
 
+# Turning the autotuner on may harm reproducibility.
+torch.backends.cudnn.benchmark = True
+
 
 @hydra.main(version_base="1.1", config_path="conf", config_name="config")
 def main(cfg: SkinstressionConfig) -> None:
