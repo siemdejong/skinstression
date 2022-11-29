@@ -8,6 +8,7 @@ data
 slurm
 image_analysis_stout.txt
 image_analysis_stderr.txt
+docs/diagrams/out/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
