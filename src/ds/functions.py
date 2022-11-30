@@ -15,16 +15,14 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-import math
+import numpy as np
 import torch
 
 
-@torch.jit.script
 def sigmoid(x, A, h, slope, C) -> float:
     """https://stackoverflow.com/a/55104465"""
-    return 1 / (1 + math.exp((x - h) / slope)) * A + C
+    return 1 / (1 + np.exp((x - h) / slope)) * A + C
 
 
-@torch.jit.script  # To fuse pointwise operations making calculation quicker.
 def logistic(x, a, k, xc):
-    return a / (1 + math.exp(-k * (x - xc)))
+    return a / (1 + np.exp(-k * (x - xc)))
