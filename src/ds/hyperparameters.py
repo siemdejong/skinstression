@@ -173,9 +173,9 @@ class Objective:
             random_state=cfg.seed,
         )
 
-        log.debug(f"train idx: {train_idx}")
-        log.debug(f"val idx: {val_idx}")
-        log.debug(f"test idx: {test_idx}")
+        log.info(f"train idx: {train_idx}")
+        log.info(f"val idx: {val_idx}")
+        log.info(f"test idx: {test_idx}")
 
         # TODO: CROSSRUNNERS NOW ONLY USE NON-AUGMENTED DATA!
         self.train_val_subset = Subset(dataset_val, indices=train_val_idx)
@@ -326,7 +326,7 @@ class Objective:
             tracker = None
 
         # Run epochs.
-        max_epoch = self.cfg.params.epoch_count
+        max_epoch = self.cfg.optuna.pruner.max_resource
         for epoch_id in range(max_epoch):
             train_runner.loader.sampler.set_epoch(epoch_id)
             val_runner.loader.sampler.set_epoch(epoch_id)
