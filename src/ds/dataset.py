@@ -123,11 +123,6 @@ class SkinstressionDataset(Dataset[Any]):
             reweight != "none" if lds else True
         ), "Set reweight to 'sqrt_inv' (default) or 'inverse' when using LDS"
 
-        if not lds:
-            raise NotImplementedError(
-                "Please use LDS. A no LDS method is not implemented."
-            )
-
         all_weights = []
         all_emp_dists = []
         all_eff_dists = []
@@ -150,38 +145,47 @@ class SkinstressionDataset(Dataset[Any]):
                 emp_target_dist = np.clip(emp_target_dist, -np.inf, np.inf)
                 raise NotImplementedError
 
-            # Calculate effective label distribution
-            if param_ks:
-                lds_ks = param_ks.get(param)
+            if lds:
+                # Calculate effective label distribution
+                if param_ks:
+                    lds_ks = param_ks.get(param)
+                else:
+                    lds_ks = 5
+                if param_sigma:
+                    lds_sigma = param_sigma.get(param)
+                else:
+                    lds_sigma = 2
+                log.info(
+                    f"LDS: {param} "
+                    + f"| kernel: {lds_kernel.upper()} "
+                    + f"| param roi: {edges[0]:.2f}-{edges[-1]:.2f} "
+                    + f"| param res.: {edges[1]-edges[0]:.5f} "
+                    + f"| kernel size: {lds_ks} "
+                    + f"| sigma: {lds_sigma}"
+                )
+                lds_kernel_window = get_lds_kernel_window(lds_kernel, lds_ks, lds_sigma)
+                eff_target_dist = convolve1d(
+                    emp_target_dist, weights=lds_kernel_window, mode="constant"
+                )
+
+                eff_num_per_target = np.float32(eff_target_dist[bin_index_per_target])
+                weights = 1 / eff_num_per_target
+
+                scaling = len(weights) / np.sum(weights)
+                scaled_weights = scaling * weights
+
+                all_weights.append(scaled_weights)
+                all_emp_dists.append(emp_target_dist)
+                all_eff_dists.append(eff_target_dist)
+                all_edges.append(edges)
             else:
-                lds_ks = 5
-            if param_sigma:
-                lds_sigma = param_sigma.get(param)
-            else:
-                lds_sigma = 2
-            log.info(
-                f"LDS: {param} "
-                + f"| kernel: {lds_kernel.upper()} "
-                + f"| param roi: {edges[0]:.2f}-{edges[-1]:.2f} "
-                + f"| param res.: {edges[1]-edges[0]:.5f} "
-                + f"| kernel size: {lds_ks} "
-                + f"| sigma: {lds_sigma}"
-            )
-            lds_kernel_window = get_lds_kernel_window(lds_kernel, lds_ks, lds_sigma)
-            eff_target_dist = convolve1d(
-                emp_target_dist, weights=lds_kernel_window, mode="constant"
-            )
-
-            eff_num_per_target = np.float32(eff_target_dist[bin_index_per_target])
-            weights = 1 / eff_num_per_target
-
-            scaling = len(weights) / np.sum(weights)
-            scaled_weights = scaling * weights
-
-            all_weights.append(scaled_weights)
-            all_emp_dists.append(emp_target_dist)
-            all_eff_dists.append(eff_target_dist)
-            all_edges.append(edges)
+                weights = 1 / emp_target_dist
+                scaling = len(weights) / np.sum(weights)
+                scaled_weights = scaling * weights
+                all_weights.append(scaled_weights)
+                all_emp_dists.append(emp_target_dist)
+                all_eff_dists.append(None)
+                all_edges.append(edges)
 
         return (
             np.asarray(all_weights).T,
@@ -207,9 +211,14 @@ class SkinstressionDataset(Dataset[Any]):
                     #     std=(6.557034596034911 / 255),
                     # ),
                     # TODO: Make sure changing the crop aspect ratio doesn't change physics.
-                    transforms.RandomResizedCrop(
-                        size=(258, 258), scale=(0.9, 1), ratio=(1, 1), antialias=True
-                    ),
+                    transforms.Resize(
+                        (1000, 1000)
+                    ),  # Stupid hack to accept images smaller than 1000x1000.
+                    transforms.RandomCrop((700, 700)),
+                    # transforms.RandomResizedCrop(
+                    #     size=(258, 258), scale=(0.9, 1), ratio=(1, 1)
+                    # ),
+                    transforms.Resize((258, 258)),
                     transforms.ColorJitter(brightness=0.3),
                     transforms.RandomHorizontalFlip(),
                     transforms.RandomVerticalFlip(),
@@ -224,7 +233,9 @@ class SkinstressionDataset(Dataset[Any]):
                     #     mean=(14.716653741103862 / 255),
                     #     std=(6.557034596034911 / 255),
                     # ),
-                    transforms.Resize((258, 258), antialias=True),
+                    transforms.Resize((1000, 1000)),
+                    transforms.CenterCrop((700, 700)),
+                    transforms.Resize((258, 258)),
                 ]
             )
         return transform
