@@ -19,6 +19,7 @@ import logging
 import os
 from typing import Any
 
+from hydra import utils
 import numpy as np
 import optuna
 import torch
@@ -154,28 +155,34 @@ class Objective:
             extension=cfg.paths.extension,
         )
 
-        # Split the dataset in train, validation and test (sub)sets.
-        train_val_size = int(len(dataset_train) * 0.8)
-        train_val_idx, test_idx = train_test_split(
-            np.arange(len(dataset_train)),
-            train_size=train_val_size,
-            stratify=class_ids,
-            shuffle=True,
-            random_state=cfg.seed,
-        )
+        try:
+            # Assuming the script is run from the project directory.
+            train_idx = np.load(f"{utils.get_original_cwd()}/data/train_idx.npy")
+            val_idx = np.load(f"{utils.get_original_cwd()}/data/val_idx.npy")
+            test_idx = np.load(f"{utils.get_original_cwd()}/data/test_idx.npy")
+        except OSError:
+            # Split the dataset in train, validation and test (sub)sets.
+            train_val_size = int(len(dataset_train) * 0.8)
+            train_val_idx, test_idx = train_test_split(
+                np.arange(len(dataset_train)),
+                train_size=train_val_size,
+                stratify=class_ids,
+                shuffle=True,
+                random_state=cfg.seed,
+            )
 
-        train_size = int(len(train_val_idx) * 0.8)
-        train_idx, val_idx = train_test_split(
-            np.arange(len(train_val_idx)),
-            train_size=train_size,
-            stratify=class_ids[train_val_idx],
-            shuffle=True,
-            random_state=cfg.seed,
-        )
+            train_size = int(len(train_val_idx) * 0.8)
+            train_idx, val_idx = train_test_split(
+                np.arange(len(train_val_idx)),
+                train_size=train_size,
+                stratify=class_ids[train_val_idx],
+                shuffle=True,
+                random_state=cfg.seed,
+            )
 
-        log.info(f"train idx: {train_idx}")
-        log.info(f"val idx: {val_idx}")
-        log.info(f"test idx: {test_idx}")
+            log.info(f"train idx: {train_idx}")
+            log.info(f"val idx: {val_idx}")
+            log.info(f"test idx: {test_idx}")
 
         # TODO: CROSSRUNNERS NOW ONLY USE NON-AUGMENTED DATA!
         self.train_val_subset = Subset(dataset_val, indices=train_val_idx)
