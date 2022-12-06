@@ -152,16 +152,16 @@ Not necessarily needed, but the project provides jobscripts for easy job submiss
     ```bash
     git clone https://github.com/siemdejong/shg-strain-stress.git shg-strain-stress
     ```
-2.  Create a new conda environment and activate it.
+1.  Create a new conda environment and activate it.
     ```bash
     conda create -n <env_name>
     conda activate <env_name>
     ```
-3.  Install dependencies from `environment.yml`.
+1.  Install dependencies from `environment.yml`.
     ```bash
-    conda env create -f environment.yml
+    conda env update -f environment.yml
     ```
-4.  Check if CUDA is available for the installed Pytorch distribution.
+1.  Check if CUDA is available for the installed Pytorch distribution.
     In a Python shell, execute
     ```python
     import torch
@@ -224,7 +224,7 @@ For more Tensorboard configurations, run `tensorboard --help`.
 ## Roadmap
 
 - [x] Hyperparameter optimization with Optuna
-- [ ] Model training with Pytorch
+- [x] Model training with Pytorch
 - [ ] Inference
 - [ ] Explainable AI
 - [ ] Documentation
