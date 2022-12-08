@@ -179,7 +179,7 @@ class SkinstressionDataset(Dataset[Any]):
                 all_eff_dists.append(eff_target_dist)
                 all_edges.append(edges)
             else:
-                weights = 1 / emp_target_dist
+                weights = 1 / np.float32(emp_target_dist[bin_index_per_target])
                 scaling = len(weights) / np.sum(weights)
                 scaled_weights = scaling * weights
                 all_weights.append(scaled_weights)
