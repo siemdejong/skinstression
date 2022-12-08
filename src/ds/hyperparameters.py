@@ -160,6 +160,7 @@ class Objective:
             train_idx = np.load(f"{utils.get_original_cwd()}/data/train_idx.npy")
             val_idx = np.load(f"{utils.get_original_cwd()}/data/val_idx.npy")
             test_idx = np.load(f"{utils.get_original_cwd()}/data/test_idx.npy")
+            train_val_idx = np.concatenate((train_idx, val_idx))
         except OSError:
             # Split the dataset in train, validation and test (sub)sets.
             train_val_size = int(len(dataset_train) * 0.8)
@@ -183,6 +184,10 @@ class Objective:
             log.info(f"train idx: {train_idx}")
             log.info(f"val idx: {val_idx}")
             log.info(f"test idx: {test_idx}")
+
+            np.save(f"{utils.get_original_cwd()}/data/train_idx.npy", train_idx)
+            np.save(f"{utils.get_original_cwd()}/data/val_idx.npy", val_idx)
+            np.save(f"{utils.get_original_cwd()}/data/test_idx.npy", test_idx)
 
         # TODO: CROSSRUNNERS NOW ONLY USE NON-AUGMENTED DATA!
         self.train_val_subset = Subset(dataset_val, indices=train_val_idx)
@@ -307,7 +312,7 @@ class Objective:
             scheduler=scheduler,
             global_rank=global_rank,
             local_rank=local_rank,
-            progress_bar=False,
+            progress_bar=self.cfg.progress_bar,
             scaler=scaler,
             dry_run=self.cfg.dry_run,
             trial=trial.number,
@@ -319,7 +324,7 @@ class Objective:
             stage=Stage.VAL,
             global_rank=global_rank,
             local_rank=local_rank,
-            progress_bar=False,
+            progress_bar=self.cfg.progress_bar,
             scaler=scaler,
             dry_run=self.cfg.dry_run,
             trial=trial.number,

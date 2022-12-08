@@ -141,3 +141,4 @@ class SkinstressionConfig:
     dry_run: bool
     load_checkpoint: bool
     profiler: Profiler
+    progress_bar: bool
