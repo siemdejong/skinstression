@@ -86,10 +86,13 @@ class SkinstressionDataset(Dataset[Any]):
         # data_path = self.data_dir / (str(int(self.labels["index"].iloc[idx])) + ".tif")
         data_path = self._data / f"{str(idx)}.{self.extension}"
         _max_attempts = 10
-        for _ in range(_max_attempts):
+        for attempt in range(_max_attempts):
             try:
                 image = Image.open(data_path)
             except OSError:
+                log.error(
+                    f"Opening image throws OSError. Retrying... Attempt {attempt}"
+                )
                 import time
 
                 time.sleep(10)  # Retry later.
