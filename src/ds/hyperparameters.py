@@ -45,6 +45,7 @@ from ds import loss as loss_functions
 from ds.runner import Runner, Stage, run_epoch
 from ds.tensorboard import TensorboardExperiment
 from ds.utils import ddp_cleanup, ddp_setup, seed_all
+from ds.exceptions import IOErrorAfterRetries
 
 optuna.logging.enable_propagation()  # Propagate logs to the root logger.
 optuna.logging.disable_default_handler()  # Stop showing logs in sys.stderr.
@@ -479,6 +480,8 @@ def tune_hyperparameters(
         study.optimize(
             lambda trial: objective(trial, global_rank, local_rank, world_size),
             n_trials=cfg.optuna.trials,
+            gc_after_trial=True,
+            catch=(IOErrorAfterRetries,),
         )
     else:
 

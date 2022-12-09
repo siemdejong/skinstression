@@ -32,6 +32,7 @@ from torch.utils.data import ConcatDataset, Dataset
 
 from ds.utils import get_lds_kernel_window
 from ds.transforms import YeoJohnsonTransform
+from ds.exceptions import IOErrorAfterRetries
 
 log = logging.getLogger(__name__)
 
@@ -83,7 +84,21 @@ class SkinstressionDataset(Dataset[Any]):
         # https://stackoverflow.com/a/60176057
         # Assuming images follow [0, n-1], so they can be accesed directly.
         # data_path = self.data_dir / (str(int(self.labels["index"].iloc[idx])) + ".tif")
-        image = Image.open(self._data / f"{str(idx)}.{self.extension}")
+        data_path = self._data / f"{str(idx)}.{self.extension}"
+        _max_attempts = 10
+        for _ in range(_max_attempts):
+            try:
+                image = Image.open(data_path)
+            except OSError:
+                import time
+
+                time.sleep(10)  # Retry later.
+                continue
+            else:
+                break
+        else:  # If the image really cannot be opened after several times.
+            raise IOErrorAfterRetries(_max_attempts, data_path)
+
         targets = self.targets
         weights = self.weights
         importances = self.importances
