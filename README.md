@@ -50,8 +50,8 @@
     <a href="https://siemdejong.github.io/shg-strain-stress"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <!-- <a href="https://github.com/siemdejong/shg-strain-stress">View Demo</a> -->
-    ·
+    <!-- <a href="https://github.com/siemdejong/shg-strain-stress">View Demo</a>
+    · -->
     <a href="https://github.com/siemdejong/shg-strain-stress/issues">Report Bug</a>
     ·
     <a href="https://github.com/siemdejong/shg-strain-stress/issues">Request Feature</a>
@@ -218,7 +218,16 @@ For more Tensorboard configurations, run `tensorboard --help`.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
+## Documentation
+Documentation is hosted by Github Pages.
+Docs are automatically created from docstrings.
+Subsequently run
+```sh
+cd docs
+sphinx-apidoc -o src ../src
+make html
+```
+to update the documentation.
 
 <!-- ROADMAP -->
 ## Roadmap

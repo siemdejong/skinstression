@@ -9,6 +9,7 @@ Subpackages
 
    src.conf
    src.ds
+   src.tests
 
 Submodules
 ----------
