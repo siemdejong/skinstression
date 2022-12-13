@@ -1,0 +1,18 @@
+@startuml System context diagram
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include FONTAWESOME/user.puml
+!include FONTAWESOME/microscope.puml
+!include FONTAWESOME/cube.puml
+
+Person(experimentalist, "Experimentalist", "Wants to know stretch properties of skin tissue.", $sprite="user")
+System(SHG_microscope, "SHG microscope", "Images collagen in skin tissue.", $sprite="microscope")
+System(Skinstression, "Skinstression", "Trains a convolutional neural network for strain-stress regression on skin tissue images.", $sprite="cube", $link="https://github.com/siemdejong/shg-strain-stress")
+
+Rel_D(experimentalist, SHG_microscope, "Uses")
+Rel_R(SHG_microscope, Skinstression, "Sends image to")
+Rel_U(Skinstression, experimentalist, "Uses")
+
+SHOW_LEGEND()
+@enduml

@@ -154,11 +154,13 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul class="current">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="modules.html">src</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">src package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.conf.html">src.conf package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.ds.html">src.ds package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.tests.html">src.tests package</a></li>
 </ul>
 </li>
 </ul>
@@ -320,7 +322,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="src.ds.html">src.ds package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="src.ds.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.ds.html#src-ds-cross-validator-module">src.ds.cross_validator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.ds.html#src-ds-cross-validation-module">src.ds.cross_validation module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.dataset">src.ds.dataset module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.dataset.SkinstressionDataset"><code class="docutils literal notranslate"><span class="pre">SkinstressionDataset</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.dataset.SkinstressionDataset.calc_length"><code class="docutils literal notranslate"><span class="pre">SkinstressionDataset.calc_length()</span></code></a></li>
@@ -330,12 +332,26 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.exceptions">src.ds.exceptions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.exceptions.IOErrorAfterRetries"><code class="docutils literal notranslate"><span class="pre">IOErrorAfterRetries</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.functions">src.ds.functions module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.functions.logistic"><code class="docutils literal notranslate"><span class="pre">logistic()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.functions.sigmoid"><code class="docutils literal notranslate"><span class="pre">sigmoid()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="src.ds.html#src-ds-hyperparameters-module">src.ds.hyperparameters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.logging_setup">src.ds.logging_setup module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.logging_setup.WorkerLogFilter"><code class="docutils literal notranslate"><span class="pre">WorkerLogFilter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.logging_setup.WorkerLogFilter.filter"><code class="docutils literal notranslate"><span class="pre">WorkerLogFilter.filter()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.logging_setup.setup_primary_logging"><code class="docutils literal notranslate"><span class="pre">setup_primary_logging()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.logging_setup.setup_worker_logging"><code class="docutils literal notranslate"><span class="pre">setup_worker_logging()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.ds.html#src-ds-loss-module">src.ds.loss module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.metrics">src.ds.metrics module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.metrics.Metric"><code class="docutils literal notranslate"><span class="pre">Metric</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.metrics.Metric.average"><code class="docutils literal notranslate"><span class="pre">Metric.average</span></code></a></li>
@@ -407,6 +423,15 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="src.ds.html#src-ds-training-module">src.ds.training module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.transforms">src.ds.transforms module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.transforms.YeoJohnsonTransform"><code class="docutils literal notranslate"><span class="pre">YeoJohnsonTransform</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.transforms.YeoJohnsonTransform.forward"><code class="docutils literal notranslate"><span class="pre">YeoJohnsonTransform.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.ds.html#src.ds.transforms.YeoJohnsonTransform.training"><code class="docutils literal notranslate"><span class="pre">YeoJohnsonTransform.training</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds.utils">src.ds.utils module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.utils.create_experiment_log_dir"><code class="docutils literal notranslate"><span class="pre">create_experiment_log_dir()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.ds.html#src.ds.utils.create_from_existing"><code class="docutils literal notranslate"><span class="pre">create_from_existing()</span></code></a></li>
@@ -428,6 +453,15 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="src.ds.html#module-src.ds">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.tests.html">src.tests package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.tests.html#module-src.tests.benchmark_num_workers">src.tests.benchmark_num_workers module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.tests.html#src.tests.benchmark_num_workers.benchmark_num_workers"><code class="docutils literal notranslate"><span class="pre">benchmark_num_workers()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.tests.html#module-src.tests">Module contents</a></li>
 </ul>
 </li>
 </ul>

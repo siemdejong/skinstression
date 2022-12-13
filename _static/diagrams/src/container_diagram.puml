@@ -1,0 +1,52 @@
+@startuml Container diagram
+' https://github.com/plantuml-stdlib/C4-PlantUML#c4-plantuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include FONTAWESOME/user.puml
+!include FONTAWESOME/microscope.puml
+!include FONTAWESOME/cube.puml
+
+Person(experimentalist, "Experimentalist", "Wants to know stretch properties of skin tissue.", $sprite="user")
+System(SHG_microscope, "SHG microscope", "Images collagen in skin tissue.", $sprite="microscope")
+System_Boundary(Skinstression, "Skinstression", $link=https://github.com/siemdejong/shg-strain-stress) {
+    Container(notebooks, "Notebooks", "IPython", "Explore data, create targets, apply noise2void, prepare data.")
+    Container(application, "Application", "Python", "Tune hyperparameters, and train model")
+    ContainerDb(model_zoo, "Model zoo", "Pytorch", "Training checkpoints.")
+    ContainerDb(config, "Configurations", "YAML", "Hyperparameter and training configurations.")
+    Container(logs, "Logs", "txt")
+    System_Boundary(Optuna, "Optuna", $link="https://optuna.org/") {
+        Container_Ext(optuna_dashboard, "Optuna-dasboard", "sqlite" ,"Hyperparameter visualization.", $link="https://github.com/optuna/optuna-dashboard")
+        ContainerDb_Ext(optuna_db, "Optuna-DB", "sqlite", "Hyperparameter trial storage")
+    }
+    Container_Ext(PyIQ, "PyIQ", "Python", "Quantify image quality.", $link="https://github.com/sakoho81/pyimagequalityranking")
+    Container_Ext(tensorboard, "Tensorboard", "Pytorch/Tensorflow", "Training visualization", $link="https://www.tensorflow.org/tensorboard")
+    ContainerDb_Ext(img_db, "Images", "BMP/TIF", "Microscope output to learn from.")
+    Container_Ext(hydra, "Hydra", "Python", "Interpret configurations.", $link="https://hydra.cc/docs/intro/")
+}
+
+Rel(experimentalist, SHG_microscope, "Uses")
+Rel(experimentalist, notebooks, "Uses")
+Rel(notebooks, img_db, "Reads from and writes to")
+Rel(notebooks, model_zoo, "Reads from and writes to")
+Rel(experimentalist, PyIQ, "Uses")
+Rel(PyIQ, img_db, "Reads from")
+Rel(experimentalist, application, "Uses")
+Rel(application, model_zoo, "Reads from and writes to")
+Rel(SHG_microscope, img_db, "Writes to")
+Rel(PyIQ, application, "Uses")
+Rel(PyIQ, notebooks, "Uses")
+Rel(application, tensorboard, "Writes to")
+Rel(tensorboard, experimentalist, "Provides network information")
+Rel(logs, experimentalist, "Shows information to")
+Rel(optuna_dashboard, experimentalist, "Shows information to")
+Rel(optuna_dashboard, optuna_db, "Reads from")
+Rel(application, optuna_db, "Writes to")
+Rel(application, hydra, "Uses")
+Rel(hydra, config, "Reads from")
+Rel(hydra, logs, "Writes to")
+
+' Lay_D(notebooks, application)
+
+SHOW_LEGEND()
+@enduml

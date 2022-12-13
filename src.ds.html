@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="src.conf package" href="src.conf.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="src.tests package" href="src.tests.html" /><link rel="prev" title="src.conf package" href="src.conf.html" />
 
     <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
         <title>src.ds package - Estimating strain-stress curves from SHG skin tissue images documentation</title>
@@ -154,11 +154,13 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul class="current">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="modules.html">src</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2 current has-children"><a class="reference internal" href="src.html">src package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="src.conf.html">src.conf package</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">src.ds package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.tests.html">src.tests package</a></li>
 </ul>
 </li>
 </ul>
@@ -202,8 +204,8 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">#</a></h2>
 </section>
-<section id="src-ds-cross-validator-module">
-<h2>src.ds.cross_validator module<a class="headerlink" href="#src-ds-cross-validator-module" title="Permalink to this heading">#</a></h2>
+<section id="src-ds-cross-validation-module">
+<h2>src.ds.cross_validation module<a class="headerlink" href="#src-ds-cross-validation-module" title="Permalink to this heading">#</a></h2>
 </section>
 <section id="module-src.ds.dataset">
 <span id="src-ds-dataset-module"></span><h2>src.ds.dataset module<a class="headerlink" href="#module-src.ds.dataset" title="Permalink to this heading">#</a></h2>
@@ -258,6 +260,16 @@ and an array of indices denoting to what group subsets of the dataset belong to.
 </dd></dl>
 
 </section>
+<section id="module-src.ds.exceptions">
+<span id="src-ds-exceptions-module"></span><h2>src.ds.exceptions module<a class="headerlink" href="#module-src.ds.exceptions" title="Permalink to this heading">#</a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="src.ds.exceptions.IOErrorAfterRetries">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.ds.exceptions.</span></span><span class="sig-name descname"><span class="pre">IOErrorAfterRetries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_attempts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.exceptions.IOErrorAfterRetries" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised for IOErrors after retries.</p>
+</dd></dl>
+
+</section>
 <section id="module-src.ds.functions">
 <span id="src-ds-functions-module"></span><h2>src.ds.functions module<a class="headerlink" href="#module-src.ds.functions" title="Permalink to this heading">#</a></h2>
 <p>Provides equations as functions.
@@ -286,6 +298,80 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 </section>
 <section id="src-ds-hyperparameters-module">
 <h2>src.ds.hyperparameters module<a class="headerlink" href="#src-ds-hyperparameters-module" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-src.ds.logging_setup">
+<span id="src-ds-logging-setup-module"></span><h2>src.ds.logging_setup module<a class="headerlink" href="#module-src.ds.logging_setup" title="Permalink to this heading">#</a></h2>
+<p>Multiprocess logging
+Copyright (C) 2022  Siem de Jong</p>
+<p>This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.</p>
+<p>This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.</p>
+<p>You should have received a copy of the GNU General Public License
+along with this program. If not, see &lt;<a class="reference external" href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/</a>&gt;.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.ds.logging_setup.WorkerLogFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.ds.logging_setup.</span></span><span class="sig-name descname"><span class="pre">WorkerLogFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rank</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.logging_setup.WorkerLogFilter" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.ds.logging_setup.WorkerLogFilter.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.logging_setup.WorkerLogFilter.filter" title="Permalink to this definition">#</a></dt>
+<dd><p>Determine if the specified record is to be logged.</p>
+<p>Returns True if the record should be logged, or False otherwise.
+If deemed appropriate, the record may be modified in-place.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.ds.logging_setup.setup_primary_logging">
+<span class="sig-prename descclassname"><span class="pre">src.ds.logging_setup.</span></span><span class="sig-name descname"><span class="pre">setup_primary_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_log_file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Queue</span></span></span><a class="headerlink" href="#src.ds.logging_setup.setup_primary_logging" title="Permalink to this definition">#</a></dt>
+<dd><p>Global logging is setup using this method. In a distributed setup, a multiprocessing queue is setup
+which can be used by the workers to write their log messages. This initializers respective handlers
+to pick messages from the queue and handle them to write to corresponding output buffers.
+:param log_file_path: File path to write output log
+:type log_file_path: <code class="docutils literal notranslate"><span class="pre">str</span></code>, required
+:param error_log_file_path: File path to write error log
+:type error_log_file_path: <code class="docutils literal notranslate"><span class="pre">str</span></code>, required</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>log_queue</strong> – A log queue to which the log handler listens to. This is used by workers
+in a distributed setup to initialize worker specific log handlers(refer <code class="docutils literal notranslate"><span class="pre">setup_worker_logging</span></code> method).
+Messages posted in this queue by the workers are picked up and bubbled up to respective log handlers.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">torch.multiprocessing.Queue</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.ds.logging_setup.setup_worker_logging">
+<span class="sig-prename descclassname"><span class="pre">src.ds.logging_setup.</span></span><span class="sig-name descname"><span class="pre">setup_worker_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_queue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.logging_setup.setup_worker_logging" title="Permalink to this definition">#</a></dt>
+<dd><p>Method to initialize worker’s logging in a distributed setup. The worker processes
+always write their logs to the <cite>log_queue</cite>. Messages in this queue in turn gets picked
+by parent’s <cite>QueueListener</cite> and pushes them to respective file/stream log handlers.
+:param rank: Rank of the worker
+:type rank: <code class="docutils literal notranslate"><span class="pre">int</span></code>, required
+:param log_queue: The common log queue to which the workers
+:type log_queue: <code class="docutils literal notranslate"><span class="pre">Queue</span></code>, required</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>features</strong> – The corresponding log power spectrogram.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="src-ds-loss-module">
+<h2>src.ds.loss module<a class="headerlink" href="#src-ds-loss-module" title="Permalink to this heading">#</a></h2>
 </section>
 <section id="module-src.ds.metrics">
 <span id="src-ds-metrics-module"></span><h2>src.ds.metrics module<a class="headerlink" href="#module-src.ds.metrics" title="Permalink to this heading">#</a></h2>
@@ -681,6 +767,37 @@ SOFTWARE.</p>
 </dd></dl>
 
 </section>
+<section id="src-ds-training-module">
+<h2>src.ds.training module<a class="headerlink" href="#src-ds-training-module" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-src.ds.transforms">
+<span id="src-ds-transforms-module"></span><h2>src.ds.transforms module<a class="headerlink" href="#module-src.ds.transforms" title="Permalink to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.ds.transforms.YeoJohnsonTransform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.ds.transforms.</span></span><span class="sig-name descname"><span class="pre">YeoJohnsonTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmbda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.transforms.YeoJohnsonTransform" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.ds.transforms.YeoJohnsonTransform.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.ds.transforms.YeoJohnsonTransform.forward" title="Permalink to this definition">#</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.ds.transforms.YeoJohnsonTransform.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#src.ds.transforms.YeoJohnsonTransform.training" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-src.ds.utils">
 <span id="src-ds-utils-module"></span><h2>src.ds.utils module<a class="headerlink" href="#module-src.ds.utils" title="Permalink to this heading">#</a></h2>
 <p>Provides utility functions like directory/file creation, convolution windows,
@@ -847,7 +964,15 @@ Plots are opened in an external browser at ports opened by Plotly.</p>
       <footer>
         
         <div class="related-pages">
-          
+          <a class="next-page" href="src.tests.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">src.tests package</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
           <a class="prev-page" href="src.conf.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
@@ -893,7 +1018,7 @@ Plots are opened in an external browser at ports opened by Plotly.</p>
             <ul>
 <li><a class="reference internal" href="#">src.ds package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#src-ds-cross-validator-module">src.ds.cross_validator module</a></li>
+<li><a class="reference internal" href="#src-ds-cross-validation-module">src.ds.cross_validation module</a></li>
 <li><a class="reference internal" href="#module-src.ds.dataset">src.ds.dataset module</a><ul>
 <li><a class="reference internal" href="#src.ds.dataset.SkinstressionDataset"><code class="docutils literal notranslate"><span class="pre">SkinstressionDataset</span></code></a><ul>
 <li><a class="reference internal" href="#src.ds.dataset.SkinstressionDataset.calc_length"><code class="docutils literal notranslate"><span class="pre">SkinstressionDataset.calc_length()</span></code></a></li>
@@ -903,12 +1028,26 @@ Plots are opened in an external browser at ports opened by Plotly.</p>
 </li>
 </ul>
 </li>
+<li><a class="reference internal" href="#module-src.ds.exceptions">src.ds.exceptions module</a><ul>
+<li><a class="reference internal" href="#src.ds.exceptions.IOErrorAfterRetries"><code class="docutils literal notranslate"><span class="pre">IOErrorAfterRetries</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-src.ds.functions">src.ds.functions module</a><ul>
 <li><a class="reference internal" href="#src.ds.functions.logistic"><code class="docutils literal notranslate"><span class="pre">logistic()</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.functions.sigmoid"><code class="docutils literal notranslate"><span class="pre">sigmoid()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#src-ds-hyperparameters-module">src.ds.hyperparameters module</a></li>
+<li><a class="reference internal" href="#module-src.ds.logging_setup">src.ds.logging_setup module</a><ul>
+<li><a class="reference internal" href="#src.ds.logging_setup.WorkerLogFilter"><code class="docutils literal notranslate"><span class="pre">WorkerLogFilter</span></code></a><ul>
+<li><a class="reference internal" href="#src.ds.logging_setup.WorkerLogFilter.filter"><code class="docutils literal notranslate"><span class="pre">WorkerLogFilter.filter()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.ds.logging_setup.setup_primary_logging"><code class="docutils literal notranslate"><span class="pre">setup_primary_logging()</span></code></a></li>
+<li><a class="reference internal" href="#src.ds.logging_setup.setup_worker_logging"><code class="docutils literal notranslate"><span class="pre">setup_worker_logging()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src-ds-loss-module">src.ds.loss module</a></li>
 <li><a class="reference internal" href="#module-src.ds.metrics">src.ds.metrics module</a><ul>
 <li><a class="reference internal" href="#src.ds.metrics.Metric"><code class="docutils literal notranslate"><span class="pre">Metric</span></code></a><ul>
 <li><a class="reference internal" href="#src.ds.metrics.Metric.average"><code class="docutils literal notranslate"><span class="pre">Metric.average</span></code></a></li>
@@ -976,6 +1115,15 @@ Plots are opened in an external browser at ports opened by Plotly.</p>
 <li><a class="reference internal" href="#src.ds.tracking.Stage.TEST"><code class="docutils literal notranslate"><span class="pre">Stage.TEST</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.tracking.Stage.TRAIN"><code class="docutils literal notranslate"><span class="pre">Stage.TRAIN</span></code></a></li>
 <li><a class="reference internal" href="#src.ds.tracking.Stage.VAL"><code class="docutils literal notranslate"><span class="pre">Stage.VAL</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src-ds-training-module">src.ds.training module</a></li>
+<li><a class="reference internal" href="#module-src.ds.transforms">src.ds.transforms module</a><ul>
+<li><a class="reference internal" href="#src.ds.transforms.YeoJohnsonTransform"><code class="docutils literal notranslate"><span class="pre">YeoJohnsonTransform</span></code></a><ul>
+<li><a class="reference internal" href="#src.ds.transforms.YeoJohnsonTransform.forward"><code class="docutils literal notranslate"><span class="pre">YeoJohnsonTransform.forward()</span></code></a></li>
+<li><a class="reference internal" href="#src.ds.transforms.YeoJohnsonTransform.training"><code class="docutils literal notranslate"><span class="pre">YeoJohnsonTransform.training</span></code></a></li>
 </ul>
 </li>
 </ul>
