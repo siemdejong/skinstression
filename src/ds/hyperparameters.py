@@ -340,6 +340,7 @@ class Objective:
 
         # Run epochs.
         max_epoch = self.cfg.optuna.pruner.max_resource
+        lowest_loss = np.inf
         for epoch_id in range(max_epoch):
             train_runner.loader.sampler.set_epoch(epoch_id)
             val_runner.loader.sampler.set_epoch(epoch_id)
@@ -353,6 +354,7 @@ class Objective:
 
             train_loss = train_runner.avg_loss
             val_loss = val_runner.avg_loss
+            lowest_loss = min(val_loss, lowest_loss)
 
             if global_rank == 0:
                 log.info(f"epoch: {epoch_id} | train loss: {train_loss}")
@@ -372,7 +374,7 @@ class Objective:
             tracker.flush()
 
         # tracker.add_hparams(hparams, loss)
-        return val_loss
+        return lowest_loss
 
 
 @record
