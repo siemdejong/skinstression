@@ -142,7 +142,7 @@ class Runner:
             if self.dry_run:
                 break
 
-        if self.scheduler and self.optimizer:
+        if self.scheduler:
             self.current_lr = self.next_lr
             self.scheduler.step()
             self.next_lr = self.scheduler.get_last_lr()[0]
@@ -172,15 +172,13 @@ class Runner:
 
         filenames = []
 
-        # Only train runners hold scheduler information.
-        if self.stage is Stage.TRAIN:
+        # Only save lowest loss checkpoint based on validation loss.
+        if self.stage is Stage.VAL:
             restart = self.next_lr > self.current_lr
             if restart:
                 self.restart_count += 1
                 self.lowest_loss_restart = np.inf
 
-        # Only save lowest loss checkpoint based on validation loss.
-        elif self.stage is Stage.VAL:
             new_low = self.loss_metric.average < self.lowest_loss
             if new_low:
                 self.lowest_loss = self.loss_metric.average
