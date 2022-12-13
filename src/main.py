@@ -45,14 +45,15 @@ def main(cfg: SkinstressionConfig) -> None:
     """
     This is the main entry point for the Skinstression project.
     Can
-    1. calculate appropriate hyperparameters for a model.
-       To be instantiated with `sbatch shg-optuna.sbatch` as it makes
-       use of Pytorch DistributedDataParallel and allows for multiple
-       nodes using their own GPUs to divide the data.
-    2. visualize result of hyperparameter optimization.
-    3. calculate model parameters for the model,
-       estimating parameters describing the strain-stress
-       curve of skin tissue from single SHG images;
+
+    1.  calculate appropriate hyperparameters for a model. \
+        To be instantiated with ``sbatch shg-optuna.sbatch`` as it makes \
+        use of Pytorch DistributedDataParallel and allows for multiple \
+        nodes using their own GPUs to divide the data.
+    2.  visualize result of hyperparameter optimization.
+    3.  calculate model parameters for the model, \
+        estimating parameters describing the strain-stress \
+        curve of skin tissue from single SHG images;
 
     Configurations must be made in conf/config.yaml.
     """
