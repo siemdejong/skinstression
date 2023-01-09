@@ -360,10 +360,15 @@ class Objective:
                 log.info(f"epoch: {epoch_id} | train loss: {train_loss}")
                 log.info(f"epoch: {epoch_id} | validation loss: {val_loss}")
 
-            trial.report(val_loss, epoch_id)
+            retry_or_raise(
+                trial.report,
+                optuna.exceptions.StorageInternalError,
+                "Problems with writing to optuna database. "
+                f"loss: {val_loss} - epoch: {epoch_id}",
+                args=[val_loss, epoch_id],
+            )
 
             if trial.should_prune():
-                # TODO: compile Pytorch with Caffe2.
                 # tracker.add_hparams(hparams)
                 raise optuna.exceptions.TrialPruned()
 

@@ -180,3 +180,27 @@ def seed_all(seed=42):
     """
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
+
+
+def retry_or_raise(
+    func: Callable,
+    exception: Exception,
+    message: str,
+    max_attempts: int = 10,
+    args: Optional[list[Any]] = None,
+) -> Any:
+    for attempt in range(max_attempts):
+        try:
+            if args:
+                out = func(*args)
+            else:
+                out = func()
+        except exception:
+            log.error(f"{message} Retrying... Attempt {attempt}.")
+            continue
+        else:
+            break
+    else:  # If the image really cannot be opened after several times.
+        raise ErrorAfterRetries(max_attempts, message)
+
+    return out

@@ -85,22 +85,16 @@ class SkinstressionDataset(Dataset[Any]):
         # Assuming images follow [0, n-1], so they can be accesed directly.
         # data_path = self.data_dir / (str(int(self.labels["index"].iloc[idx])) + ".tif")
         data_path = self._data / f"{str(idx)}.{self.extension}"
-        _max_attempts = 10
-        for attempt in range(_max_attempts):
-            try:
-                image = Image.open(data_path)
-            except OSError:
-                log.error(
-                    f"Opening image throws OSError. Retrying... Attempt {attempt}"
-                )
-                import time
 
-                time.sleep(10)  # Retry later.
-                continue
-            else:
-                break
-        else:  # If the image really cannot be opened after several times.
-            raise IOErrorAfterRetries(_max_attempts, data_path)
+        # If IOError is present use retry_or_raise, but introduces call overhead.
+        # image = retry_or_raise(
+        #     Image.open,
+        #     OSError,
+        #     "Cannot open image.",
+        #     args=[data_path],
+        # )
+
+                image = Image.open(data_path)
 
         targets = self.targets
         weights = self.weights
