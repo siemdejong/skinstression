@@ -204,6 +204,7 @@ class Runner:
             if restart and not self.warmup:
                 self.restart_count += 1
                 self.lowest_loss_restart = np.inf
+                log.info(f"Scheduler restart {restart}.")
 
             new_low = self.loss_metric.average < self.lowest_loss
             if new_low:
