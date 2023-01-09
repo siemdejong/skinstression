@@ -62,20 +62,21 @@ def main(cfg: SkinstressionConfig) -> None:
     #   https://yangkky.github.io/2019/07/08/distributed-pytorch-tutorial.html
     #   https://lambdalabs.com/blog/multi-node-pytorch-distributed-training-guide
 
-    global_rank = int(os.environ["RANK"])
-    group_rank = int(os.environ["GROUP_RANK"])
-    local_rank = int(os.environ["LOCAL_RANK"])
-    world_size = int(os.environ["WORLD_SIZE"])
+    if cfg.mode != Mode.TUNE_VISUALIZE.name:
+        global_rank = int(os.environ["RANK"])
+        group_rank = int(os.environ["GROUP_RANK"])
+        local_rank = int(os.environ["LOCAL_RANK"])
+        world_size = int(os.environ["WORLD_SIZE"])
 
-    # Initialize the primary logging handlers. Worker processes may use
-    # the `log_queue` to push their messages to the same log file.
-    # Logging processes need to be initialized with the `spawn` method.
-    torch.multiprocessing.set_start_method("spawn", force=True)
-    log_queue = setup_primary_logging(
-        log_file_path=f"out_{group_rank}.log",
-        error_log_file_path=f"error_{group_rank}.log",
-        debug=cfg.debug,
-    )
+        # Initialize the primary logging handlers. Worker processes may use
+        # the `log_queue` to push their messages to the same log file.
+        # Logging processes need to be initialized with the `spawn` method.
+        torch.multiprocessing.set_start_method("spawn", force=True)
+        log_queue = setup_primary_logging(
+            log_file_path=f"out_{group_rank}.log",
+            error_log_file_path=f"error_{group_rank}.log",
+            debug=cfg.debug,
+        )
 
     if cfg.mode == Mode.TUNE_VISUALIZE.name:
         visualize(cfg)
