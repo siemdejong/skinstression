@@ -44,11 +44,17 @@ import os
 import pathlib
 import socket
 
+import functools
 import numpy as np
 import torch
 import torch.distributed as dist
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal.windows import triang
+import datetime
+from typing import Callable, Any, Optional
+from ds.exceptions import ErrorAfterRetries
+
+log = logging.getLogger(__name__)
 
 
 def create_experiment_log_dir(root: str, parents: bool = True) -> str:
@@ -125,7 +131,11 @@ def ddp_setup(rank, world_size):
         world_size: Total number of processes.
     """
     backend = "nccl" if torch.cuda.is_available() else "gloo"
-    dist.init_process_group(backend=backend, rank=rank, world_size=world_size)
+    dist.init_process_group(
+        backend=backend,
+        rank=rank,
+        world_size=world_size,
+    )
 
 
 def ddp_cleanup():
@@ -140,9 +150,8 @@ def reduce_tensor(tensor):
     Args:
         tensor: tensor to be reduced.
     """
-    cloned_tensor = tensor.clone()
-    dist.all_reduce(cloned_tensor, op=dist.ReduceOp.SUM)
-    reduced_tensor = cloned_tensor / dist.get_world_size()
+    dist.all_reduce(tensor, dist.ReduceOp.SUM)
+    reduced_tensor = tensor / dist.get_world_size()
 
     return reduced_tensor
 
