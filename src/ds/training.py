@@ -19,6 +19,7 @@ import logging
 import os
 from typing import Any, Optional
 
+from hydra import utils
 import torch
 from torch import nn
 from torch.optim.lr_scheduler import (
@@ -26,6 +27,7 @@ from torch.optim.lr_scheduler import (
     CosineAnnealingWarmRestarts,
     LinearLR,
 )
+import torch.distributed as dist
 from torch.utils.data import Subset, DataLoader
 from torch.multiprocessing import Queue
 from torch.nn.parallel import DistributedDataParallel as DDP
@@ -175,17 +177,20 @@ class Trainer:
                 progress_bar=False,
                 scaler=scaler,
                 dry_run=self.cfg.dry_run,
+                cfg=self.cfg,
             )
             val_runner = Runner(
                 loader=val_loader,
                 model=model,
                 loss_fn=loss_fn,
                 stage=Stage.VAL,
+                scheduler=scheduler,
                 global_rank=global_rank,
                 local_rank=local_rank,
                 progress_bar=False,
                 scaler=scaler,
                 dry_run=self.cfg.dry_run,
+                cfg=self.cfg,
             )
 
         if from_checkpoint:
@@ -200,7 +205,7 @@ class Trainer:
             tracker = None
 
         # Run epochs.
-        for epoch_id in range(self.cfg.params.epoch_count):
+        for epoch_id in range(train_runner.epoch_id, self.cfg.params.epoch_count):
 
             train_runner.loader.sampler.set_epoch(epoch_id)
             val_runner.loader.sampler.set_epoch(epoch_id)
@@ -209,6 +214,7 @@ class Trainer:
                 train_runner=train_runner,
                 epoch_id=epoch_id,
                 experiment=tracker,
+                cfg=self.cfg,
             )
 
             if global_rank == 0:

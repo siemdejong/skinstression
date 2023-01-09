@@ -53,7 +53,7 @@ class Paths:
 
 @dataclass
 class Params:
-    top_k: int
+    top_k: Union[int, str]
     epoch_count: int
     batch_size: int
     k_folds: int

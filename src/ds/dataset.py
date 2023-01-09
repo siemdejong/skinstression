@@ -18,7 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import logging
 import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Union
 from glob import glob
 
 import numpy as np
@@ -30,7 +30,7 @@ from scipy.ndimage import convolve1d
 from scipy import stats
 from torch.utils.data import ConcatDataset, Dataset
 
-from ds.utils import get_lds_kernel_window
+from ds.utils import get_lds_kernel_window, retry_or_raise
 from ds.transforms import YeoJohnsonTransform
 from ds.exceptions import IOErrorAfterRetries
 
@@ -47,7 +47,7 @@ class SkinstressionDataset(Dataset[Any]):
         weights: Optional[np.ndarray],
         extension: str = "bmp",
         target_transform=None,
-        top_k: Optional[int] = None,
+        top_k: Optional[Union[int, str]] = None,
         importances: Optional[np.ndarray[float]] = None,
     ):
         self.split = split
@@ -68,8 +68,13 @@ class SkinstressionDataset(Dataset[Any]):
 
         if self.top_k:
             # To make sure top_k is not too large.
-            if self.top_k > length_whole_dataset:
-                log.error(f"Config top_k too large. Using full dataset {self._data}.")
+            if self.top_k == "all":
+                self.top_k = np.inf
+            elif self.top_k > length_whole_dataset:
+                log.error(
+                    "Config top_k too large. "
+                    f"Using full dataset ({length_whole_dataset}) {self._data}."
+                )
             number = min(self.top_k, length_whole_dataset)
         else:
             number = length_whole_dataset

@@ -40,6 +40,7 @@ This file incorporates work covered by the following copyright and permission no
 import logging
 import os
 from typing import Any, Optional, Union
+import collections
 
 import numpy as np
 import torch
@@ -47,10 +48,23 @@ import torch.distributed as dist
 from torch.optim.lr_scheduler import ReduceLROnPlateau, _LRScheduler
 from torch.utils.data.dataloader import DataLoader
 from tqdm import tqdm
+from pathlib import Path
 
 from ds.metrics import Metric
 from ds.tracking import ExperimentTracker, Stage
 from ds.utils import reduce_tensor
+from conf.config import SkinstressionConfig
+
+import warnings
+
+# This warning can safely be ignored, as it is only raised
+# for a Runner with state = State.VAL, which needs the LR scheduler
+# for checkpointing purposes.
+warnings.filterwarnings(
+    "ignore",
+    message="Detected call of `lr_scheduler.step()` before `optimizer.step()`.",
+    category=UserWarning,
+)
 
 log = logging.getLogger(__name__)
 
@@ -70,6 +84,7 @@ class Runner:
         progress_bar: bool = False,
         dry_run: bool = False,
         trial: Optional[int] = None,
+        cfg: Optional[SkinstressionConfig] = None,
     ) -> None:
         self.run_count = 0
         self.loader = loader
@@ -89,6 +104,9 @@ class Runner:
         self.scaler = scaler
         self.dry_run = dry_run
         self.trial = trial
+        self.warmup = True
+        self.epoch_id: int = 0
+        self.cfg = cfg
 
     @property
     def avg_loss(self):
@@ -137,7 +155,9 @@ class Runner:
 
             if self.global_rank == 0:
                 log.debug(f"    iteration: {batch_num} | loss: {loss}")
-                experiment.add_batch_metric("loss", loss.detach(), self.run_count)
+
+                if self.cfg.tensorboard.batch_metric:
+                    experiment.add_batch_metric("loss", loss.detach(), self.run_count)
 
             if self.dry_run:
                 break
@@ -175,19 +195,25 @@ class Runner:
         # Only save lowest loss checkpoint based on validation loss.
         if self.stage is Stage.VAL:
             restart = self.next_lr > self.current_lr
-            if restart:
+
+            # Don't count the warmup period as restarts.
+            if self.warmup and not restart:
+                self.warmup = False
+                restart = False
+
+            if restart and not self.warmup:
                 self.restart_count += 1
                 self.lowest_loss_restart = np.inf
 
             new_low = self.loss_metric.average < self.lowest_loss
             if new_low:
                 self.lowest_loss = self.loss_metric.average
-                filenames.append("low")
+                filenames.append("low.pt")
 
             new_low_restart = self.loss_metric.average < self.lowest_loss_restart
-            if new_low_restart:
+            if new_low_restart and not self.warmup:
                 self.lowest_loss_restart = self.loss_metric.average
-                filenames.append(f"low_restart-{self.restart_count}")
+                filenames.append(f"low_restart-{self.restart_count}.pt")
 
         return filenames
 
@@ -199,8 +225,12 @@ class Runner:
 
         # should_save returns empty list if saving is not needed.
         for checkpoint_fn in filenames:
-            if self.trial:
-                checkpoint_fn = f"trial_{self.trial}-{checkpoint_fn}"
+            if self.trial is not None:
+                trial_path = Path(f"checkpoints/trial-{self.trial}")
+
+                # Create trial checkpoint path if it does not exist yet.
+                trial_path.mkdir(parents=True, exist_ok=True)
+                checkpoint_fn = trial_path / checkpoint_fn
 
             state: dict[str, Union[int, dict[str, Any]]] = {
                 "epoch": self.epoch_id,
@@ -215,17 +245,24 @@ class Runner:
 
             if self.scheduler:
                 state["scheduler_state_dict"] = self.scheduler.state_dict()
+                state["warmup"] = self.warmup
 
-            torch.save(
-                state,
-                f"{os.getcwd()}/{checkpoint_fn}.pt",  # os.getcwd() is set by Hydra to 'outputs'.
-            )
+            # os.getcwd() is set by Hydra to 'outputs'.
+            save_path = Path.cwd() / checkpoint_fn
+            torch.save(state, save_path)
             log.info(f"Checkpoint '{checkpoint_fn}' saved at epoch {self.epoch_id}.")
 
-    def load_checkpoint(self, path: str):
+    def load_checkpoint(self, checkpoint_fn: str):
         # NOTE: consume_prefix_in_state_dict_if_present() should be used
         # if loading a DDP saved checkpoint to non-DDP.
-        checkpoint = torch.load(path)
+        checkpoint = torch.load(checkpoint_fn)
+        new_state_dict = collections.OrderedDict()
+        for k, v in checkpoint["model_state_dict"].items():
+            name = k.replace(
+                "module.", "module.network."
+            )  # remove 'module.' prefix, because of bug in checkpoint saving.
+            new_state_dict[name] = v
+
         self.model.load_state_dict(checkpoint["model_state_dict"])
         if self.optimizer:
             self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
@@ -233,7 +270,10 @@ class Runner:
             self.scaler.load_state_dict(checkpoint["scaler_state_dict"])
         if self.scheduler:
             self.scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
+            self.warmup = False  # checkpoint["warmup"]
         self.epoch_id = checkpoint["epoch"]
+
+        log.info(f"Checkpoint '{checkpoint_fn}' loaded at epoch {self.epoch_id}.")
 
         # Might be needed in the future (https://github.com/pytorch/pytorch/issues/2830):
         # for state in optimizer.state.values():
@@ -261,6 +301,7 @@ def run_epoch(
     train_runner: Runner,
     epoch_id: int,
     experiment: Optional[ExperimentTracker] = None,
+    cfg: Optional[SkinstressionConfig] = None,
 ) -> None:
 
     # Training Loop
@@ -271,11 +312,21 @@ def run_epoch(
     if experiment:
         # Log Training Epoch Metrics
         experiment.add_epoch_param("lr", train_runner.current_lr, epoch_id)
-        experiment.add_epoch_logistic_curve(
-            train_runner.prediction.detach().cpu(),
-            train_runner.target.detach().cpu(),
-            epoch_id,
-        )
+
+        if (
+            cfg and epoch_id % cfg.tensorboard.interval == 0
+        ):  # TODO: move this to the experiment tracker class
+            experiment.add_epoch_logistic_curve(
+                train_runner.prediction.detach().cpu(),
+                train_runner.target.detach().cpu(),
+                epoch_id,
+            )
+        else:
+            experiment.add_epoch_logistic_curve(
+                train_runner.prediction.detach().cpu(),
+                train_runner.target.detach().cpu(),
+                epoch_id,
+            )
 
     # TODO: Possibly only do validation once every x epochs.
     # Validation Loop
@@ -284,7 +335,7 @@ def run_epoch(
     with torch.no_grad():
         val_runner.run("Validation Batches", experiment, epoch_id)
 
-    if experiment:
+    if experiment and epoch_id % cfg.tensorboard.interval == 0:
         # Log Validation Epoch Metrics
         experiment.add_epoch_logistic_curve(
             val_runner.prediction.detach().cpu(),
@@ -292,6 +343,7 @@ def run_epoch(
             epoch_id,
         )
 
+    if experiment:
         # Combine training and validation loss in one plot.
         loss_value_dict = {"train": train_runner.avg_loss, "val": val_runner.avg_loss}
         experiment.add_epoch_metrics("loss", loss_value_dict, epoch_id)

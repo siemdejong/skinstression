@@ -27,6 +27,7 @@ from optuna.storages import RetryFailedTrialCallback
 from optuna.trial import TrialState
 from sklearn.model_selection import train_test_split
 from torch import nn
+import torch.distributed as dist
 from torch.distributed.elastic.multiprocessing.errors import record
 from torch.multiprocessing import Queue
 from torch.nn.parallel import DistributedDataParallel as DDP
@@ -323,6 +324,7 @@ class Objective:
             model=model,
             loss_fn=loss_fn,
             stage=Stage.VAL,
+            scheduler=scheduler,
             global_rank=global_rank,
             local_rank=local_rank,
             progress_bar=self.cfg.progress_bar,
@@ -345,6 +347,9 @@ class Objective:
         max_epoch = self.cfg.optuna.pruner.max_resource
         lowest_loss = np.inf
         for epoch_id in range(max_epoch):
+
+            # dist.barrier()
+
             train_runner.loader.sampler.set_epoch(epoch_id)
             val_runner.loader.sampler.set_epoch(epoch_id)
 
@@ -381,7 +386,7 @@ class Objective:
         if tracker:
             tracker.close()
 
-        # tracker.add_hparams(hparams, loss)
+        # tracker.add_hparams(hparams, lowest_loss)
         return lowest_loss
 
 
@@ -453,11 +458,12 @@ def tune_hyperparameters(
             sampler = sampler_cls(
                 seed=cfg.optuna.sampler.seed,
                 restart_strategy=cfg.optuna.sampler.restart_strategy,
+                # popsize=10,
                 inc_popsize=cfg.optuna.sampler.inc_popsize,
                 consider_pruned_trials=consider_pruned_trials,
             )
         elif sampler_cls.__name__ == "TPESampler":
-            sampler = sampler_cls(seed=cfg.optuna.sampler.seed)
+            sampler = sampler_cls(seed=cfg.optuna.sampler.seed, multivariate=True, constant_liar=True)
 
         pruner_cls = getattr(optuna.pruners, cfg.optuna.pruner.name)
 
