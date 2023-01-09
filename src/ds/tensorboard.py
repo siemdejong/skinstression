@@ -67,7 +67,7 @@ class TensorboardExperiment:
                 filename_suffix=f"_{trial}",
             )
         else:
-        self._writer = SummaryWriter(log_dir=log_dir)
+            self._writer = SummaryWriter(log_dir=log_dir)
         plt.ioff()
 
         charts = {
