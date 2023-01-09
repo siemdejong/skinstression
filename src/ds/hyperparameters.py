@@ -376,7 +376,7 @@ class Objective:
             val_runner.reset()
 
         if tracker:
-            tracker.flush()
+            tracker.close()
 
         # tracker.add_hparams(hparams, loss)
         return lowest_loss

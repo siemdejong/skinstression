@@ -76,6 +76,10 @@ class TensorboardExperiment:
     def flush(self) -> None:
         self._writer.flush()
 
+    def close(self) -> None:
+        self.flush()
+        self._writer.close()
+
     @staticmethod
     def _validate_log_dir(log_dir: str, create: bool = True) -> None:
         log_path = Path(log_dir).resolve()
