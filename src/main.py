@@ -37,7 +37,7 @@ cs = ConfigStore.instance()
 cs.store(name="skinstression_config", node=SkinstressionConfig)
 
 # Turning the autotuner on may harm reproducibility.
-torch.backends.cudnn.benchmark = True
+# torch.backends.cudnn.benchmark = True
 
 
 @hydra.main(version_base="1.1", config_path="conf", config_name="config")
@@ -62,18 +62,24 @@ def main(cfg: SkinstressionConfig) -> None:
     #   https://yangkky.github.io/2019/07/08/distributed-pytorch-tutorial.html
     #   https://lambdalabs.com/blog/multi-node-pytorch-distributed-training-guide
 
+    global_rank = int(os.environ["RANK"])
+    group_rank = int(os.environ["GROUP_RANK"])
+    local_rank = int(os.environ["LOCAL_RANK"])
+    world_size = int(os.environ["WORLD_SIZE"])
+
     # Initialize the primary logging handlers. Worker processes may use
     # the `log_queue` to push their messages to the same log file.
     # Logging processes need to be initialized with the `spawn` method.
     torch.multiprocessing.set_start_method("spawn", force=True)
-    log_queue = setup_primary_logging("out.log", "error.log", cfg.debug)
+    log_queue = setup_primary_logging(
+        log_file_path=f"out_{group_rank}.log",
+        error_log_file_path=f"error_{group_rank}.log",
+        debug=cfg.debug,
+    )
 
     if cfg.mode == Mode.TUNE_VISUALIZE.name:
         visualize(cfg)
     elif cfg.mode == Mode.TUNE.name:
-        global_rank = int(os.environ["RANK"])
-        local_rank = int(os.environ["LOCAL_RANK"])
-        world_size = int(os.environ["WORLD_SIZE"])
         tune_hyperparameters(global_rank, local_rank, world_size, cfg, log_queue)
     elif cfg.mode == Mode.TRAIN.name:
         with torch.autograd.profiler.profile(
@@ -81,9 +87,6 @@ def main(cfg: SkinstressionConfig) -> None:
             use_cuda=cfg.profiler.cuda,
             profile_memory=cfg.profiler.memory,
         ) as prof:
-            global_rank = int(os.environ["RANK"])
-            local_rank = int(os.environ["LOCAL_RANK"])
-            world_size = int(os.environ["WORLD_SIZE"])
             train(global_rank, local_rank, world_size, cfg, log_queue)
         try:
             log.info(prof.key_averages().table(sort_by="self_cpu_time_total"))
