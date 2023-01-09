@@ -128,6 +128,12 @@ class Profiler:
 
 
 @dataclass
+class Tensorboard:
+    interval: int
+    batch_metric: bool
+
+
+@dataclass
 class SkinstressionConfig:
     paths: Paths
     params: Params
@@ -142,3 +148,4 @@ class SkinstressionConfig:
     load_checkpoint: bool
     profiler: Profiler
     progress_bar: bool
+    tensorboard: Tensorboard
