@@ -33,6 +33,7 @@ from torch.utils.data.distributed import DistributedSampler
 from torch.distributed.elastic.multiprocessing.errors import record
 from sklearn.model_selection import train_test_split
 import numpy as np
+from pathlib import Path
 
 from conf.config import SkinstressionConfig
 from ds.dataset import SkinstressionDataset
@@ -48,18 +49,29 @@ log = logging.getLogger(__name__)
 
 
 class Trainer:
-    def __init__(self, dataset_train, dataset_val, groups, cfg: SkinstressionConfig):
+    def __init__(self, dataset_train, dataset_val, class_ids, cfg: SkinstressionConfig):
         self.cfg = cfg
         if self.cfg.try_overfit:
             self.train_subset = Subset(dataset_train, indices=[0, 1])
             self.val_subset = Subset(dataset_val, indices=[0, 1])
-        else:
+        self.cfg = cfg
+
+        top_k_dir = Path(f"{utils.get_original_cwd()}/data/top-{cfg.params.top_k}-idx")
+        top_k_dir.mkdir(parents=True, exist_ok=True)
+
+        try:
+            # Assuming the script is run from the project directory.
+            train_idx = np.load(top_k_dir / "train_idx.npy")
+            val_idx = np.load(top_k_dir / "val_idx.npy")
+            test_idx = np.load(top_k_dir / "test_idx.npy")
+            train_val_idx = np.concatenate((train_idx, val_idx))
+        except OSError:
             # Split the dataset in train, validation and test (sub)sets.
             train_val_size = int(len(dataset_train) * 0.8)
             train_val_idx, test_idx = train_test_split(
                 np.arange(len(dataset_train)),
                 train_size=train_val_size,
-                stratify=groups,
+                stratify=class_ids,
                 shuffle=True,
                 random_state=cfg.seed,
             )
@@ -68,21 +80,25 @@ class Trainer:
             train_idx, val_idx = train_test_split(
                 np.arange(len(train_val_idx)),
                 train_size=train_size,
-                stratify=groups[train_val_idx],
+                stratify=class_ids[train_val_idx],
                 shuffle=True,
                 random_state=cfg.seed,
             )
 
-            log.debug(f"train idx: {train_idx}")
-            log.debug(f"val idx: {val_idx}")
-            log.debug(f"test idx: {test_idx}")
+            log.info(f"train idx: {train_idx}")
+            log.info(f"val idx: {val_idx}")
+            log.info(f"test idx: {test_idx}")
 
-            # TODO: CROSSRUNNERS NOW ONLY USE NON-AUGMENTED DATA!
-            self.train_val_subset = Subset(dataset_val, indices=train_val_idx)
-            self.train_subset = Subset(dataset_train, indices=train_idx)
-            self.val_subset = Subset(dataset_val, indices=val_idx)
-            # dataset_val has the same augmentations as the testset
-            self.test_subset = Subset(dataset_val, indices=test_idx)
+            np.save(top_k_dir / "train_idx.npy", train_idx)
+            np.save(top_k_dir / "val_idx.npy", val_idx)
+            np.save(top_k_dir / "test_idx.npy", test_idx)
+
+        # TODO: CROSSRUNNERS NOW ONLY USE NON-AUGMENTED DATA!
+        self.train_val_subset = Subset(dataset_val, indices=train_val_idx)
+        self.train_subset = Subset(dataset_train, indices=train_idx)
+        self.val_subset = Subset(dataset_val, indices=val_idx)
+        # dataset_val has the same augmentations as the testset
+        self.test_subset = Subset(dataset_val, indices=test_idx)
 
     def __call__(
         self,

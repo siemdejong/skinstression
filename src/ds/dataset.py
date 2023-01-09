@@ -94,7 +94,7 @@ class SkinstressionDataset(Dataset[Any]):
         #     args=[data_path],
         # )
 
-                image = Image.open(data_path)
+        image = Image.open(data_path)
 
         targets = self.targets
         weights = self.weights

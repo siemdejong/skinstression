@@ -1,0 +1,78 @@
+# Modes:
+#   TUNE - for hyperparameter tuning.
+#   TUNE_VISUALIZE - for hyperparameter optimization visualization.
+#   TRAIN - for model training.
+#   CROSS_VALIDATION - for training in cross-validation mode.
+#   BENCHMARK_NUM_WORKERS - to see how much number of workers fit the environment.
+mode: TRAIN
+debug: false
+use_amp: true
+seed: 42
+try_overfit: false # Only active if "mode: Train"
+load_checkpoint: false
+dry_run: false # Only load first batch and do only 1 epoch.
+progress_bar: false
+tensorboard:
+  interval: 10
+  batch_metric: false
+paths:
+  data: /scistor/guest/sjg203/projects/shg-strain-stress/data/sorted
+  extension: bmp
+  targets: /scistor/guest/sjg203/projects/shg-strain-stress/data/z-stacks/logistic_targets.csv
+  optuna_db: /scistor/guest/sjg203/projects/shg-strain-stress/outputs/skinstression.db
+  checkpoint: /scistor/guest/sjg203/projects/shg-strain-stress/multirun/2022-12-24/08-08-21/0/checkpoints/trial-184/low.pt
+params:
+  top_k: 20 # Number of images used per z-stack. (int or 'all')
+  epoch_count: 10000
+  batch_size: 48
+  k_folds: 5 # Only when mode=CROSS_VALIDATION
+  importances: [1, 1, 0.8]  # Importance of (a, k, xc)
+  model:
+    n_nodes: 64
+    num_output_features: 3  # Depends on the number of labels learned. # TODO: INFER
+  optimizer:
+    name: Adam
+    lr: 0.004538966813335645
+    weight_decay: 1.1802697086980588e-05
+    beta_1: 0.9
+    beta_2: 0.999
+  loss_fn: weighted_focal_mse_loss # weighted_(focal_)[mse,l1]_loss, weighted_huber_loss, weighted_fr_dist, 
+  scheduler:
+    T_warmup: 20
+    T_0: 188
+    T_mult: 5
+dist:
+  num_workers: 3
+profiler:
+  enable: false # Recommended to enable in conjunction with dry_run.
+  cuda: true
+  memory: true
+optuna:
+  study_name: search_24-12-2022_1
+  parallel: false
+  trials: 300
+  direction: minimize
+  seed: 42
+  hparams:
+    weight_decay: [1e-5, 1e-4]  # log float
+    lr: [1e-6, 1e-2]  # log float
+    T_0: [100, 300] # int
+    T_mult: [1, 5]  # int
+    n_nodes: [64, 128, 64]  # int [low, high, step]
+    batch_size: [8, 64, 8]  # int [low, high, step]
+  sampler:
+    name: TPESampler # An Optuna sampler like CmaEsSampler/TPESampler/RandomSampler
+    seed: 42
+    restart_strategy: ipop
+    inc_popsize: 2
+  pruner:
+    name: HyperbandPruner # An Optuna pruner like HyperbandPruner/SuccessiveHalvingPruner
+    min_resource: 100  # epochs
+    max_resource: 3000
+    reduction_factor: 4
+    seed: 42
+
+hydra:
+  job: 
+    chdir:  True
+  verbose: False

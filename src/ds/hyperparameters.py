@@ -44,7 +44,7 @@ from ds.logging_setup import setup_worker_logging
 from ds import loss as loss_functions
 from ds.runner import Runner, Stage, run_epoch
 from ds.tensorboard import TensorboardExperiment
-from ds.utils import ddp_cleanup, ddp_setup, seed_all
+from ds.utils import ddp_cleanup, ddp_setup, seed_all, retry_or_raise
 from ds.exceptions import IOErrorAfterRetries
 
 optuna.logging.enable_propagation()  # Propagate logs to the root logger.
