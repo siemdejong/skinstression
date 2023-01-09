@@ -50,14 +50,23 @@ from torch.utils.tensorboard.writer import SummaryWriter
 from ds.functions import logistic, sigmoid
 from ds.tracking import Stage
 from ds.utils import create_experiment_log_dir
+from typing import Optional
 
 
 class TensorboardExperiment:
-    def __init__(self, log_path: str, create: bool = True) -> None:
+    def __init__(
+        self, log_path: str, trial: Optional[int] = None, create: bool = True
+    ) -> None:
 
         log_dir = create_experiment_log_dir(root=log_path)
         self.stage = Stage.TRAIN
         self._validate_log_dir(log_dir, create=create)
+        if trial is not None:
+            self._writer = SummaryWriter(
+                log_dir=log_dir,
+                filename_suffix=f"_{trial}",
+            )
+        else:
         self._writer = SummaryWriter(log_dir=log_dir)
         plt.ioff()
 

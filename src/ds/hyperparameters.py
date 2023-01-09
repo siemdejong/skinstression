@@ -334,7 +334,10 @@ class Objective:
         # Setup the experiment tracker
         if global_rank == 0:
             log_dir = os.getcwd() + "/tensorboard"
-            tracker = TensorboardExperiment(log_path=log_dir)
+            tracker = TensorboardExperiment(
+                log_path=log_dir,
+                trial=trial.number,
+            )
         else:
             tracker = None
 
