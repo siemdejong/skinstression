@@ -16,7 +16,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import numpy as np
-import torch
+import warnings
+
+# This warning happens when -k * (x - xc) is large.
+# This is unavoidable, since the neural network predicts
+# these values and might end up with extreme values.
+warnings.filterwarnings(
+    "ignore",
+    message="overflow encountered in exp",
+    category=RuntimeWarning,
+)
 
 
 def sigmoid(x, A, h, slope, C) -> float:
