@@ -47,13 +47,11 @@ from typing import Optional
 
 
 def weighted_mse_loss(
-    inputs, targets, weights=None, importances: Optional[np.ndarray[float]] = None
+    inputs, targets, weights=None
 ):
     loss = (inputs - targets) ** 2
     if weights is not None:
         loss *= weights.expand_as(loss)
-    if importances is not None:
-        loss *= importances.expand_as(loss)
     loss = torch.mean(loss)
     return loss
 
