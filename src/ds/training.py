@@ -25,6 +25,7 @@ from torch import nn
 from torch.optim.lr_scheduler import (
     ChainedScheduler,
     CosineAnnealingWarmRestarts,
+    CosineAnnealingLR,
     LinearLR,
 )
 import torch.distributed as dist
@@ -40,7 +41,7 @@ from pathlib import Path
 from conf.config import SkinstressionConfig
 from ds.dataset import SkinstressionDataset
 from ds.models import SkinstressionCNN
-from ds.runner import Runner, Stage, run_epoch
+from ds.runner import Runner, Stage, run_epoch, run_test
 from ds.tensorboard import TensorboardExperiment
 from ds import loss as loss_functions
 from ds.utils import seed_all, ddp_cleanup, ddp_setup
@@ -137,6 +138,10 @@ class Trainer:
                 T_0=self.cfg.params.scheduler.T_0,
                 T_mult=self.cfg.params.scheduler.T_mult,
             )
+            # cos_annealing_scheduler = CosineAnnealingLR(
+            #     optimizer=optimizer, T_max=2*self.cfg.params.epoch_count
+            # )
+
             scheduler = ChainedScheduler([warmup_scheduler, restart_scheduler])
             scaler = torch.cuda.amp.GradScaler(enabled=self.cfg.use_amp)
 
@@ -232,32 +237,6 @@ class Trainer:
 
         if tracker:
             tracker.flush()
-
-    def test(self, local_rank: int, world_size: int):
-        model = SkinstressionCNN(self.cfg)
-        model_sync_bathchnorm = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
-        model = DDP(model_sync_bathchnorm.to(local_rank), device_ids=[local_rank])
-
-        scaler = torch.cuda.amp.GradScaler(enabled=self.cfg.use_amp)
-
-        test_loader = DataLoader(
-            self.test_subset,
-            batch_size=int(self.cfg.params.batch_size),
-            num_workers=self.cfg.dist.num_workers,
-            pin_memory=True,
-        )
-        test_runner = Runner(
-            loader=test_loader,
-            model=model,
-            loss_fn=getattr(loss_functions, self.cfg.params.loss_fn),
-            stage=Stage.TEST,
-            local_rank=local_rank,
-            progress_bar=False,
-            scaler=scaler,
-            dry_run=self.cfg.dry_run,
-        )
-
-        test_runner.load_checkpoint(self.cfg.paths.checkpoint)
 
 
 @record

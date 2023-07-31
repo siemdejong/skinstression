@@ -92,14 +92,14 @@ class SkinstressionDataset(Dataset[Any]):
         data_path = self._data / f"{str(idx)}.{self.extension}"
 
         # If IOError is present use retry_or_raise, but introduces call overhead.
-        # image = retry_or_raise(
-        #     Image.open,
-        #     OSError,
-        #     "Cannot open image.",
-        #     args=[data_path],
-        # )
+        image = retry_or_raise(
+            Image.open,
+            OSError,
+            "Cannot open image.",
+            args=[data_path],
+        )
 
-        image = Image.open(data_path)
+        # image = Image.open(data_path)
 
         targets = self.targets
         weights = self.weights
@@ -111,7 +111,7 @@ class SkinstressionDataset(Dataset[Any]):
         if self.target_transform:
             targets = self.target_transform(targets)
 
-        return image, targets, weights, importances
+        return image, targets, weights, importances, self.group, idx
 
     @staticmethod
     def _prepare_weights(
@@ -231,11 +231,14 @@ class SkinstressionDataset(Dataset[Any]):
                     transforms.Resize(
                         (1000, 1000)
                     ),  # Stupid hack to accept images smaller than 1000x1000.
+                    # transforms.RandomRotation(180),
                     transforms.RandomCrop((700, 700)),
+                    # transforms.CenterCrop((500, 500)),
                     # transforms.RandomResizedCrop(
                     #     size=(258, 258), scale=(0.9, 1), ratio=(1, 1)
                     # ),
                     transforms.Resize((258, 258)),
+                    # transforms.RandomCrop((258, 258)),
                     transforms.ColorJitter(brightness=0.3),
                     transforms.RandomHorizontalFlip(),
                     transforms.RandomVerticalFlip(),
@@ -253,6 +256,7 @@ class SkinstressionDataset(Dataset[Any]):
                     transforms.Resize((1000, 1000)),
                     transforms.CenterCrop((700, 700)),
                     transforms.Resize((258, 258)),
+                    # transforms.CenterCrop((258, 258)),
                 ]
             )
         return transform

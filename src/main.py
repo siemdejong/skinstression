@@ -27,6 +27,7 @@ from conf.config import Mode, SkinstressionConfig
 from ds.hyperparameters import tune_hyperparameters
 from ds.logging_setup import setup_primary_logging
 from ds.training import train
+from ds.testing import test
 from ds.utils import get_free_port, get_ip
 from ds.visualization import visualize
 from tests.benchmark_num_workers import benchmark_num_workers
@@ -61,6 +62,9 @@ def main(cfg: SkinstressionConfig) -> None:
     #   https://tuni-itc.github.io/wiki/Technical-Notes/Distributed_dataparallel_pytorch/
     #   https://yangkky.github.io/2019/07/08/distributed-pytorch-tutorial.html
     #   https://lambdalabs.com/blog/multi-node-pytorch-distributed-training-guide
+
+    log.info("Configuration:")
+    log.info(cfg)
 
     if cfg.mode != Mode.TUNE_VISUALIZE.name:
         global_rank = int(os.environ["RANK"])
@@ -106,6 +110,8 @@ def main(cfg: SkinstressionConfig) -> None:
         )
     elif cfg.mode == Mode.BENCHMARK_NUM_WORKERS.name:
         benchmark_num_workers()
+    elif cfg.mode == Mode.TEST.name:
+        test(global_rank, local_rank, world_size, cfg, log_queue)
 
     log.info("All processes exited without critical errors.")
 

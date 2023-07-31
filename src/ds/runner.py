@@ -112,14 +112,16 @@ class Runner:
     def avg_loss(self):
         return self.loss_metric.average
 
-    def run(self, desc: str, experiment: ExperimentTracker, epoch_id):
+    def run(
+        self, desc: str, experiment: ExperimentTracker, epoch_id: Optional[int] = None
+    ):
 
         # Turn on eval or train mode.
         self.model.train(self.stage is Stage.TRAIN)
 
         self.epoch_id = epoch_id
 
-        for batch_num, (x, y, w, _) in enumerate(
+        for batch_num, (x, y, w, _, g, img_idx) in enumerate(
             tqdm(self.loader, desc=desc, ncols=80, disable=self.disable_progress_bar)
         ):
 
@@ -160,6 +162,11 @@ class Runner:
 
             if self.dry_run:
                 break
+
+            if self.stage == Stage.TEST:
+                log.info(f"sample: {g}")
+                log.info(f"image: {img_idx}")
+                log.info(f"prediction: {self.prediction}")
 
         if self.scheduler:
             self.current_lr = self.next_lr
@@ -203,7 +210,7 @@ class Runner:
             if restart and not self.warmup:
                 self.restart_count += 1
                 self.lowest_loss_restart = np.inf
-                log.info(f"Scheduler restart {restart}.")
+                log.info(f"Scheduler restart {self.restart_count}.")
 
             new_low = self.loss_metric.average < self.lowest_loss
             if new_low:
@@ -287,13 +294,16 @@ def run_test(
     experiment: ExperimentTracker,
 ) -> None:
     # Testing Loop
-    experiment.set_stage(Stage.TEST)
-    test_runner.run("Test Batches", experiment)
+    if experiment:
+        experiment.set_stage(Stage.TEST)
+    with torch.no_grad():
+        test_runner.run("Test Batches", experiment)
 
-    # Log Testing Epoch Metrics
-    experiment.add_epoch_logistic_curve(
-        test_runner.prediction.detach(), test_runner.target.detach()
-    )
+    if experiment:
+        # Log Testing Epoch Metrics
+        experiment.add_epoch_logistic_curve(
+            test_runner.prediction.detach().cpu(), test_runner.target.detach().cpu()
+        )
 
 
 def run_epoch(

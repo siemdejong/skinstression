@@ -2,10 +2,10 @@
 #SBATCH --job-name=shg
 #SBATCH --output=/scistor/guest/sjg203/projects/shg-strain-stress/slurm/%j.out
 #SBATCH --error=/scistor/guest/sjg203/projects/shg-strain-stress/slurm/%j.err
-#SBATCH --nodes 4
+#SBATCH --nodes 2
 #SBATCH --gpus-per-node 2
 #SBATCH --mem-per-gpu 5G
-#SBATCH --cpus-per-gpu 10
+#SBATCH --cpus-per-gpu 5
 #SBATCH --mail-user=siem.de.jong@student.vu.nl
 #SBATCH --mail-type=ALL
 
@@ -23,12 +23,15 @@ head_node_ip=$(srun --nodes 1 --ntasks 1 -w "$head_node" hostname --ip-address)
 head_node_port=29500
 rdzv_backend=c10d
 
+MAX_RESTARTS=3
+
 echo Head node IP: $head_node_ip:$head_node_port
 
 srun python src/main.py -m hydra/launcher=torchrun \
     hydra.launcher.min_nodes=$SLURM_JOB_NUM_NODES \
     hydra.launcher.max_nodes=$SLURM_JOB_NUM_NODES \
     hydra.launcher.nproc_per_node=$SLURM_GPUS_PER_NODE \
+    hydra.launcher.max_restarts=$MAX_RESTARTS \
     hydra.launcher.rdzv_id=$SLURM_JOB_ID \
     hydra.launcher.rdzv_endpoint=$head_node_ip:$head_node_port \
     hydra.launcher.rdzv_backend=$rdzv_backend

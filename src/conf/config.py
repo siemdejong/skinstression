@@ -49,6 +49,7 @@ class Paths:
     targets: str
     optuna_db: str
     checkpoint: str
+    model_zoo: str
 
 
 @dataclass
@@ -75,6 +76,7 @@ class Mode(Enum):
     TRAIN: int = 2
     CROSS_VALIDATION: int = 3
     BENCHMARK_NUM_WORKERS: int = 4
+    TEST: int = 5
 
 
 @dataclass

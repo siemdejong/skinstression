@@ -174,6 +174,8 @@ class Objective:
                 random_state=cfg.seed,
             )
 
+            # TODO: THIS IS NOT HOW IT WORKS... TRAIN/VAL-IDX CAN NOW OVERLAP WITH TESTIDX
+            # CURRENT WAY TO FIX THIS IS TAKE THE SET DIFFERENCE LIKE DIFF(TEST, UNION(TRAIN,VAL)).
             train_size = int(len(train_val_idx) * 0.8)
             train_idx, val_idx = train_test_split(
                 np.arange(len(train_val_idx)),
@@ -463,7 +465,9 @@ def tune_hyperparameters(
                 consider_pruned_trials=consider_pruned_trials,
             )
         elif sampler_cls.__name__ == "TPESampler":
-            sampler = sampler_cls(seed=cfg.optuna.sampler.seed, multivariate=True, constant_liar=True)
+            sampler = sampler_cls(
+                seed=cfg.optuna.sampler.seed, multivariate=True, constant_liar=True
+            )
 
         pruner_cls = getattr(optuna.pruners, cfg.optuna.pruner.name)
 

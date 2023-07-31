@@ -12,5 +12,5 @@ class ErrorAfterRetries(Exception):
 
     def __init__(self, max_attempts, message):
         self.max_attempts = max_attempts
-        self.message = f"{message} {max_attempts} failed."
+        self.message = f"{message} {max_attempts} failed attempts."
         super().__init__(self.message)

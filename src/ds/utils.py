@@ -53,6 +53,7 @@ from scipy.signal.windows import triang
 import datetime
 from typing import Callable, Any, Optional
 from ds.exceptions import ErrorAfterRetries
+from time import sleep
 
 log = logging.getLogger(__name__)
 
@@ -187,6 +188,7 @@ def retry_or_raise(
     exception: Exception,
     message: str,
     max_attempts: int = 10,
+    sleep_duration: float = 1,
     args: Optional[list[Any]] = None,
 ) -> Any:
     for attempt in range(max_attempts):
@@ -197,10 +199,12 @@ def retry_or_raise(
                 out = func()
         except exception:
             log.error(f"{message} Retrying... Attempt {attempt}.")
+            sleep(sleep_duration)
             continue
         else:
             break
     else:  # If the image really cannot be opened after several times.
-        raise ErrorAfterRetries(max_attempts, message)
+        log.error(ErrorAfterRetries(max_attempts, message))
+        raise
 
     return out

@@ -15,7 +15,7 @@ for ((dir = 0; dir <= $maxdir ; dir++)); do
     pyimq.main \
         --mode=directory \
         --mode=analyze \
-        --working-directory=/scistor/guest/sjg203/projects/shg-strain-stress/data/grayscale/z-stacks/$dir \
+        --working-directory=/scistor/guest/sjg203/projects/shg-strain-stress/data/normalized/z-stacks/$dir \
         --rgb-channel=0 \
         > outputs/pyimq/image_analysis_stdout.txt \
         2> outputs/pyimq/image_analysis_stderr.txt
