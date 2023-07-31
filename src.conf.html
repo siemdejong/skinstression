@@ -281,6 +281,11 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Mode.TEST">
+<span class="sig-name descname"><span class="pre">TEST</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#src.conf.config.Mode.TEST" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="src.conf.config.Mode.TRAIN">
 <span class="sig-name descname"><span class="pre">TRAIN</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#src.conf.config.Mode.TRAIN" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
@@ -438,7 +443,7 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 
 <dl class="py class">
 <dt class="sig sig-object py" id="src.conf.config.Paths">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.conf.config.</span></span><span class="sig-name descname"><span class="pre">Paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optuna_db</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.conf.config.Paths" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.conf.config.</span></span><span class="sig-name descname"><span class="pre">Paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optuna_db</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_zoo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.conf.config.Paths" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.conf.config.Paths.checkpoint">
@@ -453,6 +458,11 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.conf.config.Paths.extension">
 <span class="sig-name descname"><span class="pre">extension</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#src.conf.config.Paths.extension" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.conf.config.Paths.model_zoo">
+<span class="sig-name descname"><span class="pre">model_zoo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#src.conf.config.Paths.model_zoo" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -740,6 +750,7 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 <li><a class="reference internal" href="#src.conf.config.Mode"><code class="docutils literal notranslate"><span class="pre">Mode</span></code></a><ul>
 <li><a class="reference internal" href="#src.conf.config.Mode.BENCHMARK_NUM_WORKERS"><code class="docutils literal notranslate"><span class="pre">Mode.BENCHMARK_NUM_WORKERS</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Mode.CROSS_VALIDATION"><code class="docutils literal notranslate"><span class="pre">Mode.CROSS_VALIDATION</span></code></a></li>
+<li><a class="reference internal" href="#src.conf.config.Mode.TEST"><code class="docutils literal notranslate"><span class="pre">Mode.TEST</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Mode.TRAIN"><code class="docutils literal notranslate"><span class="pre">Mode.TRAIN</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Mode.TUNE"><code class="docutils literal notranslate"><span class="pre">Mode.TUNE</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Mode.TUNE_VISUALIZE"><code class="docutils literal notranslate"><span class="pre">Mode.TUNE_VISUALIZE</span></code></a></li>
@@ -784,6 +795,7 @@ along with this program. If not, see &lt;<a class="reference external" href="htt
 <li><a class="reference internal" href="#src.conf.config.Paths.checkpoint"><code class="docutils literal notranslate"><span class="pre">Paths.checkpoint</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Paths.data"><code class="docutils literal notranslate"><span class="pre">Paths.data</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Paths.extension"><code class="docutils literal notranslate"><span class="pre">Paths.extension</span></code></a></li>
+<li><a class="reference internal" href="#src.conf.config.Paths.model_zoo"><code class="docutils literal notranslate"><span class="pre">Paths.model_zoo</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Paths.optuna_db"><code class="docutils literal notranslate"><span class="pre">Paths.optuna_db</span></code></a></li>
 <li><a class="reference internal" href="#src.conf.config.Paths.targets"><code class="docutils literal notranslate"><span class="pre">Paths.targets</span></code></a></li>
 </ul>
