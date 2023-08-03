@@ -76,10 +76,10 @@ class SkinstressionDataModule(pl.LightningDataModule):
             self.test_dataset = SkinstressionDataset(self.data_dir, self.test_targets, self.path_curves, set="test")
         
     def train_dataloader(self) -> TRAIN_DATALOADERS:
-        return DataLoader(self.train_dataset, self.batch_size)
+        return DataLoader(self.train_dataset, self.batch_size, pin_memory=True)
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
-        return DataLoader(self.val_dataset, self.batch_size)
+        return DataLoader(self.val_dataset, self.batch_size, pin_memory=True)
 
     def test_dataloader(self) -> EVAL_DATALOADERS:
-        return DataLoader(self.test_dataset, self.batch_size)
+        return DataLoader(self.test_dataset, self.batch_size, pin_memory=True)
