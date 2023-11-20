@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from dataset import inverse_standardize
 
 def get_inplanes():
     return [64, 128, 256, 512]
@@ -261,6 +262,8 @@ def logistic(x, a, k, xc):
 
 def plot_curve_pred(preds, curves):
     preds = preds.cpu()
+    standardization = {"mean": 3.8103177043244214, "std": 3.3450981056172124}
+    preds = inverse_standardize(preds, **standardization)
     for pred, strain, stress in zip(preds, curves["strain"], curves["stress"]):
         x = torch.linspace(1, 1.7, 70)
         l, = plt.plot(x, logistic(x, *pred))
@@ -268,18 +271,19 @@ def plot_curve_pred(preds, curves):
         plt.scatter(strain.cpu(), stress.cpu(), color=l.get_color())
     
     plt.xlabel("Strain")
-    plt.xlabel("Stress [MPa]")
+    plt.ylabel("Stress [MPa]")
     plt.xlim([1, 1.6])
 
     return plt.gcf()
 
 class Skinstression(pl.LightningModule):
-    def __init__(self, backbone: str = "monai-regressor", model_depth: int = 10, variables: int = 3) -> None:
+    def __init__(self, lr: float = 1e-3, backbone: str = "monai-regressor", model_depth: int = 10, variables: int = 3) -> None:
         super().__init__()
         self.model = generate_model(backbone=backbone, model_depth=model_depth, n_classes=variables)
         self.validation_step_outputs_preds = []
         self.validation_step_outputs_strain = []
         self.validation_step_outputs_stress = []
+        self.lr = lr
     
     def _common_step(self, batch):
         x, y, curve = batch
@@ -289,12 +293,12 @@ class Skinstression(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         loss, _, _ = self._common_step(batch)
-        self.log("train_loss", loss)
+        self.log("train_loss", loss, on_step=False, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss, preds, curves = self._common_step(batch)
-        self.log("val_loss", loss)
+        self.log("val_loss", loss, on_step=False, on_epoch=True)
         self.validation_step_outputs_preds.extend(preds)
         self.validation_step_outputs_strain.extend(curves["strain"])
         self.validation_step_outputs_stress.extend(curves["stress"])
@@ -314,6 +318,7 @@ class Skinstression(pl.LightningModule):
         self.log("test_loss", loss)
 
     def configure_optimizers(self):
-        optimizer = SGD(self.parameters(), lr=1e-3, weight_decay=1e-5)
-        scheduler = CosineAnnealingLR(optimizer, 300, 1e-5)
+        optimizer = SGD(self.parameters(), lr=self.lr, weight_decay=1e-5)
+        scheduler = CosineAnnealingLR(optimizer, 500, 1e-5)
         return [optimizer], [scheduler]
+        # return optimizer

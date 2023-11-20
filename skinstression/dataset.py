@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Union, Literal
 
+from functools import partial
+
 import ast
 import cv2
 import torch
@@ -12,8 +14,16 @@ from lightning.pytorch.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADER
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 
+def standardize(value: float, mean: float, std: float, eps: float = 1e-9) -> float:
+    if std == 0:
+        return value - mean
+    return (value - mean) / (std + eps)
+
+def inverse_standardize(value: float, mean: float, std: float) -> float:
+    return value * std + mean
+
 class SkinstressionDataset(Dataset):
-    def __init__(self, image_dir: Path, path: Path, path_curves: Path, set: Literal["train", "val", "test", "inference"]) -> None:
+    def __init__(self, image_dir: Path, path: Path, path_curves: Path, set: Literal["train", "val", "test", "inference"], standardization: dict[Literal["mean", "std"], float] = {"mean": 0, "std": 0}) -> None:
         super().__init__()
         self.image_dir = image_dir
         self.df = pd.read_csv(path)
@@ -34,6 +44,8 @@ class SkinstressionDataset(Dataset):
             ])
         self.transforms = Compose(transforms)
 
+        self.target_transform = partial(standardize, **standardization)
+
     def __getitem__(self, index):
         sample = self.df.iloc[index]
         curve_tmp = self.df_curves.loc[sample["index"]]
@@ -42,6 +54,7 @@ class SkinstressionDataset(Dataset):
         curve["stress"][:len(curve_tmp["stress"])] = torch.tensor(curve_tmp["stress"])
 
         target = torch.tensor([float(sample["a"]), float(sample["k"]), float(sample["xc"])])
+        target = self.target_transform(target)
 
         path = str(self.image_dir / sample["filename"])
         image = torch.tensor(np.array(cv2.imreadmulti(path)[1]), dtype=torch.float)
@@ -54,7 +67,7 @@ class SkinstressionDataset(Dataset):
 
 class SkinstressionDataModule(pl.LightningDataModule):
 
-    def __init__(self, data_dir: Path, path_curves: Path, train_targets: Union[Path, None] = None, val_targets: Union[Path, None] = None, test_targets: Union[Path, None] = None, batch_size: int = 1, num_workers: int = 0) -> None:
+    def __init__(self, data_dir: Path, path_curves: Path, train_targets: Union[Path, None] = None, val_targets: Union[Path, None] = None, test_targets: Union[Path, None] = None, batch_size: int = 1, num_workers: int = 0, standardization: dict=None) -> None:
         super().__init__()
 
         self.data_dir = data_dir
@@ -64,16 +77,17 @@ class SkinstressionDataModule(pl.LightningDataModule):
         self.test_targets = test_targets
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.standardization = standardization
     
     def prepare_data(self) -> None:
         pass
 
     def setup(self, stage: str):
         if stage == "fit":
-            self.train_dataset = SkinstressionDataset(self.data_dir, self.train_targets, self.path_curves, set="train")
-            self.val_dataset = SkinstressionDataset(self.data_dir, self.val_targets, self.path_curves, set="val")
+            self.train_dataset = SkinstressionDataset(self.data_dir, self.train_targets, self.path_curves, set="train", standardization=self.standardization)
+            self.val_dataset = SkinstressionDataset(self.data_dir, self.val_targets, self.path_curves, set="val", standardization=self.standardization)
         elif stage == "test":
-            self.test_dataset = SkinstressionDataset(self.data_dir, self.test_targets, self.path_curves, set="test")
+            self.test_dataset = SkinstressionDataset(self.data_dir, self.test_targets, self.path_curves, set="test", standardization=self.standardization)
         
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         return DataLoader(self.train_dataset, self.batch_size, pin_memory=True)
