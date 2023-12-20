@@ -25,10 +25,12 @@ include = ["skinstression*"]  # package names should match these glob patterns (
 exclude = ["skinstression.tests*"]  # exclude packages matching these glob patterns (empty by default)
 namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
 
-
 [project.optional-dependencies]
+dev = [
+    "pre-commit"
+]
 
-[project.scripts]
+# [project.scripts]
 # my-script = "my_package.module:function"
 
 # ... other project metadata fields as listed in:

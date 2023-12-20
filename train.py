@@ -1,12 +1,16 @@
 from pathlib import Path
 
 import lightning.pytorch as pl
-from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor, LearningRateFinder
+from lightning.pytorch.callbacks import (
+    LearningRateFinder,
+    LearningRateMonitor,
+    ModelCheckpoint,
+)
 
-from skinstression.model import Skinstression
 from skinstression.dataset import SkinstressionDataModule
-
+from skinstression.model import Skinstression
 from skinstression.utils import cli_license_notice
+
 
 class FineTuneLearningRateFinder(LearningRateFinder):
     def __init__(self, milestones, *args, **kwargs):
@@ -19,6 +23,7 @@ class FineTuneLearningRateFinder(LearningRateFinder):
     def on_train_epoch_start(self, trainer, pl_module):
         if trainer.current_epoch in self.milestones or trainer.current_epoch == 0:
             self.lr_find(trainer, pl_module)
+
 
 if __name__ == "__main__":
 
@@ -35,7 +40,7 @@ if __name__ == "__main__":
             ModelCheckpoint(dirpath="checkpoints", monitor="loss/val"),
             LearningRateMonitor("epoch"),
         ],
-        )
+    )
 
     model = Skinstression(backbone="resnet", model_depth=101)
     dm = SkinstressionDataModule(

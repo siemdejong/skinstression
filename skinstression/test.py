@@ -1,9 +1,8 @@
 from pathlib import Path
 
 import lightning.pytorch as pl
-
-from model import Skinstression
 from dataset import SkinstressionDataModule
+from model import Skinstression
 
 trainer = pl.Trainer(max_time="00:00:03:00", accelerator="gpu", devices=1)
 
@@ -15,4 +14,8 @@ dm = SkinstressionDataModule(
     num_workers=10,
 )
 
-trainer.test(ckpt_path="/home/sdejong/skinstression/lightning_logs/version_3204330/checkpoints/last.ckpt", model=model, datamodule=dm)
+trainer.test(
+    ckpt_path="/home/sdejong/skinstression/lightning_logs/version_3204330/checkpoints/last.ckpt",
+    model=model,
+    datamodule=dm,
+)

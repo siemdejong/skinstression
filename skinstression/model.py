@@ -1,45 +1,36 @@
 import warnings
+from functools import partial
 from typing import Union
 
+import lightning.pytorch as pl
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import lightning.pytorch as pl
+from monai.networks.nets import Regressor
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
-from functools import partial
-from monai.networks.nets import Regressor
-import numpy as np
-import matplotlib.pyplot as plt
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
 from skinstression.dataset import inverse_standardize
 
-warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*overflow encountered in exp*")
+warnings.filterwarnings(
+    "ignore", category=RuntimeWarning, message=".*overflow encountered in exp*"
+)
+
 
 def get_inplanes():
     return [64, 128, 256, 512]
 
 
 def conv3x3x3(in_planes, out_planes, stride=1):
-    return nn.Conv3d(in_planes,
-                     out_planes,
-                     kernel_size=3,
-                     stride=stride,
-                     padding=1,
-                     bias=False)
+    return nn.Conv3d(
+        in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False
+    )
 
 
 def conv1x1x1(in_planes, out_planes, stride=1):
-    return nn.Conv3d(in_planes,
-                     out_planes,
-                     kernel_size=1,
-                     stride=stride,
-                     bias=False)
+    return nn.Conv3d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
 class BasicBlock(nn.Module):
@@ -115,18 +106,19 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-
-    def __init__(self,
-                 block,
-                 layers,
-                 block_inplanes,
-                 n_input_channels=1,
-                 conv1_t_size=7,
-                 conv1_t_stride=1,
-                 no_max_pool=False,
-                 shortcut_type='B',
-                 widen_factor=1.0,
-                 n_classes=400):
+    def __init__(
+        self,
+        block,
+        layers,
+        block_inplanes,
+        n_input_channels=1,
+        conv1_t_size=7,
+        conv1_t_stride=1,
+        no_max_pool=False,
+        shortcut_type="B",
+        widen_factor=1.0,
+        n_classes=400,
+    ):
         super().__init__()
 
         block_inplanes = [int(x * widen_factor) for x in block_inplanes]
@@ -134,49 +126,45 @@ class ResNet(nn.Module):
         self.in_planes = block_inplanes[0]
         self.no_max_pool = no_max_pool
 
-        self.conv1 = nn.Conv3d(n_input_channels,
-                               self.in_planes,
-                               kernel_size=(conv1_t_size, 7, 7),
-                               stride=(conv1_t_stride, 2, 2),
-                               padding=(conv1_t_size // 2, 3, 3),
-                               bias=False)
+        self.conv1 = nn.Conv3d(
+            n_input_channels,
+            self.in_planes,
+            kernel_size=(conv1_t_size, 7, 7),
+            stride=(conv1_t_stride, 2, 2),
+            padding=(conv1_t_size // 2, 3, 3),
+            bias=False,
+        )
         self.bn1 = nn.BatchNorm3d(self.in_planes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, block_inplanes[0], layers[0],
-                                       shortcut_type)
-        self.layer2 = self._make_layer(block,
-                                       block_inplanes[1],
-                                       layers[1],
-                                       shortcut_type,
-                                       stride=2)
-        self.layer3 = self._make_layer(block,
-                                       block_inplanes[2],
-                                       layers[2],
-                                       shortcut_type,
-                                       stride=2)
-        self.layer4 = self._make_layer(block,
-                                       block_inplanes[3],
-                                       layers[3],
-                                       shortcut_type,
-                                       stride=2)
+        self.layer1 = self._make_layer(
+            block, block_inplanes[0], layers[0], shortcut_type
+        )
+        self.layer2 = self._make_layer(
+            block, block_inplanes[1], layers[1], shortcut_type, stride=2
+        )
+        self.layer3 = self._make_layer(
+            block, block_inplanes[2], layers[2], shortcut_type, stride=2
+        )
+        self.layer4 = self._make_layer(
+            block, block_inplanes[3], layers[3], shortcut_type, stride=2
+        )
 
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
         self.fc = nn.Linear(block_inplanes[3] * block.expansion, n_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
-                nn.init.kaiming_normal_(m.weight,
-                                        mode='fan_out',
-                                        nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
             elif isinstance(m, nn.BatchNorm3d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
     def _downsample_basic_block(self, x, planes, stride):
         out = F.avg_pool3d(x, kernel_size=1, stride=stride)
-        zero_pads = torch.zeros(out.size(0), planes - out.size(1), out.size(2),
-                                out.size(3), out.size(4))
+        zero_pads = torch.zeros(
+            out.size(0), planes - out.size(1), out.size(2), out.size(3), out.size(4)
+        )
         if isinstance(out.data, torch.cuda.FloatTensor):
             zero_pads = zero_pads.cuda()
 
@@ -187,21 +175,27 @@ class ResNet(nn.Module):
     def _make_layer(self, block, planes, blocks, shortcut_type, stride=1):
         downsample = None
         if stride != 1 or self.in_planes != planes * block.expansion:
-            if shortcut_type == 'A':
-                downsample = partial(self._downsample_basic_block,
-                                     planes=planes * block.expansion,
-                                     stride=stride)
+            if shortcut_type == "A":
+                downsample = partial(
+                    self._downsample_basic_block,
+                    planes=planes * block.expansion,
+                    stride=stride,
+                )
             else:
                 downsample = nn.Sequential(
                     conv1x1x1(self.in_planes, planes * block.expansion, stride),
-                    nn.BatchNorm3d(planes * block.expansion))
+                    nn.BatchNorm3d(planes * block.expansion),
+                )
 
         layers = []
         layers.append(
-            block(in_planes=self.in_planes,
-                  planes=planes,
-                  stride=stride,
-                  downsample=downsample))
+            block(
+                in_planes=self.in_planes,
+                planes=planes,
+                stride=stride,
+                downsample=downsample,
+            )
+        )
         self.in_planes = planes * block.expansion
         for i in range(1, blocks):
             layers.append(block(self.in_planes, planes))
@@ -232,13 +226,17 @@ def generate_model(backbone, model_depth: Union[int, None] = None, **kwargs):
     assert backbone in ["mobilenetv2", "shufflenetv2", "resnet", "monai-regressor"]
 
     if backbone == "monai-regressor":
-        model = Regressor((1, 10, 500, 500), (3,), (2, 2, 2, 2, 2, 2), (2, 2, 2, 2, 2, 2), dropout=0.5)
+        model = Regressor(
+            (1, 10, 500, 500), (3,), (2, 2, 2, 2, 2, 2), (2, 2, 2, 2, 2, 2), dropout=0.5
+        )
         # model = Regressor((1, 10, 500, 500), (3,), (2, 4, 8, 16, 32, 64), (2, 2, 2, 2, 2, 2), dropout=0.5)
     elif backbone == "mobilenetv2":
         from models.mobilenetv2 import MobileNetV2
+
         model = MobileNetV2(**kwargs)
     elif backbone == "shufflenetv2":
         from models.shufflenetv2 import ShuffleNetV2
+
         model = ShuffleNetV2(**kwargs)
     elif backbone == "resnet":
         assert model_depth in [10, 18, 34, 50, 101, 152, 200]
@@ -262,9 +260,11 @@ def generate_model(backbone, model_depth: Union[int, None] = None, **kwargs):
 
     return model
 
+
 def logistic(x, a, k, xc):
     a, k, xc = a.to(torch.float), k.to(torch.float), xc.to(torch.float)
     return a / (1 + np.exp(-k * (x - xc)))
+
 
 def plot_curve_pred(preds, curves):
     preds = preds.cpu()
@@ -272,26 +272,35 @@ def plot_curve_pred(preds, curves):
     preds = inverse_standardize(preds, **standardization)
     for pred, strain, stress in zip(preds, curves["strain"], curves["stress"]):
         x = torch.linspace(1, 1.7, 70)
-        l, = plt.plot(x, logistic(x, *pred))
+        (l,) = plt.plot(x, logistic(x, *pred))
 
         plt.scatter(strain.cpu(), stress.cpu(), color=l.get_color())
-    
+
     plt.xlabel("Strain")
     plt.ylabel("Stress [MPa]")
     plt.xlim([1, 1.6])
 
     return plt.gcf()
 
+
 class Skinstression(pl.LightningModule):
-    def __init__(self, lr: float = 1e-3, backbone: str = "monai-regressor", model_depth: int = 10, variables: int = 3) -> None:
+    def __init__(
+        self,
+        lr: float = 1e-3,
+        backbone: str = "monai-regressor",
+        model_depth: int = 10,
+        variables: int = 3,
+    ) -> None:
         super().__init__()
         self.example_input_array = torch.randn((1, 1, 10, 500, 500))
-        self.model = generate_model(backbone=backbone, model_depth=model_depth, n_classes=variables)
+        self.model = generate_model(
+            backbone=backbone, model_depth=model_depth, n_classes=variables
+        )
         self.validation_step_outputs_preds = []
         self.validation_step_outputs_strain = []
         self.validation_step_outputs_stress = []
         self.lr = lr
-    
+
     def _common_step(self, batch):
         x = batch["central"]
         y = batch["y"]
@@ -312,13 +321,15 @@ class Skinstression(pl.LightningModule):
         self.validation_step_outputs_preds.extend(preds)
         self.validation_step_outputs_strain.extend(curves["strain"])
         self.validation_step_outputs_stress.extend(curves["stress"])
-    
+
     def on_validation_epoch_end(self) -> None:
         preds = torch.stack(self.validation_step_outputs_preds)
         strain = self.validation_step_outputs_strain
         stress = self.validation_step_outputs_stress
         curves = {"strain": strain, "stress": stress}
-        self.logger.experiment.add_figure("Val curves", plot_curve_pred(preds, curves), self.current_epoch)
+        self.logger.experiment.add_figure(
+            "Val curves", plot_curve_pred(preds, curves), self.current_epoch
+        )
         self.validation_step_outputs_preds.clear()
         self.validation_step_outputs_strain.clear()
         self.validation_step_outputs_stress.clear()
