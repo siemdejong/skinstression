@@ -1,10 +1,11 @@
+import warnings
 from typing import Union
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import lightning.pytorch as pl
-from torch.optim import SGD
+from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
 from functools import partial
@@ -16,7 +17,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from dataset import inverse_standardize
+from skinstression.dataset import inverse_standardize
+
+warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*overflow encountered in exp*")
 
 def get_inplanes():
     return [64, 128, 256, 512]
@@ -229,7 +232,8 @@ def generate_model(backbone, model_depth: Union[int, None] = None, **kwargs):
     assert backbone in ["mobilenetv2", "shufflenetv2", "resnet", "monai-regressor"]
 
     if backbone == "monai-regressor":
-        model = Regressor((1, 10, 500, 500), (3,), (2, 4, 8, 16, 32, 64), (2, 2, 2, 2, 2, 2), dropout=0.5)
+        model = Regressor((1, 10, 500, 500), (3,), (2, 2, 2, 2, 2, 2), (2, 2, 2, 2, 2, 2), dropout=0.5)
+        # model = Regressor((1, 10, 500, 500), (3,), (2, 4, 8, 16, 32, 64), (2, 2, 2, 2, 2, 2), dropout=0.5)
     elif backbone == "mobilenetv2":
         from models.mobilenetv2 import MobileNetV2
         model = MobileNetV2(**kwargs)
@@ -239,7 +243,9 @@ def generate_model(backbone, model_depth: Union[int, None] = None, **kwargs):
     elif backbone == "resnet":
         assert model_depth in [10, 18, 34, 50, 101, 152, 200]
 
-        if model_depth == 10:
+        if model_depth == 5:
+            model = ResNet(BasicBlock, [1, 1, 1], get_inplanes(), **kwargs)
+        elif model_depth == 10:
             model = ResNet(BasicBlock, [1, 1, 1, 1], get_inplanes(), **kwargs)
         elif model_depth == 18:
             model = ResNet(BasicBlock, [2, 2, 2, 2], get_inplanes(), **kwargs)
@@ -279,6 +285,7 @@ def plot_curve_pred(preds, curves):
 class Skinstression(pl.LightningModule):
     def __init__(self, lr: float = 1e-3, backbone: str = "monai-regressor", model_depth: int = 10, variables: int = 3) -> None:
         super().__init__()
+        self.example_input_array = torch.randn((1, 1, 10, 500, 500))
         self.model = generate_model(backbone=backbone, model_depth=model_depth, n_classes=variables)
         self.validation_step_outputs_preds = []
         self.validation_step_outputs_strain = []
@@ -286,27 +293,30 @@ class Skinstression(pl.LightningModule):
         self.lr = lr
     
     def _common_step(self, batch):
-        x, y, curve = batch
+        x = batch["central"]
+        y = batch["y"]
+        strain, stress = batch["strain"], batch["stress"]
+        curve = {"strain": strain, "stress": stress}
         pred = self.model(x)
         loss = nn.functional.l1_loss(pred, y)
         return loss, pred, curve
 
     def training_step(self, batch, batch_idx):
         loss, _, _ = self._common_step(batch)
-        self.log("train_loss", loss, on_step=False, on_epoch=True)
+        self.log("loss/train", loss, batch_size=batch["y"].shape[0])
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss, preds, curves = self._common_step(batch)
-        self.log("val_loss", loss, on_step=False, on_epoch=True)
+        self.log("loss/val", loss, batch_size=batch["y"].shape[0])
         self.validation_step_outputs_preds.extend(preds)
         self.validation_step_outputs_strain.extend(curves["strain"])
         self.validation_step_outputs_stress.extend(curves["stress"])
     
     def on_validation_epoch_end(self) -> None:
         preds = torch.stack(self.validation_step_outputs_preds)
-        strain = torch.stack(self.validation_step_outputs_strain)
-        stress = torch.stack(self.validation_step_outputs_stress)
+        strain = self.validation_step_outputs_strain
+        stress = self.validation_step_outputs_stress
         curves = {"strain": strain, "stress": stress}
         self.logger.experiment.add_figure("Val curves", plot_curve_pred(preds, curves), self.current_epoch)
         self.validation_step_outputs_preds.clear()
@@ -315,10 +325,13 @@ class Skinstression(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         loss = self._common_step(batch)
-        self.log("test_loss", loss)
+        self.log("loss/test", loss, batch_size=batch["y"].shape[0])
 
     def configure_optimizers(self):
-        optimizer = SGD(self.parameters(), lr=self.lr, weight_decay=1e-5)
+        optimizer = AdamW(self.parameters(), lr=self.lr, weight_decay=1e-5)
         scheduler = CosineAnnealingLR(optimizer, 500, 1e-5)
         return [optimizer], [scheduler]
         # return optimizer
+
+    def forward(self, x):
+        return self.model(x)
