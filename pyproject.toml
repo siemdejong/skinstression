@@ -16,6 +16,18 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
+    "torch",
+    "torchvision",
+    "lightning",
+    "numpy",
+    "monai",
+    "matplotlib",
+    "pandas",
+    "h5torch",
+    "scikit-learn",
+    "scipy",
+    "opencv-python",
+    "wandb",
 ]
 dynamic = ["version"]
 

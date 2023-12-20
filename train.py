@@ -6,6 +6,7 @@ from lightning.pytorch.callbacks import (
     LearningRateMonitor,
     ModelCheckpoint,
 )
+from lightning.pytorch.loggers.wandb import WandbLogger
 
 from skinstression.dataset import SkinstressionDataModule
 from skinstression.model import Skinstression
@@ -29,7 +30,10 @@ if __name__ == "__main__":
 
     print(cli_license_notice)
 
+    logger = WandbLogger(project="skinstression")
+
     trainer = pl.Trainer(
+        logger=logger,
         log_every_n_steps=40,
         check_val_every_n_epoch=10,
         max_epochs=500,

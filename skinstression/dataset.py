@@ -1,12 +1,8 @@
-import os
-from functools import partial
 from pathlib import Path
-from typing import Literal, Union
+from typing import Literal
 
 import h5torch
 import lightning.pytorch as pl
-import numpy as np
-import pandas as pd
 import torch
 from lightning.pytorch.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS
 from monai.transforms import (
@@ -70,10 +66,6 @@ class SkinstressionDataModule(pl.LightningDataModule):
     def __init__(
         self,
         h5_path: Path,
-        path_curves: Path,
-        train_targets: Union[Path, None] = None,
-        val_targets: Union[Path, None] = None,
-        test_targets: Union[Path, None] = None,
         batch_size: int = 1,
         num_workers: int = 0,
         standardization: dict = None,
@@ -84,10 +76,6 @@ class SkinstressionDataModule(pl.LightningDataModule):
         super().__init__()
 
         self.h5_path = h5_path
-        self.path_curves = path_curves
-        self.train_targets = train_targets
-        self.val_targets = val_targets
-        self.test_targets = test_targets
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.standardization = standardization
