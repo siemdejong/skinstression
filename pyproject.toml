@@ -20,6 +20,7 @@ dependencies = [
     "torchvision",
     "lightning",
     "numpy",
+    "itk",
     "monai",
     "matplotlib",
     "pandas",
@@ -28,6 +29,7 @@ dependencies = [
     "scipy",
     "opencv-python",
     "wandb",
+    "ipykernel",
 ]
 dynamic = ["version"]
 
