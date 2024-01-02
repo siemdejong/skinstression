@@ -30,6 +30,7 @@ dependencies = [
     "opencv-python",
     "wandb",
     "ipykernel",
+    "zarr",
 ]
 dynamic = ["version"]
 

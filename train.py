@@ -16,12 +16,15 @@ from skinstression.utils import cli_license_notice
 # TODO: make user independent defaults.
 config_defaults = dict(
     # Config
-    image_dir="data/stacks/",
-    curves_dir="data/curves/",
+    images="D:/skinstression/data/new/stacks.zarr",
+    curve_dir="D:/skinstression/data/new/curves/",
+    params="D:/skinstression/data/new/params.csv",
+    sample_to_person="D:/skinstression/data/new/sample_to_person.csv",
     max_epochs=500,
     log_every_n_steps=10,
     check_val_every_n_epoch=10,
-    precision="bf16-mixed",
+    # precision="bf16-mixed",
+    precision="16-mixed",
     n_splits=5,
     fold=0,  # Make sure to choose 0:n_splits-1 and don't change n_splits when doing cross-validation.
     # variables=["a", "k", "xc"],
@@ -32,8 +35,6 @@ config_defaults = dict(
     batch_size_exp=0,
     lr=1e-3,
     weight_decay=0,
-    backbone_name="resnet",
-    model_depth=10,
     proj_hidden_dim_exp=11,
     local_proj_hidden_dim_exp=7,
 )
@@ -75,13 +76,13 @@ def train_function(config):
     model = Skinstression(
         lr=config["lr"],
         weight_decay=config["weight_decay"],
-        backbone=config["backbone_name"],
-        model_depth=config["model_depth"],
-        num_variables=len(config["variables"]),
+        out_size=len(config["variables"]),
     )
     dm = SkinstressionDataModule(
-        image_dir=config["image_dir"],
-        curves_dir=config["curves_dir"],
+        images=config["images"],
+        curve_dir=config["curve_dir"],
+        params=config["params"],
+        sample_to_person=config["sample_to_person"],
         variables=config["variables"],
         batch_size=2 ** config["batch_size_exp"],
         n_splits=config["n_splits"],

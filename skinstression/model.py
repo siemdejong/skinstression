@@ -13,7 +13,7 @@ from torch.optim import Adam
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
 import wandb
-from skinstression.dataset import inverse_standardize
+# from skinstression.dataset import inverse_standardize
 
 warnings.filterwarnings(
     "ignore", category=RuntimeWarning, message=".*overflow encountered in exp*"
@@ -27,8 +27,8 @@ def logistic(x, a, k, xc):
 
 def plot_curve_pred(preds, curves):
     preds = preds.cpu()
-    standardization = {"mean": 3.8103177043244214, "std": 3.3450981056172124}
-    preds = inverse_standardize(preds, **standardization)
+    # standardization = {"mean": 3.8103177043244214, "std": 3.3450981056172124}
+    # preds = inverse_standardize(preds, **standardization)
     for pred, strain, stress in zip(preds, curves["strain"], curves["stress"]):
         x = torch.linspace(1, 1.7, 70)
         (l,) = plt.plot(x, logistic(x, *pred))
@@ -47,11 +47,12 @@ class Skinstression(pl.LightningModule):
         self,
         lr: float = 1e-3,
         weight_decay: float = 0,
+        out_size: int = 3,
     ) -> None:
         super().__init__()
-        self.example_input_array = torch.randn((1, 1, 500, 500, 10))
+        self.example_input_array = torch.randn((1, 1, 500, 500))
         backbone = resnet10(n_input_channels=1, spatial_dims=2)
-        regressor = Regressor((1, 400), (3,), [1, 1, 1], [2, 2, 2])
+        regressor = Regressor((1, 400), (out_size,), [1, 1, 1], [2, 2, 2])
         self.model = nn.Sequential(backbone, regressor)
         self.validation_step_outputs_preds = []
         self.validation_step_outputs_strain = []
