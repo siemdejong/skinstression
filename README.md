@@ -81,5 +81,6 @@ Contributions are welcome.
 1. Fork this repository.
 1. Clone the fork.
 1. Make a new branch.
+1. Commit changes.
 1. Push the new branch to the fork.
 1. Make a pull request to this repository.
