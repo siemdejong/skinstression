@@ -16,19 +16,18 @@ from skinstression.utils import cli_license_notice
 # TODO: make user independent defaults.
 config_defaults = dict(
     # Config
-    images="D:/skinstression/data/new/stacks.zarr",
-    curve_dir="D:/skinstression/data/new/curves/",
-    params="D:/skinstression/data/new/params.csv",
-    sample_to_person="D:/skinstression/data/new/sample_to_person.csv",
-    max_epochs=500,
-    log_every_n_steps=10,
-    check_val_every_n_epoch=10,
-    # precision="bf16-mixed",
-    precision="16-mixed",
+    images="data/stacks.zarr",
+    curve_dir="data/curves/",
+    params="data/params.csv",
+    sample_to_person="data/sample_to_person.csv",
+    max_epochs=100,
+    log_every_n_steps=100,
+    check_val_every_n_epoch=1,
+    precision="bf16-mixed",
     n_splits=5,
     fold=0,  # Make sure to choose 0:n_splits-1 and don't change n_splits when doing cross-validation.
-    # variables=["a", "k", "xc"],
-    variables=["k"],
+    variables=["a", "k", "xc"],
+    # variables=["k"],  # Alternative strategy: train three models, one for each variable.
     cache=False,
     num_workers=8,
     # Search space
@@ -39,10 +38,9 @@ config_defaults = dict(
     local_proj_hidden_dim_exp=7,
 )
 
-# wandb.init(config=config_defaults)
+wandb.init(config=config_defaults)
 # Config parameters are automatically set by W&B sweep agent
-# config = wandb.config
-config = config_defaults
+config = wandb.config
 
 
 class FineTuneLearningRateFinder(LearningRateFinder):
@@ -60,10 +58,10 @@ class FineTuneLearningRateFinder(LearningRateFinder):
 
 def train_function(config):
 
-    # logger = WandbLogger()
+    logger = WandbLogger()
 
     trainer = pl.Trainer(
-        # logger=logger,
+        logger=logger,
         log_every_n_steps=config["log_every_n_steps"],
         check_val_every_n_epoch=config["check_val_every_n_epoch"],
         max_epochs=config["max_epochs"],

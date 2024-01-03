@@ -1,3 +1,4 @@
+from io import StringIO
 from pathlib import Path
 from typing import Sequence
 
@@ -5,21 +6,11 @@ import lightning.pytorch as pl
 import numpy as np
 import pandas as pd
 import torch
-from lightning.pytorch.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS
-from monai.data import CSVDataset, Dataset, DatasetFunc, ImageDataset, SmartCacheDataset
-from monai.transforms import (
-    CenterSpatialCrop,
-    RandAdjustContrast,
-    RandAxisFlip,
-    RandRotate90,
-    RandSpatialCrop,
-    ResizeWithPadOrCrop,
-)
 import zarr
-from sklearn.model_selection import GroupKFold, GroupShuffleSplit
+from lightning.pytorch.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS
+from monai.data import Dataset, SmartCacheDataset
+from sklearn.model_selection import GroupShuffleSplit
 from torch.utils.data import DataLoader
-from torch.utils.data.dataloader import default_collate, default_convert
-from torchvision.transforms import Compose
 
 
 # TODO: apply standardization to the targets.
@@ -29,45 +20,62 @@ def standardize(value: float, mean: float, std: float, eps: float = 1e-9) -> flo
     return (value - mean) / (std + eps)
 
 
-
-
 class SkinstressionDataset(Dataset):
     def __init__(self, images, params, usecols, curve_dir, sample_to_person):
         self.images = zarr.open(images, mode="r")
         self.image_keys = list(self.images.keys())
-        self.curves = {curve.stem: pd.read_csv(curve) for curve in Path(curve_dir).glob("*.csv")}
+        self.curves = {
+            curve.stem: pd.read_csv(curve)
+            for curve in sorted(Path(curve_dir).glob("*.csv"))
+        }
+        self.usecols = usecols
         self.params = pd.read_csv(params, usecols=["sample_id"] + usecols)
         self.sample_to_person = pd.read_csv(sample_to_person)
         self.sample_ids = self.params["sample_id"]
         self.indices, self.cumsum = self.calc_indices_and_filter()
-    
+
+    @classmethod
+    def from_df(cls, df: pd.DataFrame, *args, **kwargs):
+        buffer = StringIO()
+        df.to_csv(buffer, index=False)
+        buffer.seek(0)
+        dataset = cls(params=buffer, *args, **kwargs)
+        return dataset
+
     def calc_indices_and_filter(self):
         num = 0
         lengths = []
         for img in self.images.keys():
             try:
                 self.curves[str(img)]
+                if int(img) not in self.params["sample_id"].values.astype(int):
+                    raise KeyError
             except KeyError:
-                self.image_keys.remove(img)
-                print(f"Removed {img} from dataset")
+                try:
+                    self.image_keys.remove(img)
+                except ValueError:
+                    continue
             else:
                 length = self.images[img].shape[0]
                 num += length
                 lengths.append(length)
         cumsum = np.cumsum(lengths)
         return num, cumsum
-    
+
     def __len__(self):
         return self.indices
-    
+
     def __getitem__(self, index: int | slice | Sequence[int]):
         img_idx = np.digitize(index, self.cumsum)
         sample_id = self.image_keys[img_idx]
-        slice_idx = img_idx - self.cumsum[np.digitize(index, self.cumsum)]
+        slice_idx = index - self.cumsum[np.digitize(index, self.cumsum)]
         img = self.images[sample_id][slice_idx, ...]
-        target = self.params.loc[self.params["sample_id"] == int(sample_id)]
+        target = self.params.loc[self.params["sample_id"] == int(sample_id)][
+            self.usecols
+        ]
         curve = self.curves[str(sample_id)]
         return img, target, curve, sample_id
+
 
 class SkinstressionDataModule(pl.LightningDataModule):
     def __init__(
@@ -104,7 +112,7 @@ class SkinstressionDataModule(pl.LightningDataModule):
 
         if batch_size > 1:
             raise NotImplementedError(
-                "Batch size larger than 1 is not supported yet."
+                "Batch size larger than 1 is not supported yet. The model does not accept this yet."
             )
 
     def prepare_data(self) -> None:
@@ -113,36 +121,44 @@ class SkinstressionDataModule(pl.LightningDataModule):
 
     def make_splits(self, plot: bool = False) -> None:
 
-        # Load and inspect the targets.
-        df_params = pd.read_csv(self.params)
-        df_persons = pd.read_csv(self.sample_to_person)
-        df = df_params.merge(df_persons, on="sample_id")
-        df.columns = map(str.lower, df.columns)
+        try:
+            Path("tmp").mkdir()
 
-        df["filename"] = [str(index) + ".tif" for index in df["sample_id"]]
-        filenames = list(
-            str(fn.name) for fn in self.images.glob("*.tif")
-        )  # Make sure the image is there!
-        print(f"there are {len(df)}/{len(filenames)} eligible samples")
+            # Load and inspect the targets.
+            df_params = pd.read_csv(self.params)
+            df_persons = pd.read_csv(self.sample_to_person)
+            df = df_params.merge(df_persons, on="sample_id")
+            df.columns = list(map(str.lower, df.columns))
 
-        # Split the full dataset in train and test.
-        gss = GroupShuffleSplit(1, test_size=int(0.05 * len(df)), random_state=42)
-        for split in gss.split(df["sample_id"], groups=df["person_id"]):
-            super_train, test = split
-            super_train_df = df[df["sample_id"].isin(super_train)]
-            test_df = df[df["sample_id"].isin(test)]
+            images = zarr.open(self.images, mode="r")
+            print(f"there are {len(df)}/{len(images)} eligible samples")
 
-        gss = GroupShuffleSplit(
-            1, test_size=int(0.1 * len(super_train_df)), random_state=42
-        )
-        for split in gss.split(
-            super_train_df["sample_id"], groups=super_train_df["person_id"]
-        ):
-            train, val = split
-            train_df = df[df["sample_id"].isin(train)]
-            val_df = df[df["sample_id"].isin(val)]
+            # Split the full dataset in train and test.
+            gss = GroupShuffleSplit(1, test_size=int(0.05 * len(df)), random_state=42)
+            for split in gss.split(df["sample_id"], groups=df["person_id"]):
+                super_train, test = split
+                super_train_df = df[df["sample_id"].isin(super_train)]
+                test_df = df[df["sample_id"].isin(test)]
 
-        print("train:", len(train_df), "val:", len(val_df), "test:", len(test_df))
+            gss = GroupShuffleSplit(  # TODO: change to GroupKFold when cross validation is deemed important.
+                1, test_size=int(0.1 * len(super_train_df)), random_state=42
+            )
+            for split in gss.split(
+                super_train_df["sample_id"], groups=super_train_df["person_id"]
+            ):
+                train, val = split
+                train_df = super_train_df[super_train_df["sample_id"].isin(train)]
+                val_df = super_train_df[super_train_df["sample_id"].isin(val)]
+
+            print("train:", len(train_df), "val:", len(val_df), "test:", len(test_df))
+            train_df.to_csv("tmp/train.csv", index=False)
+            val_df.to_csv("tmp/val.csv", index=False)
+            test_df.to_csv("tmp/test.csv", index=False)
+        except FileExistsError:
+            print("loading splits from tmp folder")
+            train_df = pd.read_csv("tmp/train.csv")
+            val_df = pd.read_csv("tmp/val.csv")
+            test_df = pd.read_csv("tmp/test.csv")
 
         if plot:
             raise NotImplementedError(
@@ -153,17 +169,24 @@ class SkinstressionDataModule(pl.LightningDataModule):
 
     def setup(self, stage: str):
         train_df, val_df, test_df = self.make_splits()
-        self.train_dataset = (
-            self.val_dataset
-        ) = self.test_dataset = SkinstressionDataset(
-            params=self.params,
-            usecols=self.variables,
-            sample_to_person=self.sample_to_person,
-            images=self.images,
-            curve_dir=self.curve_dir,
-        )
 
-        if self.cache:
+        def _prep_dataset(df):
+            dataset = SkinstressionDataset.from_df(
+                df,
+                images=self.images,
+                usecols=self.variables,
+                curve_dir=self.curve_dir,
+                sample_to_person=self.sample_to_person,
+            )
+            return dataset
+
+        if stage == "fit":
+            self.train_dataset = _prep_dataset(train_df)
+            self.val_dataset = _prep_dataset(val_df)
+        elif stage == "test":
+            self.test_dataset = _prep_dataset(test_df)
+
+        if self.cache and stage == "fit":
             self.train_dataset = SmartCacheDataset(
                 self.train_dataset,
                 len(self.train_dataset) if self.cache_num is None else self.cache_num,
@@ -172,57 +195,24 @@ class SkinstressionDataModule(pl.LightningDataModule):
                 self.val_dataset,
                 len(self.val_dataset) if self.cache_num is None else self.cache_num,
             )
-        
+
     def collate_fn(self, batch):
         batch_dict = {}
-        batch_dict["img"] = torch.stack([torch.tensor(sample[0]) for sample in batch])
-        batch_dict["target"] = torch.stack([torch.tensor(list(sample[1].values())) for sample in batch])
-#         batch_dict["target"] = torch.stack([torch.tensor(list(sample[1].values())) for sample in batch])
-#                                                           ^^^^^^^^^^^^^^^^^^
-# TypeError: 'numpy.ndarray' object is not callable
+        batch_dict["img"] = torch.stack(
+            [
+                torch.tensor(sample[0], dtype=torch.float).unsqueeze(0)
+                for sample in batch
+            ]
+        )
+        batch_dict["target"] = torch.stack(
+            [torch.tensor(sample[1].to_numpy()) for sample in batch]
+        ).flatten(start_dim=1)
         curves = [sample[2] for sample in batch]
         batch_dict["curve"] = [
             dict(zip(curve.T.index, curve.T.values)) for curve in curves
         ]
         batch_dict["sample_info"] = [sample[3] for sample in batch]
         return batch_dict
-
-    # def collate_fn(self, batch):
-    #     batch_dict = {}
-    #     batch_dict["img"] = torch.stack(
-    #         default_collate([sample["img"] for sample in batch])
-    #     )
-    #     batch_dict["target"] = torch.stack(
-    #         [torch.tensor(list(sample["target"].values())) for sample in batch]
-    #     )
-    #     batch_dict["sample_info"] = [sample["sample_info"] for sample in batch]
-    #     if "curve" in batch[0]:
-    #         curves = [sample["curve"] for sample in batch]
-    #         batch_dict["curve"] = [
-    #             dict(zip(curve.T.index, curve.T.values)) for curve in curves
-    #         ]
-    #     return batch_dict
-
-    # def collate_fn(self, batch):
-    # batch = default_convert(batch)
-
-    # lengths_central = torch.tensor([len(sample[0]) for sample in batch])
-    # max_length_central = torch.max(lengths_central)
-    # for sample in batch:
-    #     central_tmp = torch.zeros(
-    #         (max_length_central, *sample[0].shape[1:])
-    #     )
-    #     central_tmp[:len(sample[0])] = sample[0]
-    #     sample[0] = central_tmp
-
-    # batch_dict = {}
-    # # TODO: select best slices and feed slices as a list to the 2D model instead of selecting only the first
-    # batch_dict["img"] = default_collate([sample[0][:, :, 0].unsqueeze(0).unsqueeze(0) for sample in batch])
-    # batch_dict["strain"] = [sample[2] for sample in batch]
-    # batch_dict["stress"] = [sample[3] for sample in batch]
-    # batch_dict["y"] = torch.tensor([sample[1] for sample in batch])
-
-    # return batch_dict
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         return DataLoader(
