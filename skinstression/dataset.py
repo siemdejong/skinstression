@@ -17,6 +17,8 @@ from monai.data import Dataset, SmartCacheDataset
 from sklearn.model_selection import GroupShuffleSplit
 from torch.utils.data import DataLoader
 
+__all__ = ["SkinstressionDataset", "SkinstressionDataModule"]
+
 
 # TODO: apply standardization to the targets.
 def standardize(value: float, mean: float, std: float, eps: float = 1e-9) -> float:

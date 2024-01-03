@@ -12,7 +12,6 @@ authors = [
     {name = "Siem de Jong", email = "siem.dejong@hotmail.nl"},
 ]
 description = "Strain-stress curve regression on higher harmonic generation images of skin tissue."
-readme = "README.md"
 requires-python = ">=3.11"
 keywords = ["hhg", "regression", "skin"]
 license = {file = "LICENSE"}
@@ -24,19 +23,19 @@ dependencies = [
     "torchvision",
     "lightning",
     "numpy",
-    "itk",
     "monai",
     "matplotlib",
     "pandas",
-    "h5torch",
     "scikit-learn",
     "scipy",
-    "opencv-python",
     "wandb",
-    "ipykernel",
     "zarr",
 ]
-dynamic = ["version"]
+dynamic = ["version", "readme"]
+
+[tool.setuptools.dynamic]
+version = {attr = "skinstression.VERSION"}
+readme = {file = ["README.md"]}
 
 [tool.setuptools.packages.find]
 where = ["."]  # list of folders that contain the packages (["."] by default)
@@ -45,12 +44,5 @@ exclude = ["skinstression.tests*"]  # exclude packages matching these glob patte
 namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
 
 [project.optional-dependencies]
-dev = [
-    "pre-commit"
-]
-
-# [project.scripts]
-# my-script = "my_package.module:function"
-
-# ... other project metadata fields as listed in:
-#     https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+dev = ["pre-commit"]
+nb = ["ipykernel"]

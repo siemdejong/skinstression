@@ -10,6 +10,8 @@ from monai.networks.nets import Regressor, resnet10
 from torch.optim import Adam
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
+__all__ = ["Skinstression"]
+
 
 class Skinstression(pl.LightningModule):
     def __init__(
