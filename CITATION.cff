@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "de Jong"
+  given-names: "Siem"
+  orcid: "https://orcid.org/0000-0002-5200-4519"
+title: "Skinstression"
+version: 2.0.0
+doi: 10.5281/zenodo.10454096
+date-released: 2024-01-03
+url: "https://github.com/siemdejong/skinstression"
