@@ -1,11 +1,9 @@
-from pathlib import Path
-
+"""Skinstression: skin stretch regression using deep learning
+	Copyright (C) 2024  Siem de Jong
+    See LICENSE for full license.
+"""
 import lightning.pytorch as pl
-from lightning.pytorch.callbacks import (
-    LearningRateFinder,
-    LearningRateMonitor,
-    ModelCheckpoint,
-)
+from lightning.pytorch.callbacks import LearningRateFinder, LearningRateMonitor
 from lightning.pytorch.loggers.wandb import WandbLogger
 
 import wandb

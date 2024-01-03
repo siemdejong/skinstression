@@ -1,3 +1,8 @@
+"""Skinstression: skin stretch regression using deep learning
+	Copyright (C) 2024  Siem de Jong
+    See LICENSE for full license.
+"""
+
 import lightning.pytorch as pl
 import torch
 import torch.nn as nn
