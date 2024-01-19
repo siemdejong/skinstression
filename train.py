@@ -3,7 +3,11 @@
     See LICENSE for full license.
 """
 import lightning.pytorch as pl
-from lightning.pytorch.callbacks import LearningRateFinder, LearningRateMonitor
+from lightning.pytorch.callbacks import (
+    LearningRateFinder,
+    LearningRateMonitor,
+    ModelCheckpoint,
+)
 from lightning.pytorch.loggers.wandb import WandbLogger
 
 import wandb
@@ -26,12 +30,12 @@ config_defaults = dict(
     fold=0,  # Make sure to choose 0:n_splits-1 and don't change n_splits when doing cross-validation.
     variables=["a", "k", "xc"],
     # variables=["k"],  # Alternative strategy: train three models, one for each variable.
-    cache=False,
+    cache=True,
     num_workers=8,
     # Search space
     batch_size_exp=0,
-    lr=1e-3,
-    weight_decay=0,
+    lr=1e-4,
+    weight_decay=1e-2,
     proj_hidden_dim_exp=11,
     local_proj_hidden_dim_exp=7,
 )
@@ -56,7 +60,7 @@ class FineTuneLearningRateFinder(LearningRateFinder):
 
 def train_function(config):
 
-    logger = WandbLogger()
+    logger = WandbLogger(log_model="all")
 
     trainer = pl.Trainer(
         logger=logger,
@@ -66,6 +70,7 @@ def train_function(config):
         precision=config["precision"],
         callbacks=[
             LearningRateMonitor("epoch"),
+            ModelCheckpoint(monitor="loss/val", mode="min"),
         ],
     )
 

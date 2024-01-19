@@ -81,7 +81,7 @@ class SkinstressionDataset(Dataset):
             self.usecols
         ]
         curve = self.curves[str(sample_id)]
-        return img, target, curve, sample_id
+        return img, target, curve, sample_id, slice_idx
 
 
 class SkinstressionDataModule(pl.LightningDataModule):
@@ -190,17 +190,22 @@ class SkinstressionDataModule(pl.LightningDataModule):
         if stage == "fit":
             self.train_dataset = _prep_dataset(train_df)
             self.val_dataset = _prep_dataset(val_df)
-        elif stage == "test":
+        elif stage in ["test", "predict"]:
             self.test_dataset = _prep_dataset(test_df)
+            self.predict_dataset = self.test_dataset
 
         if self.cache and stage == "fit":
             self.train_dataset = SmartCacheDataset(
                 self.train_dataset,
-                len(self.train_dataset) if self.cache_num is None else self.cache_num,
+                cache_num=len(self.train_dataset)
+                if self.cache_num is None
+                else self.cache_num,
             )
             self.val_dataset = SmartCacheDataset(
                 self.val_dataset,
-                len(self.val_dataset) if self.cache_num is None else self.cache_num,
+                cache_num=len(self.val_dataset)
+                if self.cache_num is None
+                else self.cache_num,
             )
 
     def collate_fn(self, batch):
@@ -219,6 +224,7 @@ class SkinstressionDataModule(pl.LightningDataModule):
             dict(zip(curve.T.index, curve.T.values)) for curve in curves
         ]
         batch_dict["sample_info"] = [sample[3] for sample in batch]
+        batch_dict["slice_idx"] = [sample[4] for sample in batch]
         return batch_dict
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
@@ -226,6 +232,7 @@ class SkinstressionDataModule(pl.LightningDataModule):
             self.train_dataset,
             self.batch_size,
             pin_memory=True,
+            shuffle=True,
             num_workers=self.num_workers,
             collate_fn=self.collate_fn,
         )
@@ -243,7 +250,13 @@ class SkinstressionDataModule(pl.LightningDataModule):
         return DataLoader(
             self.test_dataset,
             self.batch_size,
-            pin_memory=True,
+            num_workers=self.num_workers,
+            collate_fn=self.collate_fn,
+        )
+
+    def predict_dataloader(self) -> EVAL_DATALOADERS:
+        return DataLoader(
+            self.predict_dataset,
             num_workers=self.num_workers,
             collate_fn=self.collate_fn,
         )

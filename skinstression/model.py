@@ -47,8 +47,12 @@ class Skinstression(pl.LightningModule):
         self.log("loss/val", loss, batch_size=batch["target"].shape[0])
 
     def test_step(self, batch, batch_idx):
-        loss = self._common_step(batch)
-        self.log("loss/test", loss, batch_size=batch[1].shape[0])
+        loss, _ = self._common_step(batch)
+        self.log("loss/test", loss, batch_size=batch["target"].shape[0])
+
+    def predict_step(self, batch, batch_idx):
+        _, pred = self._common_step(batch)
+        return pred
 
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=self.lr, weight_decay=self.weight_decay)
