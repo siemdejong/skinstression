@@ -63,11 +63,6 @@ File mapping samples (`sample_id`) to person identifiers (`person_id`).
 This directory contains curves with `<sample_id>.csv` and has columns `strain` and `stress`, making up the stress-strain curves.
 `params.csv` was calculated using these curves.
 
-
-## Roadmap
-- [ ] predict.py where curves of the (test) dataset are plotted
-- [ ] Cross validation using GroupKFold
-
 ## Extension possibilities
 Any user can contribute their own models and datasets by modifying `skinstression/dataset.py` or `skinstression/model.py`.
 
