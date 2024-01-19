@@ -18,6 +18,7 @@ A common CLI workflow includes:
 | Initializing a sweep | *not supported yet* |
 | Running a wandb sweep agent | *not supproted yet* |
 | Training a model | python train.py |
+| Predicting using a model | python predict.py |
 
 For logging to wandb, it is required to login to wandb.
 
@@ -26,6 +27,14 @@ Training with `python train.py` will make a `tmp` directory containing the split
 Subsequent runs will reuse the splits.
 Users can modify the splits.
 Users can modify training parameters in `train.py`.
+
+## Predicting
+Predict with `python predict.py`, will make use of the `tmp` directory containing the splits, or make the splits if they don't exist yet.
+Data is read sequentially.
+If `save_plots=True`, plots are save to the `tmp` directory.
+Lines are color coded by slice index (which is not necessarily depth first, depending on the scanning protocol).
+
+<center><img src="images/example_output.png" width="300" center=True></center>
 
 ## Data
 > stacks.zarr
