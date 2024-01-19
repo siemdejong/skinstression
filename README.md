@@ -40,9 +40,9 @@ Lines are color coded by slice index (which is not necessarily depth first, depe
 > stacks.zarr
 
 The `SkinstressionDataset` and `SkinstressionDataModule` rely on the iamges to be written to a zarr store.
-It is recommended for 2D models that the images in the zarr store are chunked in the slice direction.
-Every 3D image is saved separately in the zarr store.
+Every 3D image should be saved separately in a zarr store.
 This allows for easy migration to 3D models, which are currently not implemented, because they require a lot of GPU memory, not always available.
+Use `notebooks/13-sj-tozarr.ipynb` as a starting point to achieve conversion to Zarr.
 
 > params.csv
 
