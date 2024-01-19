@@ -23,7 +23,7 @@ A common CLI workflow includes:
 For logging to wandb, it is required to login to wandb.
 
 NOTE: please take a look at `train.py` or `predict.py` when training or predicting.
-The contain settings you may need to change before launching scripts.
+They contain settings you may need to change before launching scripts.
 Some settings are consumed by Pytorch Lightning ([docs](https://lightning.ai/docs/pytorch/stable/)).
 
 ## Training
