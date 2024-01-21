@@ -25,9 +25,6 @@ class Skinstression(pl.LightningModule):
         backbone = resnet10(n_input_channels=1, spatial_dims=2)
         regressor = Regressor((1, 400), (out_size,), [1, 1, 1], [2, 2, 2])
         self.model = nn.Sequential(backbone, regressor)
-        self.validation_step_outputs_preds = []
-        self.validation_step_outputs_strain = []
-        self.validation_step_outputs_stress = []
         self.lr = lr
         self.weight_decay = weight_decay
 
