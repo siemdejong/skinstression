@@ -129,7 +129,9 @@ class SkinstressionDataModule(pl.LightningDataModule):
     def make_splits(self, plot: bool = False) -> None:
 
         try:
-            Path("tmp").mkdir()
+            Path("tmp").mkdir(exist_ok=True)
+            if Path("tmp/train.csv").exists():
+                raise FileExistsError("Splits already exist.")
 
             # Load and inspect the targets.
             df_params = pd.read_csv(self.params)
@@ -144,8 +146,10 @@ class SkinstressionDataModule(pl.LightningDataModule):
             gss = GroupShuffleSplit(1, test_size=int(0.05 * len(df)), random_state=42)
             for split in gss.split(df["sample_id"], groups=df["person_id"]):
                 super_train, test = split
-                super_train_df = df[df["sample_id"].isin(super_train)]
-                test_df = df[df["sample_id"].isin(test)]
+                super_train_df: pd.DataFrame = df.loc[super_train].reset_index(
+                    drop=True
+                )
+                test_df: pd.DataFrame = df.loc[test].reset_index(drop=True)
 
             gss = GroupShuffleSplit(  # TODO: change to GroupKFold when cross validation is deemed important.
                 1, test_size=int(0.1 * len(super_train_df)), random_state=42
@@ -154,8 +158,8 @@ class SkinstressionDataModule(pl.LightningDataModule):
                 super_train_df["sample_id"], groups=super_train_df["person_id"]
             ):
                 train, val = split
-                train_df = super_train_df[super_train_df["sample_id"].isin(train)]
-                val_df = super_train_df[super_train_df["sample_id"].isin(val)]
+                train_df = super_train_df.loc[train].reset_index(drop=True)
+                val_df = super_train_df.loc[val].reset_index(drop=True)
 
             print("train:", len(train_df), "val:", len(val_df), "test:", len(test_df))
             train_df.to_csv("tmp/train.csv", index=False)
