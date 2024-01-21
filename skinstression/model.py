@@ -19,11 +19,13 @@ class Skinstression(pl.LightningModule):
         weight_decay: float = 0,
         momentum: float = 0,
         out_size: int = 3,
+        channels: list[int] = [1, 1, 1],
+        strides: list[int] = [2, 2, 2],
     ) -> None:
         super().__init__()
         self.example_input_array = torch.randn((1, 1, 500, 500))
         backbone = resnet10(n_input_channels=1, spatial_dims=2)
-        regressor = Regressor((1, 400), (out_size,), [1, 1, 1], [2, 2, 2])
+        regressor = Regressor((1, 400), (out_size,), channels, strides)
         self.model = nn.Sequential(backbone, regressor)
         self.lr = lr
         self.weight_decay = weight_decay

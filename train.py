@@ -36,6 +36,8 @@ config_defaults = dict(
     lr=1e-4,
     weight_decay=1e-2,
     momentum=0,
+    channels=[2, 4, 8, 1],
+    strides=[2, 2, 2, 2],
 )
 
 wandb.init(config=config_defaults)
@@ -76,6 +78,8 @@ def train_function(config):
         weight_decay=config["weight_decay"],
         momentum=config["momentum"],
         out_size=len(config["variables"]),
+        channels=config["channels"],
+        strides=config["strides"],
     )
     dm = SkinstressionDataModule(
         images=config["images"],
