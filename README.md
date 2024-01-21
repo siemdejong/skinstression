@@ -15,8 +15,8 @@ A common CLI workflow includes:
 | Task | Terminal |
 |------|----------|
 | Login to wandb | wandb login |
-| Initializing a sweep | *not supported yet* |
-| Running a wandb sweep agent | *not supproted yet* |
+| Initializing a sweep | wandb sweep sweep.yaml |
+| Running a wandb sweep agent | wandb agent <sweep id> |
 | Training a model | python train.py |
 | Predicting using a model | python predict.py |
 
@@ -39,6 +39,12 @@ If `save_plots=True`, plots are save to the `tmp` directory.
 Lines are color coded by slice index (which is not necessarily depth first, depending on the scanning protocol).
 
 <center><img src="images/example_output.png" width="300" center=True></center>
+
+## Hyperparameter optimization
+Running hyperparameter optimization can be done with Wandb Sweep.
+First initialize the orchestrator with `wandb sweep sweep.yaml`.
+Then, on agent devices, run `wandb agent <sweep id>`, where the sweep id given at initialization should be given.
+Hyperparameter ranges can be configured with `sweep.yaml`.
 
 ## Data
 > stacks.zarr

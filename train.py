@@ -23,7 +23,6 @@ config_defaults = dict(
     params="data/params.csv",
     sample_to_person="data/sample_to_person.csv",
     max_epochs=100,
-    log_every_n_steps=100,
     check_val_every_n_epoch=1,
     precision="bf16-mixed",
     n_splits=5,
@@ -36,8 +35,7 @@ config_defaults = dict(
     batch_size_exp=0,
     lr=1e-4,
     weight_decay=1e-2,
-    proj_hidden_dim_exp=11,
-    local_proj_hidden_dim_exp=7,
+    momentum=0,
 )
 
 wandb.init(config=config_defaults)
@@ -64,7 +62,6 @@ def train_function(config):
 
     trainer = pl.Trainer(
         logger=logger,
-        log_every_n_steps=config["log_every_n_steps"],
         check_val_every_n_epoch=config["check_val_every_n_epoch"],
         max_epochs=config["max_epochs"],
         precision=config["precision"],
@@ -77,6 +74,7 @@ def train_function(config):
     model = Skinstression(
         lr=config["lr"],
         weight_decay=config["weight_decay"],
+        momentum=config["momentum"],
         out_size=len(config["variables"]),
     )
     dm = SkinstressionDataModule(
