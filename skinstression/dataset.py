@@ -158,8 +158,10 @@ class SkinstressionDataModule(pl.LightningDataModule):
                 super_train_df["sample_id"], groups=super_train_df["person_id"]
             ):
                 train, val = split
-                train_df = super_train_df.loc[train].reset_index(drop=True)
-                val_df = super_train_df.loc[val].reset_index(drop=True)
+                train_df: pd.DataFrame = super_train_df.loc[train].reset_index(
+                    drop=True
+                )
+                val_df: pd.DataFrame = super_train_df.loc[val].reset_index(drop=True)
 
             print("train:", len(train_df), "val:", len(val_df), "test:", len(test_df))
             train_df.to_csv("tmp/train.csv", index=False)
