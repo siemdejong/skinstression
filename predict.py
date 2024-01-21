@@ -4,10 +4,14 @@
 """
 import lightning.pytorch as pl
 import matplotlib.pyplot as plt
+import torch
+from tqdm import tqdm
 
 from skinstression.dataset import SkinstressionDataModule
 from skinstression.model import Skinstression
 from skinstression.utils import cli_license_notice, plot_prediction
+
+torch.multiprocessing.set_sharing_strategy("file_system")
 
 
 def bin_per_sample(predictions_new, prediction, data):
@@ -29,7 +33,7 @@ config = dict(
     curve_dir="data/curves/",
     params="data/params.csv",
     sample_to_person="data/sample_to_person.csv",
-    ckpt_path="/home/siemdejong/skinstression/lightning_logs/i1zd6j7f/checkpoints/epoch=16-step=7344.ckpt",
+    ckpt_path="/mnt/c/Users/Z405155/Downloads/model.ckpt",
     n_splits=5,
     fold=0,  # Make sure to choose 0:n_splits-1 and don't change n_splits when doing cross-validation.
     variables=["a", "k", "xc"],
@@ -45,7 +49,6 @@ config = dict(
 
 def train_function(config):
     trainer = pl.Trainer()
-    # model = Skinstression(out_size=len(config["variables"]))
     model = Skinstression.load_from_checkpoint(
         checkpoint_path=config["ckpt_path"], out_size=len(config["variables"])
     )
@@ -63,19 +66,31 @@ def train_function(config):
 
     predictions = trainer.predict(model=model, datamodule=dm)
     predictions_binned_per_sample = dict()
-    for prediction, data in zip(predictions, dm.predict_dataloader()):
+    for prediction, data in tqdm(
+        zip(predictions, dm.predict_dataloader()),
+        desc="organizing output",
+        total=len(predictions),
+    ):
         predictions_binned_per_sample = bin_per_sample(
             predictions_binned_per_sample, prediction, data
         )
 
-    for sample_id, items in predictions_binned_per_sample.items():
+    for sample_id, items in tqdm(
+        predictions_binned_per_sample.items(),
+        desc="plotting curves",
+        total=len(predictions_binned_per_sample),
+    ):
         predictions = items["predictions"]
         data_arr = items["data"]
-        for prediction, data in zip(predictions, data_arr):
+        for prediction, data in tqdm(
+            zip(predictions, data_arr),
+            desc="plotting sample_id",
+            total=len(predictions),
+            leave=False,
+        ):
             plot_prediction(
-                pred=prediction.cpu().numpy().T,
-                target=data["target"].cpu().numpy().T,
-                sample_id=data["sample_info"][0],
+                pred=prediction.detach().cpu().numpy().T,
+                target=data["target"].detach().cpu().numpy().T,
                 slice_idx=data["slice_idx"][0],
                 num_slices=len(predictions),
             )

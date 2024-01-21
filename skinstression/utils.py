@@ -34,7 +34,6 @@ def logistic(x, a, k, xc):
 def plot_prediction(
     pred: npt.NDArray,
     target: npt.NDArray,
-    sample_id=None,
     slice_idx=None,
     num_slices=None,
 ):
