@@ -30,6 +30,7 @@ config_defaults = dict(
     variables=["a", "k", "xc"],
     # variables=["k"],  # Alternative strategy: train three models, one for each variable.
     cache=True,
+    cache_num=100,
     num_workers=8,
     # Search space
     batch_size_exp=0,
@@ -91,6 +92,7 @@ def train_function(config):
         n_splits=config["n_splits"],
         fold=config["fold"],
         cache=config["cache"],
+        cache_num=config["cache_num"],
         num_workers=config["num_workers"],
     )
 

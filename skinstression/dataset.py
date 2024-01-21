@@ -27,7 +27,7 @@ def standardize(value: float, mean: float, std: float, eps: float = 1e-9) -> flo
     return (value - mean) / (std + eps)
 
 
-class SkinstressionDataset(Dataset):
+class SkinstressionDataset(Sequence, Dataset):
     def __init__(self, images, params, usecols, curve_dir, sample_to_person):
         self.images = zarr.open(images, mode="r")
         self.image_keys = list(self.images.keys())
@@ -207,12 +207,6 @@ class SkinstressionDataModule(pl.LightningDataModule):
                 if self.cache_num is None
                 else self.cache_num,
             )
-            self.val_dataset = SmartCacheDataset(
-                self.val_dataset,
-                cache_num=len(self.val_dataset)
-                if self.cache_num is None
-                else self.cache_num,
-            )
 
     def collate_fn(self, batch):
         batch_dict = {}
@@ -238,7 +232,7 @@ class SkinstressionDataModule(pl.LightningDataModule):
             self.train_dataset,
             self.batch_size,
             pin_memory=True,
-            shuffle=True,
+            shuffle=False if self.cache else True,
             num_workers=self.num_workers,
             collate_fn=self.collate_fn,
         )
